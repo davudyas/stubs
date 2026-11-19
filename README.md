@@ -10,7 +10,7 @@ Live at **https://ticket-store.netlify.app**
 - Download the front, the back, or a 1080×1920 story image
 - Stickers you can drag, turn and resize on either side
 - Share links: `/?t=…` opens a ticket for anyone (stored with Netlify Blobs by `netlify/functions/share.mjs`)
-- Saved tickets live in **My tickets** in your browser
+- Accounts with username + password (`netlify/functions/auth.mjs`, `tickets.mjs`): log in and **My tickets** follows you to every device. Passwords are stored as salted PBKDF2 hashes. Without an account, tickets stay in the browser
 - A visitor counter (`netlify/functions/visits.mjs`)
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).

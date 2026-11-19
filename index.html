@@ -39,6 +39,16 @@
   --brass:#F2A541; --brass-hi:#FFC56A; --screen:#FBEBD3; --dust:#CDAE8D; --line:rgba(251,235,211,.13);
   --glow:242,165,65; --marquee-bg:linear-gradient(#E4572E,#C9431F); --logo-font:Shrikhand,Georgia,serif; --logo-color:#FFF3DC; --logo-ls:.01em; --logo-glow:.25;
 }
+.account{display:flex;align-items:center;gap:10px}
+.whoami{font-weight:600;color:var(--screen)}
+.whoami::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:7px;vertical-align:1px}
+.banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--velvet-2);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:0 0 20px}
+.banner p{margin:0;flex:1;min-width:220px}
+.auth-tabs{margin-bottom:14px;width:max-content}
+.auth-tabs button[aria-selected=true]{background:var(--velvet-4);color:var(--screen)}
+#authForm .f{margin:10px 0}
+.auth-warn{margin:8px 0 0;font-size:13px;color:var(--brass-hi)}
+.auth-error{margin:8px 0 0;font-size:14px;color:var(--danger);font-weight:600}
 .themes{display:flex;align-items:center;gap:8px}
 .themes span{font-size:13px;color:var(--dust)}
 .themes button{width:28px;height:28px;border-radius:50%;padding:0;cursor:pointer;border:2px solid var(--line);background:var(--sw);transition:transform .15s}
@@ -78,7 +88,7 @@ details.group[open]>summary::after{transform:rotate(225deg) translateY(-2px)}
 .f{display:flex;flex-direction:column;gap:5px;min-width:0}
 .f.full{grid-column:1/-1}
 .f>span,.f>label{font-size:13px;color:var(--dust);font-weight:500}
-input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
+input[type=text],input[type=password],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
 input:hover,select:hover,textarea:hover{border-color:var(--line)}
 input::placeholder,textarea::placeholder{color:var(--dust);opacity:.6}
 textarea{resize:vertical;min-height:84px}
@@ -241,6 +251,11 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <button role="tab" id="tabMake" aria-selected="true" aria-controls="viewMake">Make a ticket</button>
     <button role="tab" id="tabWall" aria-selected="false" aria-controls="viewWall">My tickets<span class="count" id="count"></span></button>
   </nav>
+  <div class="account" id="account" hidden>
+    <button type="button" class="btn" id="loginBtn">Log in</button>
+    <span class="whoami" id="whoami" hidden></span>
+    <button type="button" class="linkbtn" id="logoutBtn" hidden>Log out</button>
+  </div>
   <div class="themes" role="group" aria-label="Website theme">
     <span>Theme</span>
     <button type="button" data-theme-btn="velvet" title="Velvet" aria-label="Velvet theme" style="--sw:linear-gradient(135deg,#2A1621 50%,#D6A84E 50%)"></button>
@@ -410,6 +425,14 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <label class="sr" for="sortSel">Sort</label>
     <select id="sortSel"><option value="date">Newest screening first</option><option value="rating">Highest rated first</option><option value="title">Title A–Z</option></select>
   </div>
+  <div class="banner" id="moveBanner" hidden>
+    <p id="moveText"></p>
+    <button type="button" class="btn primary" id="moveBtn">Add them to my account</button>
+  </div>
+  <div class="banner" id="loginBanner" hidden>
+    <p>These tickets are saved in this browser only. Log in to keep them on every device.</p>
+    <button type="button" class="btn" id="bannerLogin">Log in or create an account</button>
+  </div>
   <div class="grid" id="grid"></div>
 </section>
 
@@ -426,6 +449,26 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
       <button type="button" class="btn" id="closeShare">Close</button>
     </div>
   </div>
+</div>
+<div class="modal" id="authModal" hidden role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <form class="modal-card" id="authForm" novalidate>
+    <div class="seg auth-tabs" role="tablist" aria-label="Account">
+      <button type="button" role="tab" data-auth="login" aria-selected="true">Log in</button>
+      <button type="button" role="tab" data-auth="signup" aria-selected="false">Create account</button>
+    </div>
+    <h3 id="authTitle">Log in to Ticket Store</h3>
+    <p class="hint" id="authHint">Your tickets show up on every device you log in on.</p>
+    <label class="f"><span>Username</span><input type="text" id="authUser" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" required></label>
+    <label class="f"><span>Password</span><input type="password" id="authPass" autocomplete="current-password" maxlength="200" required></label>
+    <label class="f" id="authPass2Wrap" hidden><span>Password again</span><input type="password" id="authPass2" autocomplete="new-password" maxlength="200"></label>
+    <p class="auth-warn" id="authWarn" hidden>There's no email, so a forgotten password can't be reset. Keep it somewhere safe.</p>
+    <p class="auth-error" id="authError" role="alert" hidden></p>
+    <div class="share-actions">
+      <button type="submit" class="btn primary" id="authSubmit">Log in</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="authClose">Cancel</button>
+    </div>
+  </form>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2195,6 +2238,21 @@ document.addEventListener('click', e => { const m = $('#dlMenu'); if (m.open && 
 
 /* ---------- storage: claude db per person, or this browser ---------- */
 const LS_KEY = 'stubs.collection.v1', DRAFT_KEY = 'stubs.draft.v1';
+/* ---------- accounts (username + password, on the Ticket Store website) ---------- */
+const SESSION_KEY = 'stubs.session.v1';
+let session = null;
+try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) {}
+function setSession(v) {
+  session = v;
+  try { if (v) localStorage.setItem(SESSION_KEY, JSON.stringify(v)); else localStorage.removeItem(SESSION_KEY); } catch (e) {}
+  syncAccountUI();
+}
+async function api(path, opts = {}) {
+  const headers = { ...(opts.body ? { 'content-type': 'application/json' } : {}), ...(session ? { authorization: 'Bearer ' + session.token } : {}) };
+  const r = await fetch(path, { ...opts, headers, cache: 'no-store' });
+  if (r.status === 401 && session && path !== '/api/auth') { setSession(null); toast('You were logged out. Log in again to see your account tickets.'); const e = new Error('logged_out'); e.code = 'logged_out'; throw e; }
+  return r;
+}
 const store = {
   mode: 'local', col: null,
   ready: (async () => {
@@ -2210,6 +2268,10 @@ const store = {
   })(),
   async list() {
     await this.ready;
+    if (session) {
+      try { const r = await api('/api/tickets'); if (!r.ok) throw new Error('http'); return await r.json(); }
+      catch (e) { if (e.code !== 'logged_out') toast('Your account tickets can\'t be reached right now.'); if (session) return []; return this.localList(); }
+    }
     if (this.mode === 'db') {
       try {
         const snap = await Promise.race([this.col.get(), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 10000))]);
@@ -2222,17 +2284,100 @@ const store = {
   localWrite(list) { localStorage.setItem(LS_KEY, JSON.stringify(list)); },
   async put(stub) {
     await this.ready;
+    if (session) {
+      const r = await api('/api/tickets', { method: 'PUT', body: JSON.stringify(stub) });
+      if (!r.ok) { const e = new Error('save'); e.code = r.status === 413 ? 'too_big' : r.status === 507 ? 'full' : 'save'; throw e; }
+      return;
+    }
     if (this.mode === 'db') { await this.col.doc(stub.id).set(stub); return; }
     const list = this.localList().filter(x => x.id !== stub.id); list.push(stub); this.localWrite(list);
   },
   async remove(id) {
     await this.ready;
+    if (session) { const r = await api('/api/tickets?id=' + encodeURIComponent(id), { method: 'DELETE' }); if (!r.ok) throw new Error('delete'); return; }
     if (this.mode === 'db') { await this.col.doc(id).delete(); return; }
     this.localWrite(this.localList().filter(x => x.id !== id));
   },
 };
 let collection = [];
-async function refreshCollection() { collection = await store.list(); $('#count').textContent = collection.length || ''; if (!$('#viewWall').hidden) renderWall(); }
+async function refreshCollection() { collection = await store.list(); $('#count').textContent = collection.length || ''; syncBanners(); if (!$('#viewWall').hidden) renderWall(); }
+function syncBanners() {
+  const local = store.localList().length;
+  $('#moveBanner').hidden = !(session && local);
+  if (session && local) $('#moveText').textContent = `${local} ${local === 1 ? 'ticket is' : 'tickets are'} saved only in this browser.`;
+  $('#loginBanner').hidden = !(!session && !inArtifact && collection.length);
+}
+function syncAccountUI() {
+  if (inArtifact) return;
+  $('#account').hidden = false;
+  $('#loginBtn').hidden = !!session; $('#whoami').hidden = !session; $('#logoutBtn').hidden = !session;
+  if (session) $('#whoami').textContent = '@' + session.username;
+}
+let authMode = 'login';
+function setAuthMode(m) {
+  authMode = m;
+  document.querySelectorAll('[data-auth]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.auth === m)));
+  const up = m === 'signup';
+  $('#authTitle').textContent = up ? 'Create your account' : 'Log in to Ticket Store';
+  $('#authHint').textContent = up ? 'Pick a username: 3 to 20 letters, numbers, dots or underscores. Your password needs at least 6 characters.' : 'Your tickets show up on every device you log in on.';
+  $('#authPass2Wrap').hidden = !up; $('#authWarn').hidden = !up; $('#authError').hidden = true;
+  $('#authPass').autocomplete = up ? 'new-password' : 'current-password';
+  $('#authSubmit').textContent = up ? 'Create account' : 'Log in';
+}
+function openAuth(m = 'login') { setAuthMode(m); $('#authModal').hidden = false; $('#authUser').focus(); }
+function closeAuth() { $('#authModal').hidden = true; $('#authPass').value = ''; $('#authPass2').value = ''; }
+document.querySelectorAll('[data-auth]').forEach(b => b.addEventListener('click', () => setAuthMode(b.dataset.auth)));
+$('#loginBtn').addEventListener('click', () => openAuth('login'));
+$('#bannerLogin').addEventListener('click', () => openAuth('login'));
+$('#authClose').addEventListener('click', closeAuth);
+$('#authModal').addEventListener('click', e => { if (e.target.id === 'authModal') closeAuth(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#authModal').hidden) closeAuth(); });
+const AUTH_ERRORS = {
+  bad_username: 'Usernames are 3 to 20 characters: letters, numbers, dots or underscores.',
+  bad_password: 'Passwords need at least 6 characters.',
+  taken: 'That username is taken. Try another one.',
+  wrong: 'That username and password don\'t match. Check them and try again.',
+};
+$('#authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('#authError'); err.hidden = true;
+  const username = $('#authUser').value.trim().toLowerCase(), password = $('#authPass').value;
+  const show = m => { err.textContent = m; err.hidden = false; };
+  if (!/^[a-z0-9_.]{3,20}$/.test(username)) return show(AUTH_ERRORS.bad_username);
+  if (password.length < 6) return show(AUTH_ERRORS.bad_password);
+  if (authMode === 'signup' && password !== $('#authPass2').value) return show('The two passwords don\'t match.');
+  const btn = $('#authSubmit'); btn.disabled = true;
+  try {
+    const r = await fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: authMode, username, password }) });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) return show(data.error === 'locked' ? `Too many tries. Wait ${data.minutes || 10} minutes and try again.` : AUTH_ERRORS[data.error] || 'That didn\'t work. Try again in a moment.');
+    setSession({ username: data.username, token: data.token });
+    closeAuth();
+    toast(authMode === 'signup' ? `Welcome, @${data.username}. Your account is ready.` : `Logged in as @${data.username}.`);
+    await refreshCollection();
+  } catch (e2) { show('Ticket Store can\'t be reached right now. Check your connection.'); }
+  finally { btn.disabled = false; }
+});
+$('#logoutBtn').addEventListener('click', async () => {
+  try { await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); } catch (e) {}
+  setSession(null); S.id = null; syncUI(); toast('Logged out. Tickets saved in this browser are still here.');
+  refreshCollection();
+});
+$('#moveBtn').addEventListener('click', async () => {
+  const btn = $('#moveBtn'); btn.disabled = true;
+  const local = store.localList(); let moved = 0;
+  for (const t of local) {
+    try { await store.put(t); moved++; store.localWrite(store.localList().filter(x => x.id !== t.id)); } catch (e) { if (e.code === 'logged_out') break; }
+  }
+  btn.disabled = false;
+  toast(moved === local.length ? `Added ${moved} ${moved === 1 ? 'ticket' : 'tickets'} to your account.` : `Added ${moved} of ${local.length}. Try again for the rest.`);
+  refreshCollection();
+});
+async function checkSession() {
+  syncAccountUI();
+  if (!session || inArtifact) return;
+  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.status === 401) { setSession(null); refreshCollection(); } } catch (e) {}
+}
 
 function clean(s) { const o = { ...s }; delete o.id; return o; }
 $('#saveBtn').addEventListener('click', async () => {
@@ -2246,7 +2391,7 @@ $('#saveBtn').addEventListener('click', async () => {
     syncUI(); refreshCollection();
   } catch (e) {
     if (isNew) S.id = null;
-    toast(e && e.code === 'quota_exceeded' ? 'Your collection is full. Delete a few tickets to make room.' : e && e.name === 'QuotaExceededError' ? 'This browser is out of space. Delete a few tickets, or use smaller posters.' : 'That ticket couldn\'t be saved. Try again in a moment.');
+    toast(e && e.code === 'logged_out' ? 'Log in again, then save.' : e && e.code === 'full' ? 'Your account is full (500 tickets). Delete a few to make room.' : e && e.code === 'too_big' ? 'This ticket is too big to save. Try a smaller poster.' : e && e.code === 'quota_exceeded' ? 'Your collection is full. Delete a few tickets to make room.' : e && e.name === 'QuotaExceededError' ? 'This browser is out of space. Delete a few tickets, or use smaller posters.' : 'That ticket couldn\'t be saved. Try again in a moment.');
   } finally { btn.disabled = false; }
 });
 $('#newBtn').addEventListener('click', () => {
@@ -2448,6 +2593,7 @@ if (document.fonts) {
 visitCounter();
 openSharedFromUrl();
 if (document.fonts) document.fonts.ready.then(drawStickerPick);
+checkSession();
 
 </script>
 </body>
