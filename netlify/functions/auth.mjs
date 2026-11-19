@@ -1,4 +1,5 @@
 // Ticket Store: sign up, log in, log out and "who am I", with username + password only.
+import { getStore } from '@netlify/blobs';
 import { stores, json, normUser, USER_RE, hashPassword, sameHash, createSession, tokenFrom, sessionFrom } from '../lib/account.mjs';
 
 const MAX_FAILS = 6, LOCK_MS = 10 * 60 * 1000;
@@ -9,11 +10,25 @@ export default async (req) => {
   const action = body && body.action;
   const { users, sessions, fails } = stores();
 
-  if (['me', 'set_public', 'change_password', 'delete_account'].includes(action)) {
+  if (['me', 'set_public', 'set_avatar', 'remove_avatar', 'change_password', 'delete_account'].includes(action)) {
     const sess = await sessionFrom(req);
     if (!sess) return json({ error: 'not_logged_in' }, 401);
     const { username, user } = sess;
-    if (action === 'me') return json({ username, public: !!user.public });
+    const avatars = getStore({ name: 'avatars' });
+    if (action === 'me') return json({ username, public: !!user.public, avatar: user.avatar || 0 });
+    if (action === 'set_avatar') {
+      const m = typeof body.image === 'string' && body.image.match(/^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/);
+      if (!m || m[1].length > 160_000) return json({ error: 'bad_image' }, 400);
+      await avatars.set(username, Buffer.from(m[1], 'base64'));
+      const avatar = Date.now();
+      await users.setJSON(username, { ...user, avatar });
+      return json({ avatar });
+    }
+    if (action === 'remove_avatar') {
+      await avatars.delete(username);
+      await users.setJSON(username, { ...user, avatar: 0 });
+      return json({ avatar: 0 });
+    }
     if (action === 'set_public') {
       await users.setJSON(username, { ...user, public: !!body.public });
       return json({ username, public: !!body.public });
@@ -29,13 +44,14 @@ export default async (req) => {
       await sessions.delete(sess.token);
       // every other device is logged out; this one gets a fresh session
       await new Promise(r => setTimeout(r, 5));
-      return json({ username, token: await createSession(username), public: !!user.public });
+      return json({ username, token: await createSession(username), public: !!user.public, avatar: user.avatar || 0 });
     }
     if (action === 'delete_account') {
       const { tickets } = stores();
       const { blobs } = await tickets.list({ prefix: username + '/' });
       await Promise.all(blobs.map(b => tickets.delete(b.key)));
       await users.delete(username);
+      await avatars.delete(username);
       await sessions.delete(sess.token);
       await fails.delete(username);
       return json({ ok: true });

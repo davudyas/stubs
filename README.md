@@ -11,7 +11,7 @@ Live at **https://ticket-store.netlify.app**
 - Stickers you can drag, turn and resize on either side
 - Share links: `/t/…` shows a picture of the ticket in chat apps (`share-page.mjs`, `share-image.mjs`) and opens it for anyone (`share.mjs`)
 - Public walls at `/@username`, switched on in account settings (`profile.mjs`)
-- Account settings: change password (logs out other devices), delete account
+- Account settings: profile picture (photo, cinema avatar or initials), change password (logs out other devices), delete account
 - Accounts with username + password (`netlify/functions/auth.mjs`, `tickets.mjs`): log in and **My tickets** follows you to every device. Passwords are stored as salted PBKDF2 hashes. Without an account, tickets stay in the browser
 - 14 website themes in a dropdown (Classic and Film looks)
 - A visitor counter (`netlify/functions/visits.mjs`)

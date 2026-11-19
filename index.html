@@ -98,7 +98,21 @@
 .settings h4{margin:0 0 8px;font-size:15px}
 .settings .toggle{margin:4px 0 6px}
 .settings .f{margin:8px 0}
-.whoami::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:7px;vertical-align:1px}
+.whoami{display:inline-flex;align-items:center;gap:8px;padding-left:8px}
+.avatar{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;overflow:hidden;flex:none;background:var(--av,var(--velvet-4));color:#fff;font-weight:700;font-size:13px;line-height:1;text-transform:uppercase;box-shadow:0 0 0 2px var(--line)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.lg{width:64px;height:64px;font-size:28px;align-self:center}
+.avatar.xl{width:96px;height:96px;font-size:40px}
+.av-row{display:flex;gap:16px;align-items:center}
+.av-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.av-actions .hint{width:100%;margin:2px 0 0}
+.av-colors{display:flex;gap:8px;margin:12px 0 8px}
+.av-colors button{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.av-colors button[aria-pressed=true]{border-color:var(--screen);box-shadow:0 0 0 3px rgba(var(--glow),.35)}
+.av-picks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.av-picks button{border:0;padding:0;background:none;cursor:pointer;border-radius:50%;aspect-ratio:1}
+.av-picks button:hover canvas{transform:scale(1.06)}
+.av-picks canvas{width:100%;height:100%;display:block;border-radius:50%;transition:transform .15s}
 .banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--velvet-2);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:0 0 20px}
 .banner p{margin:0;flex:1;min-width:220px}
 .auth-tabs{margin-bottom:14px;width:max-content}
@@ -481,6 +495,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 
 <section class="wall" id="viewProfile" hidden aria-live="polite">
   <div class="wall-head">
+    <span class="avatar lg" id="profAvatar" hidden></span>
     <h2 id="profTitle">Loading…</h2>
     <p id="profStats"></p>
     <span class="spacer" style="flex:1"></span>
@@ -552,6 +567,20 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   <div class="modal-card settings">
     <h3 id="setTitle">Your account</h3>
     <p class="hint" id="setWho"></p>
+    <section>
+      <h4>Profile picture</h4>
+      <div class="av-row">
+        <span class="avatar xl" id="avBig"></span>
+        <div class="av-actions">
+          <label class="btn" for="avFile">Upload a photo</label><input type="file" id="avFile" accept="image/*" class="sr">
+          <button type="button" class="btn" id="avRemove">Use initials</button>
+          <p class="hint">Or pick a cinema avatar and a colour:</p>
+        </div>
+      </div>
+      <div class="av-colors" id="avColors" role="group" aria-label="Avatar background colour"></div>
+      <div class="av-picks" id="avPicks" role="group" aria-label="Cinema avatars"></div>
+      <p class="auth-error" id="avError" role="alert" hidden></p>
+    </section>
     <section>
       <h4>Public profile</h4>
       <label class="toggle"><input type="checkbox" id="setPublic"> Show my tickets on a public wall</label>
@@ -2428,7 +2457,7 @@ function syncAccountUI() {
   if (inArtifact) return;
   $('#account').hidden = false;
   $('#loginBtn').hidden = !!session; $('#whoami').hidden = !session;
-  if (session) $('#whoami').textContent = '@' + session.username;
+  if (session) { const w = $('#whoami'); w.innerHTML = ''; w.append(avatarEl(session.username, session.avatar), document.createTextNode('@' + session.username)); }
 }
 let authMode = 'login';
 function setAuthMode(m) {
@@ -2482,15 +2511,80 @@ async function logOut(msg = 'Logged out. Tickets saved in this browser are still
   refreshCollection();
 }
 const wallUrl = () => session ? location.origin + '/@' + session.username : '';
+/* ---------- profile pictures ---------- */
+const AV_COLORS = ['#C0392B', '#E67E22', '#D4A437', '#2A9D8F', '#2F6FB5', '#7B4FB8', '#C2477A', '#1B1B1B'];
+function avColorFor(name) { let h = 0; for (const c of String(name)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return AV_COLORS[h % AV_COLORS.length]; }
+function avatarEl(username, version, cls = '') {
+  const el = document.createElement('span'); el.className = 'avatar' + (cls ? ' ' + cls : ''); el.setAttribute('aria-hidden', 'true');
+  if (version) { const im = document.createElement('img'); im.alt = ''; im.src = `/api/avatar?u=${encodeURIComponent(username)}&v=${version}`; im.onerror = () => { im.remove(); el.textContent = String(username).charAt(0); el.style.setProperty('--av', avColorFor(username)); }; el.appendChild(im); }
+  else { el.textContent = String(username).charAt(0); el.style.setProperty('--av', avColorFor(username)); }
+  return el;
+}
+function fillAvatar(target, username, version) { const fresh = avatarEl(username, version, target.className.replace('avatar', '').trim()); target.replaceWith(fresh); fresh.id = target.id; return fresh; }
+let avColor = AV_COLORS[3];
+function avatarCanvas() { const c = document.createElement('canvas'); c.width = c.height = 256; return c; }
+function stickerAvatar(type, color) {
+  const c = avatarCanvas(), g = c.getContext('2d');
+  g.fillStyle = color; g.fillRect(0, 0, 256, 256);
+  const art = stickerArt(type); if (art) { g.save(); g.shadowColor = 'rgba(0,0,0,.25)'; g.shadowBlur = 12; g.shadowOffsetY = 5; g.drawImage(art, 18, 18, 220, 220); g.restore(); }
+  return c;
+}
+function drawAvatarPicks() {
+  const wrap = $('#avPicks'); wrap.innerHTML = '';
+  for (const [type, def] of Object.entries(STICKERS)) {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Use ' + def.name + ' as profile picture');
+    const c = stickerAvatar(type, avColor); b.appendChild(c);
+    b.addEventListener('click', () => saveAvatar(stickerAvatar(type, avColor)));
+    wrap.appendChild(b);
+  }
+}
+function buildAvatarColors() {
+  const wrap = $('#avColors'); wrap.innerHTML = '';
+  for (const col of AV_COLORS) {
+    const b = document.createElement('button'); b.type = 'button'; b.style.background = col; b.setAttribute('aria-label', 'Background ' + col); b.setAttribute('aria-pressed', String(col === avColor));
+    b.addEventListener('click', () => { avColor = col; wrap.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); drawAvatarPicks(); });
+    wrap.appendChild(b);
+  }
+}
+async function saveAvatar(canvas) {
+  const err = $('#avError'); err.hidden = true;
+  let q = .86, data = canvas.toDataURL('image/jpeg', q);
+  while (data.length > 150000 && q > .4) { q -= .1; data = canvas.toDataURL('image/jpeg', q); }
+  try {
+    const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'set_avatar', image: data }) });
+    if (!r.ok) throw new Error('http');
+    const d = await r.json(); setSession({ ...session, avatar: d.avatar }); syncSettings(); toast('Profile picture saved.');
+  } catch (e) { if (e.code !== 'logged_out') { err.textContent = 'The picture couldn\'t be saved. Try again in a moment.'; err.hidden = false; } }
+}
+$('#avFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f || !f.type.startsWith('image/')) { toast('Choose a JPG, PNG or WebP image.'); return; }
+  const url = URL.createObjectURL(f);
+  const im = await new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = url; });
+  URL.revokeObjectURL(url);
+  if (!im) { toast('That image couldn\'t be opened. Try another file.'); return; }
+  const c = avatarCanvas(), g = c.getContext('2d'), side = Math.min(im.width, im.height);
+  g.drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, 256, 256);
+  saveAvatar(c);
+});
+$('#avRemove').addEventListener('click', async () => {
+  try {
+    const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'remove_avatar' }) });
+    if (!r.ok) throw new Error('http');
+    setSession({ ...session, avatar: 0 }); syncSettings(); toast('Your initials are your picture again.');
+  } catch (e) { if (e.code !== 'logged_out') toast('That didn\'t save. Try again in a moment.'); }
+});
 function syncSettings() {
   if (!session) return;
   $('#setWho').textContent = 'Logged in as @' + session.username + '.';
+  fillAvatar($('#avBig'), session.username, session.avatar);
+  $('#avRemove').hidden = !session.avatar;
   $('#setPublic').checked = !!session.public;
   $('#setLinkRow').hidden = !session.public; $('#setLink').value = wallUrl();
   $('#publicBanner').hidden = !session.public;
   $('#publicLink').textContent = wallUrl().replace(/^https?:\/\//, ''); $('#publicLink').href = wallUrl();
 }
-function openSettings() { syncSettings(); ['pwError', 'delError'].forEach(i => $('#' + i).hidden = true); $('#setModal').hidden = false; $('#setClose').focus(); }
+function openSettings() { if (!$('#avColors').children.length) { avColor = avColorFor(session.username); buildAvatarColors(); } drawAvatarPicks(); syncSettings(); $('#avError').hidden = true; ['pwError', 'delError'].forEach(i => $('#' + i).hidden = true); $('#setModal').hidden = false; $('#setClose').focus(); }
 function closeSettings() { $('#setModal').hidden = true; ['pwCur', 'pwNew', 'pwNew2', 'delPw'].forEach(i => $('#' + i).value = ''); }
 $('#whoami').addEventListener('click', openSettings);
 $('#setClose').addEventListener('click', closeSettings);
@@ -2522,7 +2616,7 @@ $('#pwForm').addEventListener('submit', async e => {
     const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'change_password', current: cur, password: nw }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) return show(d.error === 'wrong_current' ? 'Your current password isn\'t right.' : 'That didn\'t work. Try again in a moment.');
-    setSession({ username: d.username, token: d.token, public: !!d.public });
+    setSession({ username: d.username, token: d.token, public: !!d.public, avatar: d.avatar || 0 });
     ['pwCur', 'pwNew', 'pwNew2'].forEach(i => $('#' + i).value = '');
     toast('Password changed. Other devices are logged out.');
   } catch (e2) { if (e2.code !== 'logged_out') show('Ticket Store can\'t be reached right now.'); }
@@ -2556,7 +2650,7 @@ $('#moveBtn').addEventListener('click', async () => {
 async function checkSession() {
   syncAccountUI();
   if (!session || inArtifact) return;
-  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.ok) { const d = await r.json(); setSession({ ...session, public: !!d.public }); syncSettings(); } } catch (e) {}
+  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.ok) { const d = await r.json(); setSession({ ...session, public: !!d.public, avatar: d.avatar || 0 }); syncSettings(); } } catch (e) {}
 }
 
 function clean(s) { const o = { ...s }; delete o.id; return o; }
@@ -2854,6 +2948,7 @@ async function openProfileFromUrl() {
     profile = await r.json();
     document.title = '@' + profile.username + "'s tickets · Ticket Store";
     $('#profTitle').textContent = `@${profile.username}'s tickets`;
+    const pa = fillAvatar($('#profAvatar'), profile.username, profile.avatar); pa.hidden = false;
     $('#profStats').textContent = stats(profile.tickets) || 'No tickets on this wall yet.';
     $('#profCopy').hidden = false;
     const grid = $('#profGrid'); grid.innerHTML = '';

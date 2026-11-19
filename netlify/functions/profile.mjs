@@ -10,7 +10,7 @@ export default async (req) => {
   const { blobs } = await tickets.list({ prefix: username + '/' });
   const all = (await Promise.all(blobs.map(b => tickets.get(b.key, { type: 'json' }).catch(() => null)))).filter(Boolean);
   all.sort((a, b) => (String(b.date) + String(b.time)).localeCompare(String(a.date) + String(a.time)));
-  return new Response(JSON.stringify({ username, tickets: all.slice(0, 120) }), {
+  return new Response(JSON.stringify({ username, avatar: user.avatar || 0, tickets: all.slice(0, 120) }), {
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=60' },
   });
 };
