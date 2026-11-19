@@ -6,13 +6,44 @@
 <title>Ticket Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Shippori+Mincho:wght@600;800&family=Rozha+One&family=Oswald:wght@500;700&family=PT+Mono&family=IBM+Plex+Mono:wght@400;600;700&family=Abril+Fatface&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Shippori+Mincho:wght@600;800&family=Rozha+One&family=Oswald:wght@500;700&family=PT+Mono&family=IBM+Plex+Mono:wght@400;600;700&family=Abril+Fatface&family=Shrikhand&display=swap" rel="stylesheet">
+<script>try{var th=localStorage.getItem("stubs.theme");if(th&&th!=="velvet")document.documentElement.dataset.theme=th}catch(e){}</script>
 <style>
 :root{
   --velvet:#1E0F17; --velvet-2:#2A1621; --velvet-3:#3A2131; --velvet-4:#4A2B3E;
   --brass:#D6A84E; --brass-hi:#F2CD7E; --screen:#F3ECDF; --dust:#BBA1AF;
   --line:rgba(243,236,223,.12); --ui:'Instrument Sans',system-ui,-apple-system,sans-serif;
+  --glow:242,205,126; --marquee-bg:linear-gradient(#2E1824,#24121C); --scheme:dark; --shadow:.5;
+  --logo-font:Limelight,serif; --logo-weight:400; --logo-style:normal; --logo-size:40px; --logo-ls:.04em; --logo-color:var(--brass-hi); --logo-glow:.35;
+  --on-accent:var(--velvet); --danger:#FF9C8A; --ok:#9FD8A8;
 }
+/* Website themes (the tickets keep their own styles) */
+[data-theme=noir]{
+  --velvet:#0F0F0F; --velvet-2:#1A1A1A; --velvet-3:#262626; --velvet-4:#363636;
+  --brass:#E9E4D8; --brass-hi:#FFFFFF; --screen:#F2F0EA; --dust:#A19D94; --line:rgba(255,255,255,.12);
+  --glow:255,255,255; --marquee-bg:#000; --logo-font:"Playfair Display",Georgia,serif; --logo-weight:900; --logo-style:italic; --logo-ls:0; --logo-glow:.2;
+}
+[data-theme=popcorn]{
+  --velvet:#FFF7EC; --velvet-2:#FFFFFF; --velvet-3:#F7EBDD; --velvet-4:#EAD7C2;
+  --brass:#D7263D; --brass-hi:#B81D31; --screen:#2B1A12; --dust:#7C6656; --line:rgba(43,26,18,.12);
+  --glow:215,38,61; --marquee-bg:repeating-linear-gradient(90deg,#fff 0 22px,#FDE3E6 22px 44px); --scheme:light; --shadow:.22;
+  --logo-font:"Alfa Slab One",Rockwell,serif; --logo-ls:.02em; --logo-glow:0; --danger:#C0392B; --ok:#2E7D32;
+}
+[data-theme=neon]{
+  --velvet:#0A0820; --velvet-2:#141033; --velvet-3:#1E1846; --velvet-4:#2B235E;
+  --brass:#FF3EA5; --brass-hi:#FF85C8; --screen:#ECF1FF; --dust:#A3A3D1; --line:rgba(236,241,255,.12);
+  --glow:255,62,165; --marquee-bg:#0E0A2B; --logo-font:Monoton,Impact,sans-serif; --logo-size:36px; --logo-ls:.06em; --logo-glow:.8;
+}
+[data-theme=drivein]{
+  --velvet:#2A190F; --velvet-2:#3A2416; --velvet-3:#4A2F1D; --velvet-4:#5D3B25;
+  --brass:#F2A541; --brass-hi:#FFC56A; --screen:#FBEBD3; --dust:#CDAE8D; --line:rgba(251,235,211,.13);
+  --glow:242,165,65; --marquee-bg:linear-gradient(#E4572E,#C9431F); --logo-font:Shrikhand,Georgia,serif; --logo-color:#FFF3DC; --logo-ls:.01em; --logo-glow:.25;
+}
+.themes{display:flex;align-items:center;gap:8px}
+.themes span{font-size:13px;color:var(--dust)}
+.themes button{width:28px;height:28px;border-radius:50%;padding:0;cursor:pointer;border:2px solid var(--line);background:var(--sw);transition:transform .15s}
+.themes button:hover{transform:scale(1.1)}
+.themes button[aria-pressed=true]{border-color:var(--screen);box-shadow:0 0 0 3px rgba(var(--glow),.35)}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
@@ -23,10 +54,10 @@ a{color:var(--brass-hi)}
 
 /* ---- header: the marquee ---- */
 .top{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:22px 28px 18px;max-width:1500px;margin:0 auto}
-.marquee{position:relative;padding:8px 26px 10px;border-radius:14px;background:linear-gradient(#2E1824,#24121C)}
-.marquee::before{content:"";position:absolute;inset:0;border-radius:14px;border:6px dotted var(--brass);filter:drop-shadow(0 0 4px rgba(242,205,126,.75));animation:bulbs 1.3s steps(6) 1 both}
+.marquee{position:relative;padding:8px 26px 10px;border-radius:14px;background:var(--marquee-bg)}
+.marquee::before{content:"";position:absolute;inset:0;border-radius:14px;border:6px dotted var(--brass);filter:drop-shadow(0 0 4px rgba(var(--glow),.75));animation:bulbs 1.3s steps(6) 1 both}
 @keyframes bulbs{0%{opacity:.15;filter:none}40%{opacity:.7}55%{opacity:.25}100%{opacity:1}}
-.logo{font-family:Limelight,serif;font-size:40px;line-height:1;color:var(--brass-hi);letter-spacing:.04em;text-shadow:0 0 18px rgba(242,205,126,.35)}
+.logo{font-family:var(--logo-font);font-weight:var(--logo-weight);font-style:var(--logo-style);font-size:var(--logo-size);line-height:1;color:var(--logo-color);letter-spacing:var(--logo-ls);text-shadow:0 0 18px rgba(var(--glow),var(--logo-glow));white-space:nowrap}
 .sub{margin:0;color:var(--dust);max-width:30ch}
 .tabs{margin-left:auto;display:flex;gap:6px;background:var(--velvet-2);padding:5px;border-radius:12px}
 .tabs button{border:0;background:none;padding:9px 16px;border-radius:8px;cursor:pointer;color:var(--dust);font-weight:600}
@@ -49,9 +80,9 @@ details.group[open]>summary::after{transform:rotate(225deg) translateY(-2px)}
 .f>span,.f>label{font-size:13px;color:var(--dust);font-weight:500}
 input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
 input:hover,select:hover,textarea:hover{border-color:var(--line)}
-input::placeholder,textarea::placeholder{color:rgba(187,161,175,.55)}
+input::placeholder,textarea::placeholder{color:var(--dust);opacity:.6}
 textarea{resize:vertical;min-height:84px}
-input[type=date],input[type=time]{color-scheme:dark}
+input[type=date],input[type=time]{color-scheme:var(--scheme)}
 .toggle{grid-column:1/-1;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px}
 .toggle input{appearance:none;width:38px;height:22px;border-radius:99px;background:var(--velvet-4);position:relative;cursor:pointer;flex:none;transition:background .2s}
 .toggle input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--screen);transition:transform .2s}
@@ -61,7 +92,7 @@ input[type=range]{width:100%;accent-color:var(--brass)}
 .rating-row{display:flex;align-items:center;gap:12px}
 .rating-row output{font-size:20px;color:var(--brass-hi);min-width:6.5em;letter-spacing:2px}
 .drop{grid-column:1/-1;display:flex;gap:14px;align-items:center;padding:12px;border:1.5px dashed var(--velvet-4);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s}
-.drop.over{border-color:var(--brass);background:rgba(214,168,78,.08)}
+.drop.over{border-color:var(--brass);background:rgba(var(--glow),.08)}
 .drop img{width:54px;height:80px;object-fit:cover;border-radius:5px;background:var(--velvet-3);flex:none}
 .drop .ph{width:54px;height:80px;border-radius:5px;background:var(--velvet-3);display:grid;place-items:center;color:var(--dust);flex:none;font-size:22px}
 .drop p{margin:0;font-size:13.5px;color:var(--dust)}
@@ -93,13 +124,13 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 .keybox>summary{cursor:pointer;font-size:13px;color:var(--dust);width:max-content}
 .keybox[open]>summary{margin-bottom:8px}
 .key-row{display:flex;gap:8px;margin-bottom:6px}
-.key-ok{color:#9FD8A8;margin-bottom:4px}
+.key-ok{color:var(--ok);margin-bottom:4px}
 .key-row input{flex:1;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
 .serial-row input{flex:1}
 
 /* ---- stage ---- */
 .stage{position:sticky;top:16px;align-self:start;display:flex;flex-direction:column;gap:18px}
-.beam{perspective:2200px;padding:26px 8px 30px;border-radius:20px;background:radial-gradient(120% 90% at 50% -10%,rgba(242,205,126,.17),rgba(242,205,126,.04) 45%,transparent 70%);filter:drop-shadow(0 22px 26px rgba(0,0,0,.5))}
+.beam{perspective:2200px;padding:26px 8px 30px;border-radius:20px;background:radial-gradient(120% 90% at 50% -10%,rgba(var(--glow),.17),rgba(var(--glow),.04) 45%,transparent 70%);filter:drop-shadow(0 22px 26px rgba(0,0,0,var(--shadow)))}
 .flip{position:relative;aspect-ratio:1600/620;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.75,.25,1)}
 .flip canvas{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .flip #cBack{transform:rotateY(180deg)}
@@ -110,7 +141,7 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 .seg button[aria-pressed=true]{background:var(--velvet-4);color:var(--screen)}
 .btn{border:1px solid var(--line);background:var(--velvet-2);padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600;white-space:nowrap}
 .btn:hover{background:var(--velvet-3)}
-.btn.primary{background:var(--brass);border-color:var(--brass);color:var(--velvet)}
+.btn.primary{background:var(--brass);border-color:var(--brass);color:var(--on-accent)}
 .btn.primary:hover{background:var(--brass-hi)}
 .spacer{flex:1}
 .menu{position:relative}
@@ -131,7 +162,7 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 /* ---- wall ---- */
 .wall{max-width:1500px;margin:0 auto;padding:0 28px 60px}
 .wall-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin:6px 0 22px}
-.wall-head h2{margin:0;font-family:Limelight,serif;font-weight:400;font-size:30px;color:var(--brass-hi)}
+.wall-head h2{margin:0;font-family:var(--logo-font);font-weight:var(--logo-weight);font-style:var(--logo-style);font-size:30px;color:var(--logo-color);letter-spacing:var(--logo-ls)}
 .wall-head p{margin:0;color:var(--dust)}
 .wall-head select{width:auto}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:26px 22px}
@@ -146,7 +177,7 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 .stub-meta .spacer{flex:1}
 .mini{border:0;background:none;color:var(--dust);cursor:pointer;padding:4px 8px;border-radius:7px;font-size:13px;font-weight:600}
 .mini:hover{background:var(--velvet-2);color:var(--screen)}
-.mini.danger{color:#FF9C8A}
+.mini.danger{color:var(--danger)}
 .empty{border:1.5px dashed var(--velvet-4);border-radius:18px;padding:60px 24px;text-align:center;color:var(--dust)}
 .empty h3{color:var(--screen);margin:0 0 6px;font-size:20px}
 
@@ -161,14 +192,16 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   .stage,.controls{min-width:0}
   .stage{position:static;order:-1}
   .top{padding:18px 16px 14px}
-  .tabs{margin-left:0;width:100%}
+  .tabs{margin-left:0;width:100%;order:3}
+  .themes{margin-left:auto}
+  .sub{order:4}
   .tabs button{flex:1}
   .wall{padding:0 16px 50px}
 }
 @media (max-width:700px){
   .menu .pop{position:fixed;left:12px;right:12px;bottom:12px;top:auto;min-width:0;padding:8px;border-radius:16px;box-shadow:0 -10px 60px rgba(0,0,0,.6)}
   .menu .pop button{padding:14px 14px;font-size:16px}
-  .menu[open]::before{content:"";position:fixed;inset:0;background:rgba(10,4,8,.55);z-index:19}
+  .menu[open]::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:19}
   .templates{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:42%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
   .tpl{scroll-snap-align:start}
 }
@@ -184,6 +217,14 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <button role="tab" id="tabMake" aria-selected="true" aria-controls="viewMake">Make a ticket</button>
     <button role="tab" id="tabWall" aria-selected="false" aria-controls="viewWall">My tickets<span class="count" id="count"></span></button>
   </nav>
+  <div class="themes" role="group" aria-label="Website theme">
+    <span>Theme</span>
+    <button type="button" data-theme-btn="velvet" title="Velvet" aria-label="Velvet theme" style="--sw:linear-gradient(135deg,#2A1621 50%,#D6A84E 50%)"></button>
+    <button type="button" data-theme-btn="noir" title="Noir" aria-label="Noir theme" style="--sw:linear-gradient(135deg,#0F0F0F 50%,#E9E4D8 50%)"></button>
+    <button type="button" data-theme-btn="popcorn" title="Popcorn" aria-label="Popcorn theme" style="--sw:linear-gradient(135deg,#FFF7EC 50%,#D7263D 50%)"></button>
+    <button type="button" data-theme-btn="neon" title="Neon" aria-label="Neon theme" style="--sw:linear-gradient(135deg,#141033 50%,#FF3EA5 50%)"></button>
+    <button type="button" data-theme-btn="drivein" title="Drive-in" aria-label="Drive-in theme" style="--sw:linear-gradient(135deg,#3A2416 50%,#F2A541 50%)"></button>
+  </div>
 </header>
 
 <main class="app" id="viewMake">
@@ -1702,6 +1743,15 @@ $('#tabWall').addEventListener('click', () => { showView('wall'); refreshCollect
 let draftT;
 function saveDraft() { clearTimeout(draftT); draftT = setTimeout(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) {} }, 500); }
 function loadDraft() { try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d && typeof d === 'object') { if (d.loggedBy === 'davudiswatchin' && !('letterboxd' in d)) d.loggedBy = ''; S = { ...defaults(), ...d }; } } catch (e) {} }
+
+/* ---------- website theme ---------- */
+function setTheme(name, save = true) {
+  if (name === 'velvet') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = name;
+  document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeBtn === name)));
+  if (save) { try { localStorage.setItem('stubs.theme', name); } catch (e) {} }
+}
+document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeBtn)));
+setTheme(document.documentElement.dataset.theme || 'velvet', false);
 
 /* ---------- boot ---------- */
 loadDraft();
