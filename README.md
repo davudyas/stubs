@@ -11,6 +11,7 @@ Live at **https://ticket-store.netlify.app**
 - Stickers you can drag, turn and resize on either side
 - Share links: `/?t=…` opens a ticket for anyone (stored with Netlify Blobs by `netlify/functions/share.mjs`)
 - Accounts with username + password (`netlify/functions/auth.mjs`, `tickets.mjs`): log in and **My tickets** follows you to every device. Passwords are stored as salted PBKDF2 hashes. Without an account, tickets stay in the browser
+- 14 website themes in a dropdown (Classic and Film looks)
 - A visitor counter (`netlify/functions/visits.mjs`)
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).
