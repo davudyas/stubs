@@ -1,7 +1,7 @@
 // Ticket Store: stores a shared ticket and hands it back by its link id.
 import { getStore } from '@netlify/blobs';
 
-const MAX_BYTES = 450_000;
+const MAX_BYTES = 800_000;
 const ID_RE = /^[A-Za-z0-9_-]{8,24}$/;
 const TEXT_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'date', 'time', 'cinema', 'screen', 'platform', 'format', 'row', 'seat',
   'price', 'currency', 'rating', 'withWho', 'note', 'loggedBy', 'letterboxd', 'template', 'posterOpacity', 'posterX', 'posterY', 'serial'];
@@ -43,6 +43,8 @@ export default async (req) => {
     if (!data || typeof data !== 'object' || Array.isArray(data)) return json({ error: 'bad_ticket' }, 400);
     const id = newId();
     await store.setJSON(id, { ticket: clean(data), created: Date.now() });
+    const m = typeof data.preview === 'string' && data.preview.match(/^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/);
+    if (m && m[1].length < 400_000) await getStore({ name: 'share-previews' }).set(id, Buffer.from(m[1], 'base64'));
     return json({ id }, 201);
   }
   const id = new URL(req.url).searchParams.get('id') || '';

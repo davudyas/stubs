@@ -1,5 +1,5 @@
 // Ticket Store: sign up, log in, log out and "who am I", with username + password only.
-import { stores, json, normUser, USER_RE, hashPassword, sameHash, createSession, tokenFrom, userFrom } from '../lib/account.mjs';
+import { stores, json, normUser, USER_RE, hashPassword, sameHash, createSession, tokenFrom, sessionFrom } from '../lib/account.mjs';
 
 const MAX_FAILS = 6, LOCK_MS = 10 * 60 * 1000;
 
@@ -9,9 +9,37 @@ export default async (req) => {
   const action = body && body.action;
   const { users, sessions, fails } = stores();
 
-  if (action === 'me') {
-    const username = await userFrom(req);
-    return username ? json({ username }) : json({ error: 'not_logged_in' }, 401);
+  if (['me', 'set_public', 'change_password', 'delete_account'].includes(action)) {
+    const sess = await sessionFrom(req);
+    if (!sess) return json({ error: 'not_logged_in' }, 401);
+    const { username, user } = sess;
+    if (action === 'me') return json({ username, public: !!user.public });
+    if (action === 'set_public') {
+      await users.setJSON(username, { ...user, public: !!body.public });
+      return json({ username, public: !!body.public });
+    }
+    const current = String(body.current || '');
+    if (!sameHash((await hashPassword(current, user.salt)).hash, user.hash)) return json({ error: 'wrong_current' }, 403);
+    if (action === 'change_password') {
+      const next = String(body.password || '');
+      if (next.length < 6 || next.length > 200) return json({ error: 'bad_password' }, 400);
+      const { salt, hash } = await hashPassword(next);
+      const since = Date.now();
+      await users.setJSON(username, { ...user, salt, hash, since });
+      await sessions.delete(sess.token);
+      // every other device is logged out; this one gets a fresh session
+      await new Promise(r => setTimeout(r, 5));
+      return json({ username, token: await createSession(username), public: !!user.public });
+    }
+    if (action === 'delete_account') {
+      const { tickets } = stores();
+      const { blobs } = await tickets.list({ prefix: username + '/' });
+      await Promise.all(blobs.map(b => tickets.delete(b.key)));
+      await users.delete(username);
+      await sessions.delete(sess.token);
+      await fails.delete(username);
+      return json({ ok: true });
+    }
   }
   if (action === 'logout') {
     const token = tokenFrom(req); if (token) await sessions.delete(token);

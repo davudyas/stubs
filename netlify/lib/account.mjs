@@ -33,18 +33,25 @@ export function sameHash(a, b) {
 
 export async function createSession(username) {
   const token = randomToken();
-  await stores().sessions.setJSON(token, { username, created: Date.now() });
+  await stores().sessions.setJSON(token, { username, created: Date.now() + 1 });
   return token;
 }
 export function tokenFrom(req) {
   const m = (req.headers.get('authorization') || '').match(/^Bearer ([A-Za-z0-9_-]{30,64})$/);
   return m ? m[1] : null;
 }
-export async function userFrom(req) {
+export async function sessionFrom(req) {
   const token = tokenFrom(req); if (!token) return null;
-  const { sessions } = stores();
+  const { sessions, users } = stores();
   const s = await sessions.get(token, { type: 'json' });
   if (!s) return null;
   if (Date.now() - s.created > SESSION_DAYS * 864e5) { await sessions.delete(token); return null; }
-  return s.username;
+  const user = await users.get(s.username, { type: 'json' });
+  // account deleted, or password changed after this session started
+  if (!user || (user.since && s.created < user.since)) { await sessions.delete(token); return null; }
+  return { token, username: s.username, user };
+}
+export async function userFrom(req) {
+  const s = await sessionFrom(req);
+  return s ? s.username : null;
 }

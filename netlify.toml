@@ -1,0 +1,5 @@
+# Public profiles: /@username opens the app, which shows that person's wall.
+[[redirects]]
+  from = "/@*"
+  to = "/index.html"
+  status = 200

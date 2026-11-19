@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ticket Store</title>
+<meta name="description" content="Make a ticket stub for every film you watch, and keep them all in one place.">
+<meta property="og:title" content="Ticket Store"><meta property="og:description" content="Make a ticket stub for every film you watch, and keep them all in one place.">
+<meta property="og:image" content="https://ticket-store.netlify.app/og-default.jpg"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Shippori+Mincho:wght@600;800&family=Rozha+One&family=Oswald:wght@500;700&family=PT+Mono&family=IBM+Plex+Mono:wght@400;600;700&family=Abril+Fatface&family=Shrikhand&family=Bangers&family=VT323&family=Josefin+Sans:wght@400;700&display=swap" rel="stylesheet">
@@ -90,6 +93,11 @@
 }
 .account{display:flex;align-items:center;gap:10px}
 .whoami{font-weight:600;color:var(--screen)}
+.settings{max-height:90vh;overflow:auto}
+.settings section{border-top:1px solid var(--line);padding:14px 0 6px;margin-top:12px}
+.settings h4{margin:0 0 8px;font-size:15px}
+.settings .toggle{margin:4px 0 6px}
+.settings .f{margin:8px 0}
 .whoami::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:7px;vertical-align:1px}
 .banner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--velvet-2);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:0 0 20px}
 .banner p{margin:0;flex:1;min-width:220px}
@@ -311,8 +319,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   </nav>
   <div class="account" id="account" hidden>
     <button type="button" class="btn" id="loginBtn">Log in</button>
-    <span class="whoami" id="whoami" hidden></span>
-    <button type="button" class="linkbtn" id="logoutBtn" hidden>Log out</button>
+    <button type="button" class="btn whoami" id="whoami" hidden aria-haspopup="dialog"></button>
   </div>
   <details class="menu theme-menu" id="themeMenu">
     <summary class="btn theme-btn" aria-label="Choose a website theme"><span class="sw" id="themeSw"></span><span class="theme-label">Theme:</span> <b id="themeName">Velvet</b><span class="caret" aria-hidden="true"></span></summary>
@@ -466,9 +473,22 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <span class="spacer"></span>
     <button type="button" class="btn" id="sDownload">Download</button>
     <button type="button" class="btn" id="sSave">Save to My tickets</button>
+    <button type="button" class="btn" id="sBackProf" hidden>Back to the wall</button>
     <button type="button" class="btn primary" id="sMake">Make your own ticket</button>
   </div>
   <p class="shared-note" id="sharedNote" hidden></p>
+</section>
+
+<section class="wall" id="viewProfile" hidden aria-live="polite">
+  <div class="wall-head">
+    <h2 id="profTitle">Loading…</h2>
+    <p id="profStats"></p>
+    <span class="spacer" style="flex:1"></span>
+    <button type="button" class="btn" id="profCopy" hidden>Copy link</button>
+    <button type="button" class="btn primary" id="profMake">Make your own ticket</button>
+  </div>
+  <p class="shared-note" id="profNote" hidden></p>
+  <div class="grid" id="profGrid"></div>
 </section>
 
 <section class="wall" id="viewWall" hidden>
@@ -478,6 +498,10 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <span class="spacer" style="flex:1"></span>
     <label class="sr" for="sortSel">Sort</label>
     <select id="sortSel"><option value="date">Newest screening first</option><option value="rating">Highest rated first</option><option value="title">Title A–Z</option></select>
+  </div>
+  <div class="banner" id="publicBanner" hidden>
+    <p>Your public wall: <a id="publicLink" href="#"></a></p>
+    <button type="button" class="btn" id="copyPublic">Copy link</button>
   </div>
   <div class="banner" id="moveBanner" hidden>
     <p id="moveText"></p>
@@ -523,6 +547,43 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
       <button type="button" class="btn" id="authClose">Cancel</button>
     </div>
   </form>
+</div>
+<div class="modal" id="setModal" hidden role="dialog" aria-modal="true" aria-labelledby="setTitle">
+  <div class="modal-card settings">
+    <h3 id="setTitle">Your account</h3>
+    <p class="hint" id="setWho"></p>
+    <section>
+      <h4>Public profile</h4>
+      <label class="toggle"><input type="checkbox" id="setPublic"> Show my tickets on a public wall</label>
+      <p class="hint">Anyone with the link sees all your saved tickets, including the notes on the back. Switch it off at any time.</p>
+      <div class="share-row" id="setLinkRow" hidden><label class="sr" for="setLink">Your wall</label><input type="text" id="setLink" readonly><button type="button" class="btn" id="setCopy">Copy</button></div>
+    </section>
+    <section>
+      <h4>Change password</h4>
+      <form id="pwForm" novalidate>
+        <label class="f"><span>Current password</span><input type="password" id="pwCur" autocomplete="current-password"></label>
+        <label class="f"><span>New password</span><input type="password" id="pwNew" autocomplete="new-password"></label>
+        <label class="f"><span>New password again</span><input type="password" id="pwNew2" autocomplete="new-password"></label>
+        <p class="auth-error" id="pwError" role="alert" hidden></p>
+        <button type="submit" class="btn" id="pwSubmit">Change password</button>
+        <p class="hint">Other devices are logged out when you change it.</p>
+      </form>
+    </section>
+    <section>
+      <h4>Delete account</h4>
+      <p class="hint">Deletes your account and every ticket in it. This can't be undone.</p>
+      <form id="delForm" novalidate>
+        <label class="f"><span>Password</span><input type="password" id="delPw" autocomplete="current-password"></label>
+        <p class="auth-error" id="delError" role="alert" hidden></p>
+        <button type="submit" class="btn danger" id="delSubmit">Delete my account</button>
+      </form>
+    </section>
+    <div class="share-actions">
+      <button type="button" class="btn" id="setLogout">Log out</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn primary" id="setClose">Done</button>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2360,11 +2421,13 @@ function syncBanners() {
   $('#moveBanner').hidden = !(session && local);
   if (session && local) $('#moveText').textContent = `${local} ${local === 1 ? 'ticket is' : 'tickets are'} saved only in this browser.`;
   $('#loginBanner').hidden = !(!session && !inArtifact && collection.length);
+  $('#publicBanner').hidden = !(session && session.public);
+  if (session && session.public) { $('#publicLink').textContent = (location.origin + '/@' + session.username).replace(/^https?:\/\//, ''); $('#publicLink').href = location.origin + '/@' + session.username; }
 }
 function syncAccountUI() {
   if (inArtifact) return;
   $('#account').hidden = false;
-  $('#loginBtn').hidden = !!session; $('#whoami').hidden = !session; $('#logoutBtn').hidden = !session;
+  $('#loginBtn').hidden = !!session; $('#whoami').hidden = !session;
   if (session) $('#whoami').textContent = '@' + session.username;
 }
 let authMode = 'login';
@@ -2405,17 +2468,80 @@ $('#authForm').addEventListener('submit', async e => {
     const r = await fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: authMode, username, password }) });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) return show(data.error === 'locked' ? `Too many tries. Wait ${data.minutes || 10} minutes and try again.` : AUTH_ERRORS[data.error] || 'That didn\'t work. Try again in a moment.');
-    setSession({ username: data.username, token: data.token });
+    setSession({ username: data.username, token: data.token, public: false });
+    checkSession();
     closeAuth();
     toast(authMode === 'signup' ? `Welcome, @${data.username}. Your account is ready.` : `Logged in as @${data.username}.`);
     await refreshCollection();
   } catch (e2) { show('Ticket Store can\'t be reached right now. Check your connection.'); }
   finally { btn.disabled = false; }
 });
-$('#logoutBtn').addEventListener('click', async () => {
+async function logOut(msg = 'Logged out. Tickets saved in this browser are still here.') {
   try { await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) }); } catch (e) {}
-  setSession(null); S.id = null; syncUI(); toast('Logged out. Tickets saved in this browser are still here.');
+  setSession(null); S.id = null; syncUI(); closeSettings(); toast(msg);
   refreshCollection();
+}
+const wallUrl = () => session ? location.origin + '/@' + session.username : '';
+function syncSettings() {
+  if (!session) return;
+  $('#setWho').textContent = 'Logged in as @' + session.username + '.';
+  $('#setPublic').checked = !!session.public;
+  $('#setLinkRow').hidden = !session.public; $('#setLink').value = wallUrl();
+  $('#publicBanner').hidden = !session.public;
+  $('#publicLink').textContent = wallUrl().replace(/^https?:\/\//, ''); $('#publicLink').href = wallUrl();
+}
+function openSettings() { syncSettings(); ['pwError', 'delError'].forEach(i => $('#' + i).hidden = true); $('#setModal').hidden = false; $('#setClose').focus(); }
+function closeSettings() { $('#setModal').hidden = true; ['pwCur', 'pwNew', 'pwNew2', 'delPw'].forEach(i => $('#' + i).value = ''); }
+$('#whoami').addEventListener('click', openSettings);
+$('#setClose').addEventListener('click', closeSettings);
+$('#setModal').addEventListener('click', e => { if (e.target.id === 'setModal') closeSettings(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#setModal').hidden) closeSettings(); });
+$('#setLogout').addEventListener('click', () => logOut());
+async function copyText(v, okMsg) { try { await navigator.clipboard.writeText(v); toast(okMsg); } catch (e) { toast('Copy this link: ' + v); } }
+$('#setCopy').addEventListener('click', () => copyText(wallUrl(), 'Link to your wall copied.'));
+$('#copyPublic').addEventListener('click', () => copyText(wallUrl(), 'Link to your wall copied.'));
+$('#setPublic').addEventListener('change', async e => {
+  const want = e.target.checked; e.target.disabled = true;
+  try {
+    const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'set_public', public: want }) });
+    if (!r.ok) throw new Error('http');
+    setSession({ ...session, public: want }); syncSettings();
+    toast(want ? 'Your wall is public. Copy the link to share it.' : 'Your wall is private again.');
+  } catch (err) { e.target.checked = !want; if (err.code !== 'logged_out') toast('That didn\'t save. Try again in a moment.'); }
+  finally { e.target.disabled = false; }
+});
+$('#pwForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('#pwError'), show = m => { err.textContent = m; err.hidden = false; }; err.hidden = true;
+  const cur = $('#pwCur').value, nw = $('#pwNew').value;
+  if (!cur) return show('Type your current password.');
+  if (nw.length < 6) return show('The new password needs at least 6 characters.');
+  if (nw !== $('#pwNew2').value) return show('The two new passwords don\'t match.');
+  const btn = $('#pwSubmit'); btn.disabled = true;
+  try {
+    const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'change_password', current: cur, password: nw }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return show(d.error === 'wrong_current' ? 'Your current password isn\'t right.' : 'That didn\'t work. Try again in a moment.');
+    setSession({ username: d.username, token: d.token, public: !!d.public });
+    ['pwCur', 'pwNew', 'pwNew2'].forEach(i => $('#' + i).value = '');
+    toast('Password changed. Other devices are logged out.');
+  } catch (e2) { if (e2.code !== 'logged_out') show('Ticket Store can\'t be reached right now.'); }
+  finally { btn.disabled = false; }
+});
+$('#delForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('#delError'), show = m => { err.textContent = m; err.hidden = false; }; err.hidden = true;
+  const pw = $('#delPw').value; if (!pw) return show('Type your password to delete the account.');
+  const btn = $('#delSubmit');
+  if (btn.dataset.armed !== '1') { btn.dataset.armed = '1'; btn.textContent = 'Yes, delete everything'; setTimeout(() => { btn.dataset.armed = ''; btn.textContent = 'Delete my account'; }, 5000); return; }
+  btn.disabled = true;
+  try {
+    const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'delete_account', current: pw }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return show(d.error === 'wrong_current' ? 'That password isn\'t right.' : 'That didn\'t work. Try again in a moment.');
+    setSession(null); S.id = null; syncUI(); closeSettings(); toast('Your account and its tickets are deleted.'); refreshCollection();
+  } catch (e2) { if (e2.code !== 'logged_out') show('Ticket Store can\'t be reached right now.'); }
+  finally { btn.disabled = false; btn.dataset.armed = ''; btn.textContent = 'Delete my account'; }
 });
 $('#moveBtn').addEventListener('click', async () => {
   const btn = $('#moveBtn'); btn.disabled = true;
@@ -2430,7 +2556,7 @@ $('#moveBtn').addEventListener('click', async () => {
 async function checkSession() {
   syncAccountUI();
   if (!session || inArtifact) return;
-  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.status === 401) { setSession(null); refreshCollection(); } } catch (e) {}
+  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.ok) { const d = await r.json(); setSession({ ...session, public: !!d.public }); syncSettings(); } } catch (e) {}
 }
 
 function clean(s) { const o = { ...s }; delete o.id; return o; }
@@ -2504,8 +2630,8 @@ function renderWall() {
 }
 $('#sortSel').addEventListener('change', renderWall);
 function showView(v) {
-  if (v !== 'shared' && new URLSearchParams(location.search).has('t')) history.replaceState(null, '', location.pathname);
-  $('#viewMake').hidden = v !== 'make'; $('#viewWall').hidden = v !== 'wall'; $('#viewShared').hidden = v !== 'shared';
+  if (!['shared', 'profile'].includes(v) && (location.search || location.pathname !== '/')) history.replaceState(null, '', '/');
+  $('#viewMake').hidden = v !== 'make'; $('#viewWall').hidden = v !== 'wall'; $('#viewShared').hidden = v !== 'shared'; $('#viewProfile').hidden = v !== 'profile';
   $('#tabMake').setAttribute('aria-selected', String(v === 'make')); $('#tabWall').setAttribute('aria-selected', String(v === 'wall'));
   if (v === 'wall') renderWall();
   if (v === 'make') schedule();
@@ -2521,20 +2647,35 @@ const shareCache = new Map();
 function sharePayload(st) { const o = {}; for (const k of SHARE_KEYS) if (st[k] !== undefined) o[k] = st[k]; return o; }
 async function shareTicket(st = S) {
   if (inArtifact) { toast('Sharing works on ticket-store.netlify.app.'); return; }
-  const body = JSON.stringify(sharePayload(st));
-  let id = shareCache.get(body);
+  const payload = sharePayload(st), key = JSON.stringify(payload);
+  let id = shareCache.get(key);
   if (!id) {
     const btn = $('#shareBtn'); btn.disabled = true; const old = btn.textContent; btn.textContent = 'Making link…';
     try {
-      const r = await fetch('/api/share', { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+      let preview = ''; try { preview = (await renderPreview(st)).toDataURL('image/jpeg', .82); } catch (e) {}
+      const r = await fetch('/api/share', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...payload, preview }) });
       if (!r.ok) throw new Error(r.status === 413 ? 'big' : 'http');
-      id = (await r.json()).id; shareCache.set(body, id);
+      id = (await r.json()).id; shareCache.set(key, id);
     } catch (e) {
       toast(e.message === 'big' ? 'This ticket is too big to share. Try a smaller poster.' : 'The link couldn\'t be made. Check your connection and try again.');
       return;
     } finally { btn.disabled = false; btn.textContent = old; }
   }
-  openShare(location.origin + '/?t=' + id, st);
+  openShare(location.origin + '/t/' + id, st);
+}
+/* 1200×630 picture that chat apps show for a shared link */
+async function renderPreview(st) {
+  const img = await loadImg(st.poster);
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  const tk = renderTicket(document.createElement('canvas'), st, 'front', img, .75);
+  const c = document.createElement('canvas'); c.width = 1200; c.height = 630;
+  const g = c.getContext('2d');
+  g.fillStyle = mix(st.paper || '#2A1621', '#000000', TEMPLATES[st.template]?.dark ? .35 : .6); g.fillRect(0, 0, 1200, 630);
+  if (img) { g.save(); g.filter = 'blur(30px) saturate(1.2)'; g.globalAlpha = .9; drawCover(g, img, -60, -60, 1320, 750); g.restore(); g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, 0, 1200, 630); }
+  const tw = 1110, th = tw * H / W;
+  g.save(); g.translate(600, 315); g.rotate(-0.025); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 40; g.shadowOffsetY = 18;
+  g.drawImage(tk, -tw / 2, -th / 2, tw, th); g.restore();
+  return c;
 }
 function openShare(url, st) {
   const m = $('#shareModal'); $('#shareUrl').value = url;
@@ -2687,6 +2828,56 @@ visitCounter();
 openSharedFromUrl();
 if (document.fonts) document.fonts.ready.then(drawStickerPick);
 checkSession();
+
+/* ---------- public walls: /@username ---------- */
+let profile = null;
+function sharedFromProfile(t) {
+  shared = { ...defaults(), ...t }; setSSide('front');
+  $('#sharedFrom').textContent = `From @${profile.username}'s wall`;
+  $('#sharedBeam').hidden = false; $('#sharedBar').hidden = false; $('#sDownload').hidden = false; $('#sSave').hidden = false;
+  $('#sharedNote').hidden = false; $('#sharedNote').textContent = 'Tap the ticket to see the back.';
+  $('#sBackProf').hidden = false;
+  showView('shared'); drawShared(); window.scrollTo({ top: 0 });
+}
+$('#sBackProf').addEventListener('click', () => { $('#sBackProf').hidden = true; showView('profile'); });
+$('#profMake').addEventListener('click', () => showView('make'));
+$('#profCopy').addEventListener('click', () => copyText(location.origin + '/@' + profile.username, 'Link copied.'));
+async function openProfileFromUrl() {
+  const m = location.pathname.match(/^\/@([A-Za-z0-9_.]{3,20})\/?$/);
+  if (!m || inArtifact) return false;
+  const u = m[1].toLowerCase();
+  showView('profile');
+  $('#profTitle').textContent = '@' + u;
+  try {
+    const r = await fetch('/api/profile?u=' + encodeURIComponent(u));
+    if (!r.ok) throw new Error('missing');
+    profile = await r.json();
+    document.title = '@' + profile.username + "'s tickets · Ticket Store";
+    $('#profTitle').textContent = `@${profile.username}'s tickets`;
+    $('#profStats').textContent = stats(profile.tickets) || 'No tickets on this wall yet.';
+    $('#profCopy').hidden = false;
+    const grid = $('#profGrid'); grid.innerHTML = '';
+    for (const t of profile.tickets) {
+      const st = { ...defaults(), ...t };
+      const el = document.createElement('div'); el.className = 'stub';
+      const c = document.createElement('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', 'Open ' + (st.title || 'Untitled'));
+      el.appendChild(c);
+      const meta = document.createElement('div'); meta.className = 'stub-meta';
+      meta.innerHTML = '<b></b><small></small>';
+      meta.querySelector('b').textContent = st.title || 'Untitled'; meta.querySelector('small').textContent = fmtDate(st);
+      el.appendChild(meta); grid.appendChild(el);
+      renderTicket(c, st, 'front', null, .42);
+      if (st.poster && /^data:image\//.test(st.poster)) loadImg(st.poster).then(im => renderTicket(c, st, 'front', im, .42));
+      const open = () => sharedFromProfile(st);
+      c.addEventListener('click', open); c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    }
+  } catch (e) {
+    $('#profTitle').textContent = 'This wall isn\'t public';
+    $('#profNote').hidden = false; $('#profNote').textContent = `@${u} hasn't made a public wall, or the name is spelled differently.`;
+  }
+  return true;
+}
+openProfileFromUrl();
 
 </script>
 </body>
