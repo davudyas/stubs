@@ -261,7 +261,8 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
         <label class="toggle"><input type="checkbox" name="liked"> Liked it</label>
         <label class="f full"><span>Watched with</span><input type="text" name="withWho" maxlength="50" placeholder="Nobody, or a name or two"></label>
         <label class="f full"><span>Note for the back</span><textarea name="note" maxlength="320" placeholder="What stayed with you?"></textarea></label>
-        <label class="f full"><span>Your Letterboxd name</span><input type="text" name="loggedBy" maxlength="30"></label>
+        <label class="f"><span>Your name (optional)</span><input type="text" name="loggedBy" maxlength="30" placeholder="Shown on the back"></label>
+        <label class="f"><span>Letterboxd username (optional)</span><input type="text" name="letterboxd" maxlength="30" placeholder="Adds your profile link"></label>
       </div>
     </details>
 
@@ -798,9 +799,16 @@ function drawBack(ctx, s) {
   if (t === 'poster') { ctx.fillStyle = acc; ctx.fillRect(PX, 0, W - PX, H); }
   else if (t !== 'carnival' && t !== 'gala') { ctx.fillStyle = alpha(ink, .05); ctx.fillRect(PX, 0, W - PX, H); }
   const sInk = t === 'poster' ? (luminance(acc) > .4 ? '#141416' : '#F7F3EA') : ink;
-  text(ctx, 'Logged by', cx, 120, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center', ls: 3 });
-  text(ctx, s.loggedBy || 'davudiswatchin', cx, 176, { font: font(42, F.cav, 700), color: sInk, align: 'center', maxW: sw });
-  if (s.loggedBy) text(ctx, 'letterboxd.com/' + s.loggedBy, cx, 216, { font: font(17, F.cour, 700), color: alpha(sInk, .6), align: 'center', maxW: sw });
+  const who = (s.loggedBy || '').trim(), lb = (s.letterboxd || '').trim().replace(/^@/, '');
+  if (who || lb) {
+    text(ctx, 'Kept by', cx, 120, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center', ls: 3 });
+    text(ctx, who || lb, cx, 176, { font: font(42, F.cav, 700), color: sInk, align: 'center', maxW: sw });
+    if (lb) text(ctx, 'letterboxd.com/' + lb, cx, 216, { font: font(17, F.cour, 700), color: alpha(sInk, .6), align: 'center', maxW: sw });
+  } else {
+    text(ctx, 'Keep this stub', cx, 120, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center', ls: 3 });
+    text(ctx, fmtDate(s), cx, 182, { font: font(46, F.cav, 700), color: sInk, align: 'center', maxW: sw });
+    text(ctx, fmtTime(s), cx, 222, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center' });
+  }
   barcode(ctx, sx, 380, sw, 96, s.serial, t === 'gala' ? goldGrad(ctx, 380, 476, acc) : sInk);
   text(ctx, s.serial, cx, 524, { font: font(19, F.cour, 700), color: alpha(sInk, .7), align: 'center', ls: 5 });
 }
@@ -860,7 +868,7 @@ function renderStory(s, img, frontC, backC) {
   };
   put(frontC, 760, -0.045);
   put(backC, 1210, 0.035);
-  text(ctx, s.loggedBy ? '@' + s.loggedBy : '', 540, 1780, { font: font(34, F.inst, 600), color: 'rgba(255,255,255,.85)', align: 'center' });
+  text(ctx, (s.letterboxd || '').trim() ? '@' + s.letterboxd.trim().replace(/^@/, '') : (s.loggedBy || ''), 540, 1780, { font: font(34, F.inst, 600), color: 'rgba(255,255,255,.85)', align: 'center' });
   return c;
 }
 
@@ -1102,7 +1110,7 @@ Object.assign(FRONT, {
     if (s.tagline) text(ctx, s.tagline, 70, 382, { font: font(24, F.inst, 400, 'italic'), color: alpha(ink, .7), maxW: (hasP ? ppx : PX - 60) - 90 });
     ctx.fillStyle = alpha(ink, .12); ctx.fillRect(70, 420, PX - 130, 2);
     const seat = s.home ? (s.seat || 'Sofa') : `${s.row || ''}${s.seat || '—'}`;
-    const list = [['Passenger', s.loggedBy || 'Guest'], ['Date', fmtDate(s)], ['Boarding', fmtTime(s)]];
+    const list = [['Passenger', (s.loggedBy || s.letterboxd || 'Guest').trim() || 'Guest'], ['Date', fmtDate(s)], ['Boarding', fmtTime(s)]];
     if (!s.home) list.push(['Gate', s.screen || '—']);
     list.push(['Seat', seat], ['Class', s.format || 'Economy']);
     fieldRow(ctx, list, 70, 470, PX - 130, { labelFont: font(15, F.inst, 600), labelColor: alpha(ink, .5), labelLS: 2, upperLabels: true, gap: 42, valueFont: font(28, F.plex, 600), valueColor: ink });
@@ -1212,7 +1220,7 @@ function defaults() {
     date: today(), time: '20:15', usFormat: false, home: false,
     cinema: 'Arthouse Kino', screen: 'Saal 2', platform: '', format: 'OmU',
     row: 'F', seat: '14', price: '9.50', currency: '€',
-    rating: '4.5', liked: true, withWho: '', note: '', loggedBy: 'davudiswatchin',
+    rating: '4.5', liked: true, withWho: '', note: '', loggedBy: '', letterboxd: '',
     template: 'classic', paper: t.paper, ink: t.ink, accent: t.accent,
     posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false,
     serial: makeSerial(), palette: [],
@@ -1631,7 +1639,7 @@ $('#saveBtn').addEventListener('click', async () => {
   } finally { btn.disabled = false; }
 });
 $('#newBtn').addEventListener('click', () => {
-  const keep = { loggedBy: S.loggedBy, usFormat: S.usFormat, currency: S.currency, template: S.template, paper: S.paper, ink: S.ink, accent: S.accent, grain: S.grain };
+  const keep = { loggedBy: S.loggedBy, letterboxd: S.letterboxd, usFormat: S.usFormat, currency: S.currency, template: S.template, paper: S.paper, ink: S.ink, accent: S.accent, grain: S.grain };
   S = { ...defaults(), ...keep, title: '', tagline: '', director: '', year: '', runtime: '', rating: '0', liked: false, cinema: S.cinema, price: '', row: '', seat: '', screen: '', format: '' };
   fillForm(); setSide('front'); schedule();
   $('#posterPickWrap').hidden = true; $('#posterPick').innerHTML = '';
@@ -1696,7 +1704,7 @@ $('#tabWall').addEventListener('click', () => { showView('wall'); refreshCollect
 /* ---------- draft (this browser only, a convenience) ---------- */
 let draftT;
 function saveDraft() { clearTimeout(draftT); draftT = setTimeout(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) {} }, 500); }
-function loadDraft() { try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d && typeof d === 'object') S = { ...defaults(), ...d }; } catch (e) {} }
+function loadDraft() { try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d && typeof d === 'object') { if (d.loggedBy === 'davudiswatchin' && !('letterboxd' in d)) d.loggedBy = ''; S = { ...defaults(), ...d }; } } catch (e) {} }
 
 /* ---------- boot ---------- */
 loadDraft();
