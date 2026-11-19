@@ -280,9 +280,6 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
         <label class="f"><span>Poster top–bottom</span><input type="range" name="posterY" min="0" max="1" step="0.01"></label>
         <label class="toggle"><input type="checkbox" name="grain"> Paper grain</label>
         <label class="toggle"><input type="checkbox" name="stamp"> "Watched" stamp</label>
-        <div class="f full"><label for="serial">Ticket number</label>
-          <div class="serial-row"><input type="text" id="serial" name="serial" maxlength="14"><button type="button" class="btn" id="shuffle">Shuffle</button></div>
-        </div>
       </div>
     </details>
   </form>
@@ -586,6 +583,7 @@ const FRONT = {
     fieldRow(ctx, mainFields(s), 74, 494, PX - 148, { labelFont: font(17, F.cour, 700), labelColor: alpha(ink, .55), labelLS: 3, upperLabels: true, gap: 40, valueFont: font(30, F.cour, 700), valueColor: ink });
     // stub
     const sx = PX + 40, sw = W - PX - 80, cx = PX + (W - PX) / 2;
+    ctx.save(); ctx.translate(0, 90); // centre the stub now the codes are gone
     text(ctx, 'ADMIT ONE', cx, 98, { font: font(22, F.cour, 700), color: ink, align: 'center', ls: 6 });
     const seats = seatFields(s);
     seats.forEach(([k, v], i) => {
@@ -594,8 +592,7 @@ const FRONT = {
       text(ctx, v, x, 262, { font: font(86, F.play, 900), color: acc, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 - 10 });
     });
     const p = fmtPrice(s); if (p) text(ctx, p, cx, 340, { font: font(32, F.cour, 700), color: ink, align: 'center' });
-    barcode(ctx, sx + 10, 410, sw - 20, 96, s.serial, ink);
-    text(ctx, s.serial, cx, 548, { font: font(20, F.cour, 700), color: alpha(ink, .7), align: 'center', ls: 4 });
+    ctx.restore();
   },
 
   poster(ctx, s, img) {
@@ -624,12 +621,12 @@ const FRONT = {
     const cx = PX + (W - PX) / 2, sx = PX + 40, sw = W - PX - 80;
     const seats = seatFields(s);
     const seat = seats[seats.length - 1];
+    ctx.save(); ctx.translate(0, 105); // centre the stub now the codes are gone
     text(ctx, seat[0].toUpperCase(), sx, 92, { font: font(20, F.inst, 700), color: sInk, ls: 7 });
     text(ctx, seat[1], sx - 6, 260, { font: font(170, F.arch), color: sInk, maxW: sw });
     if (seats.length > 1) text(ctx, 'Row ' + seats[0][1], sx, 318, { font: font(34, F.inst, 700), color: sInk });
     const p = fmtPrice(s); if (p) text(ctx, p, sx + sw, 318, { font: font(34, F.inst, 700), color: sInk, align: 'right' });
-    barcode(ctx, sx, 400, sw, 100, s.serial, sInk);
-    text(ctx, s.serial, cx, 544, { font: font(20, F.inst, 600), color: sInk, align: 'center', ls: 5 });
+    ctx.restore();
   },
 
   minimal(ctx, s, img) {
@@ -649,14 +646,14 @@ const FRONT = {
     // stub
     ctx.fillStyle = alpha(ink, .025); ctx.fillRect(PX, 0, W - PX, H);
     const sx = PX + 50, sw = W - PX - 100;
+    ctx.save(); ctx.translate(0, 86); // centre the stub now the codes are gone
     const seats = seatFields(s);
     seats.forEach(([k, v], i) => {
       text(ctx, k, sx, 112 + i * 140, { font: font(18, F.inst, 500), color: alpha(ink, .45) });
       text(ctx, v, sx, 196 + i * 140, { font: font(76, F.inst, 500), color: ink, maxW: sw, ls: -2 });
     });
     const p = fmtPrice(s); if (p) text(ctx, p, sx + sw, 112, { font: font(22, F.inst, 500), color: alpha(ink, .6), align: 'right' });
-    barcode(ctx, sx, 440, sw, 62, s.serial, ink);
-    text(ctx, s.serial, sx, 540, { font: font(17, F.inst, 500), color: alpha(ink, .45), ls: 3 });
+    ctx.restore();
   },
 
   carnival(ctx, s, img) {
@@ -675,13 +672,13 @@ const FRONT = {
     fieldRow(ctx, mainFields(s), 110, 492, PX - 220, { labelFont: font(16, F.cour, 700), labelColor: alpha(ink, .75), labelLS: 3, upperLabels: true, gap: 40, valueFont: font(30, F.cour, 700), valueColor: ink });
     // stub
     const scx = PX + (W - PX) / 2;
+    ctx.save(); ctx.translate(0, 100); // centre the stub now the codes are gone
     text(ctx, 'ADMIT', scx, 150, { font: font(84, F.alfa), color: ink, align: 'center', ls: 2 });
     text(ctx, 'ONE', scx, 236, { font: font(84, F.alfa), color: ink, align: 'center', ls: 6 });
     const seats = seatFields(s).map(([k, v]) => `${k} ${v}`).join('   ');
     text(ctx, seats.toUpperCase(), scx, 312, { font: font(28, F.cour, 700), color: ink, align: 'center', maxW: W - PX - 110 });
     const p = fmtPrice(s); if (p) text(ctx, p, scx, 356, { font: font(26, F.cour, 700), color: ink, align: 'center' });
-    text(ctx, 'Nº ' + serialDigits(s.serial), scx, 470, { font: font(54, F.cour, 700), color: acc, align: 'center', ls: 3 });
-    text(ctx, 'KEEP THIS COUPON', scx, 530, { font: font(17, F.cour, 700), color: alpha(ink, .8), align: 'center', ls: 4 });
+    ctx.restore();
   },
 
   neon(ctx, s, img) {
@@ -703,6 +700,7 @@ const FRONT = {
     const cr = credits(s); if (cr && y + 40 <= 440) text(ctx, cr, 80, y + 40, { font: font(22, F.cour), color: alpha(ink, .6) });
     fieldRow(ctx, mainFields(s), 80, 490, PX - 160, { labelFont: font(16, F.cour, 700), labelColor: acc, labelLS: 3, upperLabels: true, gap: 40, valueFont: font(30, F.cour, 700), valueColor: ink });
     const cx = PX + (W - PX) / 2, sx = PX + 60, sw = W - PX - 120;
+    ctx.save(); ctx.translate(0, 105); // centre the stub now the codes are gone
     const seats = seatFields(s);
     seats.forEach(([k, v], i) => {
       const x = seats.length === 1 ? cx : sx + sw * (i ? .78 : .22);
@@ -710,8 +708,7 @@ const FRONT = {
       text(ctx, v, x, 220, { font: font(80, F.mono), color: acc, align: 'center', glow: acc, glowBlur: 26, maxW: seats.length === 1 ? sw : sw / 2 });
     });
     const p = fmtPrice(s); if (p) text(ctx, p, cx, 300, { font: font(30, F.cour, 700), color: ink, align: 'center' });
-    barcode(ctx, sx, 380, sw, 100, s.serial, ink);
-    text(ctx, s.serial, cx, 528, { font: font(19, F.cour, 700), color: alpha(ink, .7), align: 'center', ls: 5 });
+    ctx.restore();
   },
 
   gala(ctx, s, img) {
@@ -742,6 +739,7 @@ const FRONT = {
     if (+s.rating > 0 && y + 32 <= 450) stars(ctx, cx - 5 * 2.25 * 12 / 2, y + 32, 12, +s.rating, acc, alpha(ink, .15));
     fieldRow(ctx, mainFields(s), x, 500, w, { labelFont: font(14, F.inst, 600), labelColor: acc, labelLS: 3, upperLabels: true, gap: 38, valueFont: font(30, F.corm, 700), valueColor: ink });
     const scx = PX + (W - PX) / 2, sx = PX + 60, sw = W - PX - 120;
+    ctx.save(); ctx.translate(0, 105); // centre the stub now the codes are gone
     const seats = seatFields(s);
     seats.forEach(([k, v], i) => {
       const xx = seats.length === 1 ? scx : sx + sw * (i ? .75 : .25);
@@ -749,8 +747,7 @@ const FRONT = {
       text(ctx, v, xx, 220, { font: font(86, F.corm, 700), color: ink, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
     });
     const p = fmtPrice(s); if (p) text(ctx, p, scx, 290, { font: font(30, F.corm, 700), color: ink, align: 'center' });
-    barcode(ctx, sx, 370, sw, 110, s.serial, gold);
-    text(ctx, s.serial, scx, 528, { font: font(16, F.inst, 600), color: acc, align: 'center', ls: 5 });
+    ctx.restore();
   },
 };
 
@@ -805,7 +802,6 @@ function drawBack(ctx, s) {
     text(ctx, who || lb, cx, 176, { font: font(42, F.cav, 700), color: sInk, align: 'center', maxW: sw });
     if (lb) text(ctx, 'letterboxd.com/' + lb, cx, 216, { font: font(17, F.cour, 700), color: alpha(sInk, .6), align: 'center', maxW: sw });
   } else {
-    text(ctx, 'Keep this stub', cx, 120, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center', ls: 3 });
     text(ctx, fmtDate(s), cx, 182, { font: font(46, F.cav, 700), color: sInk, align: 'center', maxW: sw });
     text(ctx, fmtTime(s), cx, 222, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center' });
   }
@@ -1001,6 +997,7 @@ Object.assign(FRONT, {
     ctx.fillStyle = acc; ctx.fillRect(226, 452, PX - 296, 2);
     fieldRow(ctx, locFields(s), 226, 494, PX - 296, { labelFont: font(17, F.mincho, 600), labelColor: alpha(ink, .6), gap: 40, valueFont: font(30, F.mincho, 800), valueColor: ink });
     const cx = PX + (W - PX) / 2, sw = W - PX - 90;
+    ctx.save(); ctx.translate(0, 80); // centre the stub now the codes are gone
     text(ctx, '座席  Seat', cx, 100, { font: font(20, F.mincho, 600), color: alpha(ink, .6), align: 'center' });
     const seatTxt = s.home ? (s.seat || 'Sofa') : `${s.row || '—'}列 ${s.seat || '—'}番`;
     text(ctx, seatTxt, cx, 190, { font: font(70, F.mincho, 800), color: ink, align: 'center', maxW: sw });
@@ -1011,8 +1008,7 @@ Object.assign(FRONT, {
       g.strokeStyle = acc; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 50, 0, Math.PI * 2); g.stroke();
       text(g, '映', 0, 22, { font: font(60, F.mincho, 800), color: acc, align: 'center' });
     });
-    barcode(ctx, PX + 45, 410, sw, 90, s.serial, ink);
-    text(ctx, s.serial, cx, 540, { font: font(18, F.inst, 600), color: alpha(ink, .6), align: 'center', ls: 4 });
+    ctx.restore();
   },
 
   bombay(ctx, s, img) {
@@ -1034,12 +1030,13 @@ Object.assign(FRONT, {
     ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.strokeRect(PX + 24, 24, W - PX - 48, H - 48);
     const scx = PX + (W - PX) / 2, sw = W - PX - 100;
     text(ctx, 'COUNTERFOIL', scx, 84, { font: font(16, F.cour, 700), color: alpha(ink, .75), align: 'center', ls: 4 });
+    ctx.save(); ctx.translate(0, 80); // centre the stub now the codes are gone
     const cls = seatClass(s).split(' ');
     cls.forEach((wd, i) => text(ctx, wd, scx, 160 + i * 62 - (cls.length - 1) * 20, { font: font(56, F.rozha), color: ink, align: 'center', maxW: sw }));
     const seats = seatFields(s).map(([k, v]) => `${k} ${v}`).join('   ');
     text(ctx, seats.toUpperCase(), scx, 290, { font: font(26, F.cour, 700), color: ink, align: 'center', maxW: sw });
     const p = fmtPrice(s); if (p) text(ctx, p, scx, 330, { font: font(26, F.cour, 700), color: ink, align: 'center' });
-    text(ctx, 'No. ' + serialDigits(s.serial), scx, 440, { font: font(50, F.cour, 700), color: acc, align: 'center', ls: 2 });
+    ctx.restore();
     text(ctx, 'NOT TRANSFERABLE', scx, 520, { font: font(16, F.cour, 700), color: alpha(ink, .75), align: 'center', ls: 3 });
   },
 
@@ -1056,7 +1053,7 @@ Object.assign(FRONT, {
     else { ctx.fillStyle = ink; ctx.fillRect(ccx - cr0, ccy - cr0, cr0 * 2, cr0 * 2); }
     ctx.restore();
     ctx.strokeStyle = ink; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(ccx, ccy, cr0 + 10, 0, Math.PI * 2); ctx.stroke();
-    text(ctx, `СЕРИЯ ${s.serial.slice(4, 6)}  № ${serialDigits(s.serial)}`, M + 40, 86, { font: font(24, F.ptmono), color: acc, ls: 2 });
+    text(ctx, 'КИНО  ADMIT ONE', M + 40, 86, { font: font(24, F.osw, 500), color: acc, ls: 4 });
     if (+s.rating > 0) stars(ctx, M + 40, 118, 12, +s.rating, acc, alpha(ink, .15));
     const tx = M + 40, tw = ccx - cr0 - 40 - tx;
     let y = titleBlock(ctx, s.title, { x: tx, y: 140, w: tw, h: 190, family: F.osw, weight: 700, max: 120, min: 44, lh: .98, color: ink, upper: true });
@@ -1072,6 +1069,7 @@ Object.assign(FRONT, {
     ctx.fillStyle = ink; ctx.fillRect(PX, 0, W - PX, 70);
     const scx = PX + (W - PX) / 2;
     text(ctx, 'КОНТРОЛЬ', scx, 48, { font: font(30, F.osw, 700), color: paper, align: 'center', ls: 10 });
+    ctx.save(); ctx.translate(0, 75); // centre the stub now the codes are gone
     const seats = seatFields(s);
     seats.forEach(([k, v], i) => {
       const x = seats.length === 1 ? scx : PX + (W - PX) * (i ? .72 : .28);
@@ -1079,9 +1077,7 @@ Object.assign(FRONT, {
       text(ctx, v, x, 250, { font: font(104, F.osw, 700), color: ink, align: 'center', maxW: seats.length === 1 ? 300 : 160 });
     });
     const p = fmtPrice(s); if (p) { text(ctx, 'ЦЕНА', scx, 316, { font: font(18, F.osw, 500), color: acc, align: 'center', ls: 4 }); text(ctx, p, scx, 356, { font: font(32, F.ptmono), color: ink, align: 'center' }); }
-    ctx.fillStyle = acc; ctx.fillRect(PX + 50, 410, W - PX - 100, 86);
-    text(ctx, `${s.serial.slice(4, 6)} ${serialDigits(s.serial)}`, scx, 468, { font: font(40, F.ptmono), color: paper, align: 'center', ls: 3 });
-    text(ctx, s.serial, scx, 546, { font: font(17, F.ptmono), color: alpha(ink, .6), align: 'center', ls: 3 });
+    ctx.restore();
   },
 
   boarding(ctx, s, img) {
@@ -1115,11 +1111,11 @@ Object.assign(FRONT, {
     fieldRow(ctx, list, 70, 470, PX - 130, { labelFont: font(15, F.inst, 600), labelColor: alpha(ink, .5), labelLS: 2, upperLabels: true, gap: 42, valueFont: font(28, F.plex, 600), valueColor: ink });
     // stub
     const sx = PX + 50, sw = W - PX - 100;
+    ctx.save(); ctx.translate(0, 90); // centre the stub now the codes are gone
     text(ctx, seat, sx - 4, 220, { font: font(110, F.inst, 700), color: ink, maxW: sw });
     text(ctx, `${from} → ${to}`, sx, 276, { font: font(28, F.plex, 600), color: alpha(ink, .75) });
     text(ctx, `${fmtDate(s)}  ${fmtTime(s)}`, sx, 316, { font: font(22, F.plex, 400), color: alpha(ink, .6), maxW: sw });
-    pdf417(ctx, sx, 372, sw, 110, s.serial, ink);
-    text(ctx, s.serial, sx, 532, { font: font(18, F.plex, 600), color: alpha(ink, .55), ls: 3 });
+    ctx.restore();
   },
 
   receipt(ctx, s, img) {
@@ -1145,14 +1141,16 @@ Object.assign(FRONT, {
     const p = fmtPrice(s);
     if (p) { leader(ctx, 'TOTAL', p, 640, 440, top + 3 * 38 + 6, font(30, F.plex, 700), ink); }
     text(ctx, '*** ENJOY THE FILM ***', cx, H - 44, { font: font(18, F.plex, 600), color: alpha(ink, .75), align: 'center', ls: 3 });
-    // stub with QR
-    const scx = PX + (W - PX) / 2;
-    text(ctx, 'SCAN AT ENTRANCE', scx, 80, { font: font(16, F.plex, 600), color: alpha(ink, .7), align: 'center', ls: 3 });
-    drawQR(ctx, scx - 120, 112, 240, s.serial, ink, paper);
-    text(ctx, s.serial, scx, 410, { font: font(24, F.plex, 700), color: ink, align: 'center', ls: 3 });
-    const seatT = s.home ? (s.seat || 'Sofa') : `ROW ${s.row || '-'}  SEAT ${s.seat || '-'}`;
-    text(ctx, seatT, scx, 456, { font: font(22, F.plex, 600), color: ink, align: 'center', maxW: W - PX - 80 });
-    if (p) text(ctx, p, scx, 494, { font: font(22, F.plex, 600), color: alpha(ink, .75), align: 'center' });
+    // stub
+    const scx = PX + (W - PX) / 2, ssw = W - PX - 80;
+    text(ctx, 'ADMIT ONE', scx, 150, { font: font(20, F.plex, 600), color: alpha(ink, .7), align: 'center', ls: 4 });
+    ctx.save(); ctx.strokeStyle = alpha(ink, .55); ctx.lineWidth = 2; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(PX + 50, 176); ctx.lineTo(W - 50, 176); ctx.stroke(); ctx.restore();
+    if (s.home) text(ctx, s.seat || 'Sofa', scx, 290, { font: font(64, F.plex, 700), color: ink, align: 'center', maxW: ssw });
+    else {
+      text(ctx, 'ROW ' + (s.row || '-'), scx, 260, { font: font(48, F.plex, 700), color: ink, align: 'center', maxW: ssw });
+      text(ctx, 'SEAT ' + (s.seat || '-'), scx, 326, { font: font(48, F.plex, 700), color: ink, align: 'center', maxW: ssw });
+    }
+    if (p) text(ctx, p, scx, 400, { font: font(26, F.plex, 600), color: alpha(ink, .75), align: 'center' });
   },
 
   istanbul(ctx, s, img) {
@@ -1187,6 +1185,7 @@ Object.assign(FRONT, {
     ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(PX + 24, 24, W - PX - 48, H - 48);
     ctx.lineWidth = 1.5; ctx.strokeStyle = acc; ctx.strokeRect(PX + 34, 34, W - PX - 68, H - 68);
     const scx = PX + (W - PX) / 2, sw = W - PX - 120;
+    ctx.save(); ctx.translate(0, 95); // centre the stub now the codes are gone
     const seats = seatFields(s);
     seats.forEach(([kk, v], i) => {
       const xx = seats.length === 1 ? scx : PX + 60 + sw * (i ? .75 : .25);
@@ -1194,8 +1193,7 @@ Object.assign(FRONT, {
       text(ctx, v, xx, 210, { font: font(88, F.abril), color: ink, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
     });
     const p = fmtPrice(s); if (p) { text(ctx, 'FİYAT', scx, 268, { font: font(15, F.inst, 700), color: acc, align: 'center', ls: 3 }); text(ctx, p, scx, 304, { font: font(28, F.inst, 700), color: ink, align: 'center' }); }
-    barcode(ctx, PX + 60, 360, sw, 100, s.serial, ink);
-    text(ctx, s.serial, scx, 494, { font: font(16, F.inst, 600), color: alpha(ink, .6), align: 'center', ls: 4 });
+    ctx.restore();
     text(ctx, 'İYİ SEYİRLER', scx, 548, { font: font(20, F.inst, 700), color: turq, align: 'center', ls: 5 });
   },
 });
@@ -1324,7 +1322,7 @@ form.addEventListener('input', e => {
   schedule(el.type !== 'range' || el.name === 'posterOpacity' ? true : true);
 });
 form.addEventListener('change', e => { if (e.target.name === 'serial') { S.serial = e.target.value.toUpperCase().replace(/[^0-9A-Z-]/g, '') || makeSerial(); e.target.value = S.serial; schedule(); } });
-$('#shuffle').addEventListener('click', () => { S.serial = makeSerial(); form.elements.serial.value = S.serial; schedule(); });
+
 
 /* ---------- poster ---------- */
 async function takePoster(file, fromSearch = false) {
