@@ -6,7 +6,7 @@
 <title>Ticket Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Shippori+Mincho:wght@600;800&family=Rozha+One&family=Oswald:wght@500;700&family=PT+Mono&family=IBM+Plex+Mono:wght@400;600;700&family=Abril+Fatface&display=swap" rel="stylesheet">
 <style>
 :root{
   --velvet:#1E0F17; --velvet-2:#2A1621; --velvet-3:#3A2131; --velvet-4:#4A2B3E;
@@ -43,7 +43,7 @@ details.group>summary{list-style:none;cursor:pointer;padding:14px 18px;font-weig
 details.group>summary::-webkit-details-marker{display:none}
 details.group>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--dust);border-bottom:2px solid var(--dust);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
 details.group[open]>summary::after{transform:rotate(225deg) translateY(-2px)}
-.fields{padding:2px 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 12px}
+.fields{padding:2px 18px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 12px}
 .f{display:flex;flex-direction:column;gap:5px;min-width:0}
 .f.full{grid-column:1/-1}
 .f>span,.f>label{font-size:13px;color:var(--dust);font-weight:500}
@@ -157,14 +157,22 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 
 @media (max-width:1100px){.templates{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:980px){
-  .app{grid-template-columns:1fr;padding:0 16px 40px}
+  .app{grid-template-columns:minmax(0,1fr);padding:0 16px 40px}
+  .stage,.controls{min-width:0}
   .stage{position:static;order:-1}
   .top{padding:18px 16px 14px}
   .tabs{margin-left:0;width:100%}
   .tabs button{flex:1}
   .wall{padding:0 16px 50px}
 }
-@media (max-width:520px){.logo{font-size:32px}.fields{grid-template-columns:1fr}.colors{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+@media (max-width:700px){
+  .menu .pop{position:fixed;left:12px;right:12px;bottom:12px;top:auto;min-width:0;padding:8px;border-radius:16px;box-shadow:0 -10px 60px rgba(0,0,0,.6)}
+  .menu .pop button{padding:14px 14px;font-size:16px}
+  .menu[open]::before{content:"";position:fixed;inset:0;background:rgba(10,4,8,.55);z-index:19}
+  .templates{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:42%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+  .tpl{scroll-snap-align:start}
+}
+@media (max-width:520px){.logo{font-size:32px}.fields{grid-template-columns:minmax(0,1fr)}.colors{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -540,17 +548,23 @@ function goldGrad(ctx, y0, y1, base) {
   g.addColorStop(0, mix(base, '#ffffff', .45)); g.addColorStop(.5, base); g.addColorStop(1, mix(base, '#000000', .35));
   return g;
 }
+/* Draw ink on its own layer, scuff it with grain, then lay it on the ticket (keeps the paper underneath intact). */
+function inkLayer(ctx, x, y, w, h, scuff, draw) {
+  const c = document.createElement('canvas'); c.width = w * 2; c.height = h * 2;
+  const g = c.getContext('2d'); g.scale(2, 2); draw(g);
+  g.globalCompositeOperation = 'destination-out'; g.globalAlpha = scuff;
+  g.drawImage(grainCanvas(), 0, 0, w, h);
+  ctx.drawImage(c, x, y, w, h);
+}
 function stamp(ctx, s, x, y, color) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.16); ctx.scale(.8, .8); ctx.globalAlpha = .82;
-  ctx.strokeStyle = color; ctx.lineWidth = 6;
-  ctx.beginPath(); ctx.roundRect(-150, -58, 300, 116, 14); ctx.stroke();
-  ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-140, -48, 280, 96, 9); ctx.stroke();
-  text(ctx, 'WATCHED', 0, 6, { font: font(52, F.alfa), color, align: 'center', ls: 4 });
-  text(ctx, fmtDate(s), 0, 36, { font: font(20, F.cour, 700), color, align: 'center', ls: 3 });
-  // scuff the ink so it reads as a rubber stamp
-  ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = .5;
-  ctx.drawImage(grainCanvas(), -150, -58, 300, 116);
-  ctx.restore();
+  inkLayer(ctx, x - 170, y - 110, 340, 220, .5, g => {
+    g.translate(170, 110); g.rotate(-0.16); g.scale(.8, .8); g.globalAlpha = .85;
+    g.strokeStyle = color; g.lineWidth = 6;
+    g.beginPath(); g.roundRect(-150, -58, 300, 116, 14); g.stroke();
+    g.lineWidth = 2; g.beginPath(); g.roundRect(-140, -48, 280, 96, 9); g.stroke();
+    text(g, 'WATCHED', 0, 6, { font: font(52, F.alfa), color, align: 'center', ls: 4 });
+    text(g, fmtDate(s), 0, 36, { font: font(20, F.cour, 700), color, align: 'center', ls: 3 });
+  });
 }
 
 /* ---------- templates: front ---------- */
@@ -757,7 +771,7 @@ function drawBack(ctx, s) {
   const x = 84, w = PX - 168;
   const labelCol = t === 'carnival' ? alpha(ink, .8) : alpha(ink, .55);
   text(ctx, (s.home ? 'Watched at home' : 'Seen') + ', ' + fmtDate(s), x, 100, { font: font(20, F.cour, 700), color: labelCol, ls: 3 });
-  let y = titleBlock(ctx, s.title, { x, y: 118, w: w - 360, h: 120, family: fam, weight: wt, max: 58, min: 30, lh: 1.05, color: t === 'classic' ? acc : ink, upper: t === 'poster' || t === 'carnival' || t === 'neon', maxLines: 2 });
+  let y = titleBlock(ctx, s.title, { x, y: 118, w: w - 360, h: 120, family: fam, weight: wt, max: 58, min: 30, lh: 1.05, color: t === 'classic' ? acc : ink, upper: (typeof UPPER_BACK !== 'undefined' ? UPPER_BACK : ['poster', 'carnival', 'neon']).includes(t), maxLines: 2 });
   // rating block on the right
   const rx = PX - 84 - 5 * 2.25 * 26;
   if (+s.rating > 0) stars(ctx, rx, 160, 26, +s.rating, t === 'carnival' ? ink : acc, alpha(ink, .14));
@@ -798,7 +812,7 @@ function renderTicket(canvas, s, side, img, scale = 1) {
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   ctx.clearRect(0, 0, W, H);
   ctx.save();
-  ctx.beginPath(); ctx.roundRect(0, 0, W, H, R); ctx.clip();
+  ctx.beginPath(); ctx.roundRect(0, 0, W, H, s.template === 'receipt' ? 4 : R); ctx.clip();
   try {
     if (side === 'back') drawBack(ctx, s);
     else {
@@ -818,6 +832,13 @@ function renderTicket(canvas, s, side, img, scale = 1) {
   ctx.beginPath(); ctx.arc(PX, 0, NR, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(PX, H, NR, 0, Math.PI * 2); ctx.fill();
   for (let y = NR + 18; y <= H - NR - 14; y += 19) { ctx.beginPath(); ctx.arc(PX, y, 3.6, 0, Math.PI * 2); ctx.fill(); }
+  if (s.template === 'receipt') {
+    // torn thermal-paper edges, top and bottom
+    for (let x = 0; x < W; x += 22) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 11, 9); ctx.lineTo(x + 22, 0); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, H); ctx.lineTo(x + 11, H - 9); ctx.lineTo(x + 22, H); ctx.closePath(); ctx.fill();
+    }
+  }
   ctx.restore();
   return canvas;
 }
@@ -842,6 +863,335 @@ function renderStory(s, img, frontC, backC) {
   text(ctx, s.loggedBy ? '@' + s.loggedBy : '', 540, 1780, { font: font(34, F.inst, 600), color: 'rgba(255,255,255,.85)', align: 'center' });
   return c;
 }
+
+</script>
+<script>
+/* ===== Ticket Store: world styles ===== */
+Object.assign(F, {
+  mincho: '"Shippori Mincho", "Noto Serif JP", "Yu Mincho", serif',
+  rozha: '"Rozha One", Georgia, serif',
+  osw: 'Oswald, "Arial Narrow", sans-serif',
+  ptmono: '"PT Mono", "Courier New", monospace',
+  plex: '"IBM Plex Mono", "Courier New", monospace',
+  abril: '"Abril Fatface", Georgia, serif',
+});
+Object.assign(TEMPLATES, {
+  tokyo:    { name: 'Tokyo',    paper: '#F3ECDD', ink: '#1E1B18', accent: '#C8361F', dark: false },
+  bombay:   { name: 'Bombay',   paper: '#F2B9C5', ink: '#4A1426', accent: '#C2192B', dark: false },
+  kino:     { name: 'Kino',     paper: '#E9DCC2', ink: '#151313', accent: '#C62828', dark: false },
+  boarding: { name: 'Boarding pass', paper: '#FFFFFF', ink: '#14213D', accent: '#2F80ED', dark: false },
+  receipt:  { name: 'Receipt',  paper: '#F6F5F0', ink: '#2A2A2A', accent: '#2A2A2A', dark: false },
+  istanbul: { name: 'Istanbul', paper: '#F5EEDC', ink: '#1F3A7A', accent: '#C0392B', dark: false },
+});
+Object.assign(BACK_FONTS, {
+  tokyo: [F.mincho, 800, ''], bombay: [F.rozha, '', ''], kino: [F.osw, 700, ''],
+  boarding: [F.inst, 700, ''], receipt: [F.plex, 600, ''], istanbul: [F.abril, '', ''],
+});
+const UPPER_BACK = ['poster', 'carnival', 'neon', 'kino', 'receipt'];
+const LABELS = {
+  tokyo: { Date: '日付 Date', Time: '開映 Time', Cinema: '劇場 Cinema', Screen: 'スクリーン', Format: '方式 Format', Where: '場所 Where', Via: '配信 Via', Row: '列', Seat: '番' },
+  kino: { Date: 'ДАТА', Time: 'СЕАНС', Cinema: 'КИНОТЕАТР', Screen: 'ЗАЛ', Format: 'ФОРМАТ', Where: 'ГДЕ', Via: 'ПЛАТФОРМА', Row: 'РЯД', Seat: 'МЕСТО', Price: 'ЦЕНА' },
+  istanbul: { Date: 'TARİH', Time: 'SEANS', Cinema: 'SİNEMA', Screen: 'SALON', Format: 'FORMAT', Where: 'YER', Via: 'PLATFORM', Row: 'SIRA', Seat: 'KOLTUK', Price: 'FİYAT' },
+};
+function lab(s, k) { const m = LABELS[s.template]; return m && m[k] ? m[k] : k; }
+function locFields(s) { return mainFields(s).map(([k, v]) => [lab(s, k), v]); }
+function seeded(str) { let h = 2166136261; for (const c of String(str)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; }; }
+function code3(str, fallback) { const t = String(str || '').normalize('NFKD').toUpperCase().replace(/[^A-Z]/g, ''); return (t.slice(0, 3) || fallback).padEnd(3, 'X'); }
+function seatClass(s) {
+  if (s.home) return 'SOFA CLASS';
+  const r = String(s.row || '').trim().toUpperCase();
+  let n = /^\d+$/.test(r) ? +r : r ? r.charCodeAt(0) - 64 : 0;
+  if (n <= 0) return 'STALLS';
+  if (n <= 5) return 'FRONT STALLS';
+  if (n <= 11) return 'DRESS CIRCLE';
+  return 'BALCONY';
+}
+function star8(ctx, cx, cy, r, color) {
+  ctx.fillStyle = color;
+  for (const a of [0, Math.PI / 4]) { ctx.save(); ctx.translate(cx, cy); ctx.rotate(a); ctx.fillRect(-r * .72, -r * .72, r * 1.44, r * 1.44); ctx.restore(); }
+}
+function pointedArch(ctx, x, y, w, h) {
+  const r = w * .9;
+  ctx.beginPath();
+  ctx.moveTo(x, y + h); ctx.lineTo(x, y + w * .55);
+  ctx.arcTo(x, y + w * .1, x + w / 2, y, r * .62);
+  ctx.lineTo(x + w / 2, y);
+  ctx.arcTo(x + w, y + w * .1, x + w, y + w * .55, r * .62);
+  ctx.lineTo(x + w, y + h); ctx.closePath();
+}
+function drawQR(ctx, x, y, size, seed, ink, paper) {
+  const n = 25, m = size / n, rnd = seeded(seed);
+  ctx.fillStyle = paper; ctx.fillRect(x - m, y - m, size + 2 * m, size + 2 * m);
+  ctx.fillStyle = ink;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const inF = (i < 8 && j < 8) || (i > n - 9 && j < 8) || (i < 8 && j > n - 9);
+    if (!inF && rnd() > .52) ctx.fillRect(x + i * m, y + j * m, m + .4, m + .4);
+  }
+  for (const [fx, fy] of [[0, 0], [n - 7, 0], [0, n - 7]]) {
+    ctx.fillStyle = ink; ctx.fillRect(x + fx * m, y + fy * m, 7 * m, 7 * m);
+    ctx.fillStyle = paper; ctx.fillRect(x + (fx + 1) * m, y + (fy + 1) * m, 5 * m, 5 * m);
+    ctx.fillStyle = ink; ctx.fillRect(x + (fx + 2) * m, y + (fy + 2) * m, 3 * m, 3 * m);
+  }
+}
+function pdf417(ctx, x, y, w, h, seed, color) {
+  const rnd = seeded(seed), rows = 14, cols = 46, cw = w / cols, rh = h / rows;
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, cw * 2, h); ctx.fillRect(x + w - cw * 2, y, cw * 2, h);
+  for (let r = 0; r < rows; r++) for (let c = 3; c < cols - 3; c++) if (rnd() > .5) ctx.fillRect(x + c * cw, y + r * rh, cw + .3, rh - 1);
+}
+function leader(ctx, k, v, x, w, y, fnt, color) {
+  ctx.save(); ctx.font = fnt; ctx.fillStyle = color; ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left'; ctx.fillText(k, x, y);
+  ctx.textAlign = 'right'; ctx.fillText(v, x + w, y);
+  const a = ctx.measureText(k).width, b = ctx.measureText(v).width;
+  ctx.textAlign = 'left'; let dots = ''; const dw = ctx.measureText('.').width;
+  const n = Math.max(0, Math.floor((w - a - b - 24) / dw)); dots = '.'.repeat(n);
+  ctx.globalAlpha = .55; ctx.fillText(dots, x + a + 12, y);
+  ctx.restore();
+}
+function plane(ctx, cx, cy, s, color) {
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(-22, -2); ctx.lineTo(18, -3); ctx.quadraticCurveTo(26, 0, 18, 3); ctx.lineTo(-22, 2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(2, -2); ctx.lineTo(-8, -18); ctx.lineTo(-3, -18); ctx.lineTo(10, -2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(2, 2); ctx.lineTo(-8, 18); ctx.lineTo(-3, 18); ctx.lineTo(10, 2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-18, -1); ctx.lineTo(-24, -9); ctx.lineTo(-20, -9); ctx.lineTo(-13, -1); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-18, 1); ctx.lineTo(-24, 9); ctx.lineTo(-20, 9); ctx.lineTo(-13, 1); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function revenueStamp(ctx, x, y, s) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.07);
+  const w = 112, h = 128, r = 5;
+  ctx.beginPath();
+  for (let i = 0; i <= w; i += 2 * r) ctx.arc(i, 0, r, Math.PI, 0, false);
+  ctx.lineTo(w, 0);
+  for (let i = 0; i <= h; i += 2 * r) ctx.arc(w, i, r, -Math.PI / 2, Math.PI / 2, false);
+  for (let i = w; i >= 0; i -= 2 * r) ctx.arc(i, h, r, 0, Math.PI, false);
+  for (let i = h; i >= 0; i -= 2 * r) ctx.arc(0, i, r, Math.PI / 2, -Math.PI / 2, false);
+  ctx.closePath(); ctx.fillStyle = '#B9D4A6'; ctx.fill();
+  ctx.strokeStyle = '#3E6B35'; ctx.lineWidth = 2; ctx.strokeRect(10, 10, w - 20, h - 20);
+  text(ctx, 'ENT. TAX', w / 2, 46, { font: font(17, F.cour, 700), color: '#2F5428', align: 'center' });
+  text(ctx, 'PAID', w / 2, 78, { font: font(28, F.rozha), color: '#2F5428', align: 'center' });
+  text(ctx, (s.currency || '') + '1', w / 2, 106, { font: font(18, F.cour, 700), color: '#2F5428', align: 'center' });
+  ctx.restore();
+}
+
+Object.assign(FRONT, {
+  tokyo(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper, BW = 150;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    if (img) { ctx.save(); ctx.globalAlpha = +s.posterOpacity; ctx.filter = 'grayscale(1) sepia(.35)'; drawCover(ctx, img, BW, 0, PX - BW, H, +s.posterX, +s.posterY); ctx.restore(); }
+    ctx.fillStyle = acc; ctx.fillRect(0, 0, BW, H);
+    ['鑑', '賞', '券'].forEach((ch, i) => text(ctx, ch, BW / 2, 172 + i * 118, { font: font(96, F.mincho, 800), color: paper, align: 'center' }));
+    ctx.save(); ctx.translate(BW / 2 + 8, H - 34); ctx.rotate(-Math.PI / 2);
+    text(ctx, 'ADMISSION', 0, 0, { font: font(15, F.inst, 600), color: alpha(paper, .85), ls: 5 }); ctx.restore();
+    ctx.strokeStyle = alpha(ink, .5); ctx.lineWidth = 1.5; ctx.strokeRect(182, 30, PX - 212, H - 60); ctx.lineWidth = 1; ctx.strokeRect(190, 38, PX - 228, H - 76);
+    text(ctx, '一般  General admission', 226, 98, { font: font(22, F.mincho, 600), color: alpha(ink, .75) });
+    if (+s.rating > 0) stars(ctx, PX - 70 - 5 * 2.25 * 14, 91, 14, +s.rating, acc, alpha(ink, .15));
+    let y = titleBlock(ctx, s.title, { x: 224, y: 122, w: PX - 300, h: s.tagline ? 170 : 220, family: F.mincho, weight: 800, max: 104, min: 40, lh: 1.08, color: ink });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: 226, y: y + 10, w: PX - 310, h: Math.max(36, 400 - y), family: F.mincho, weight: 600, max: 30, min: 20, lh: 1.25, color: alpha(ink, .8), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 38 <= 432) text(ctx, cr, 226, y + 38, { font: font(21, F.mincho, 600), color: alpha(ink, .6) });
+    ctx.fillStyle = acc; ctx.fillRect(226, 452, PX - 296, 2);
+    fieldRow(ctx, locFields(s), 226, 494, PX - 296, { labelFont: font(17, F.mincho, 600), labelColor: alpha(ink, .6), gap: 40, valueFont: font(30, F.mincho, 800), valueColor: ink });
+    const cx = PX + (W - PX) / 2, sw = W - PX - 90;
+    text(ctx, '座席  Seat', cx, 100, { font: font(20, F.mincho, 600), color: alpha(ink, .6), align: 'center' });
+    const seatTxt = s.home ? (s.seat || 'Sofa') : `${s.row || '—'}列 ${s.seat || '—'}番`;
+    text(ctx, seatTxt, cx, 190, { font: font(70, F.mincho, 800), color: ink, align: 'center', maxW: sw });
+    const p = fmtPrice(s); if (p) text(ctx, p, cx, 246, { font: font(28, F.mincho, 800), color: ink, align: 'center' });
+    // hanko seal
+    inkLayer(ctx, cx + 96 - 60, 330 - 60, 120, 120, .35, g => {
+      g.translate(60, 60); g.rotate(-0.12); g.globalAlpha = .85;
+      g.strokeStyle = acc; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 50, 0, Math.PI * 2); g.stroke();
+      text(g, '映', 0, 22, { font: font(60, F.mincho, 800), color: acc, align: 'center' });
+    });
+    barcode(ctx, PX + 45, 410, sw, 90, s.serial, ink);
+    text(ctx, s.serial, cx, 540, { font: font(18, F.inst, 600), color: alpha(ink, .6), align: 'center', ls: 4 });
+  },
+
+  bombay(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    if (img) { ctx.save(); ctx.globalAlpha = Math.min(1, +s.posterOpacity * 2); ctx.globalCompositeOperation = 'multiply'; ctx.filter = 'grayscale(1) contrast(1.3)'; drawCover(ctx, img, 0, 0, PX, H, +s.posterX, +s.posterY); ctx.restore(); }
+    ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.strokeRect(24, 24, PX - 48, H - 48);
+    ctx.setLineDash([10, 8]); ctx.lineWidth = 1.5; ctx.strokeRect(36, 36, PX - 72, H - 72); ctx.setLineDash([]);
+    revenueStamp(ctx, 66, 66, s);
+    const cx = PX / 2 + 60;
+    text(ctx, s.home ? 'HOME TALKIES' : (s.cinema || 'CINEMA').toUpperCase(), cx, 104, { font: font(40, F.rozha), color: ink, align: 'center', ls: 3, maxW: PX - 400 });
+    text(ctx, 'सिनेमा   ADMIT ONE', cx, 140, { font: font(22, F.rozha), color: acc, align: 'center', ls: 2 });
+    let y = titleBlock(ctx, s.title, { x: cx, y: 160, w: PX - 400, h: s.tagline ? 150 : 200, family: F.rozha, max: 96, min: 40, lh: 1.05, color: ink, align: 'center' });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: cx, y: y + 8, w: PX - 420, h: Math.max(34, 410 - y), family: F.cour, weight: 700, max: 26, min: 18, lh: 1.25, color: alpha(ink, .85), align: 'center', maxLines: 2 });
+    if (+s.rating > 0 && y + 34 <= 425) stars(ctx, cx - 5 * 2.25 * 13 / 2, y + 34, 13, +s.rating, acc, alpha(ink, .15));
+    ctx.fillStyle = ink; ctx.fillRect(80, 452, PX - 160, 2);
+    fieldRow(ctx, mainFields(s), 80, 492, PX - 160, { labelFont: font(15, F.cour, 700), labelColor: alpha(ink, .7), labelLS: 2, upperLabels: true, gap: 40, valueFont: font(28, F.cour, 700), valueColor: ink });
+    // counterfoil
+    ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.strokeRect(PX + 24, 24, W - PX - 48, H - 48);
+    const scx = PX + (W - PX) / 2, sw = W - PX - 100;
+    text(ctx, 'COUNTERFOIL', scx, 84, { font: font(16, F.cour, 700), color: alpha(ink, .75), align: 'center', ls: 4 });
+    const cls = seatClass(s).split(' ');
+    cls.forEach((wd, i) => text(ctx, wd, scx, 160 + i * 62 - (cls.length - 1) * 20, { font: font(56, F.rozha), color: ink, align: 'center', maxW: sw }));
+    const seats = seatFields(s).map(([k, v]) => `${k} ${v}`).join('   ');
+    text(ctx, seats.toUpperCase(), scx, 290, { font: font(26, F.cour, 700), color: ink, align: 'center', maxW: sw });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 330, { font: font(26, F.cour, 700), color: ink, align: 'center' });
+    text(ctx, 'No. ' + serialDigits(s.serial), scx, 440, { font: font(50, F.cour, 700), color: acc, align: 'center', ls: 2 });
+    text(ctx, 'NOT TRANSFERABLE', scx, 520, { font: font(16, F.cour, 700), color: alpha(ink, .75), align: 'center', ls: 3 });
+  },
+
+  kino(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper, M = 78;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = acc; ctx.fillRect(0, 0, M, H);
+    ctx.save(); ctx.translate(M / 2 + 14, H - 40); ctx.rotate(-Math.PI / 2);
+    text(ctx, 'КИНОБИЛЕТ', 0, 0, { font: font(40, F.osw, 700), color: paper, ls: 14 }); ctx.restore();
+    // photo circle
+    const ccx = PX - 230, ccy = 240, cr0 = 165;
+    ctx.save(); ctx.beginPath(); ctx.arc(ccx, ccy, cr0, 0, Math.PI * 2); ctx.clip();
+    if (img) { ctx.filter = 'grayscale(1) contrast(1.35)'; drawCover(ctx, img, ccx - cr0, ccy - cr0, cr0 * 2, cr0 * 2, +s.posterX, +s.posterY); }
+    else { ctx.fillStyle = ink; ctx.fillRect(ccx - cr0, ccy - cr0, cr0 * 2, cr0 * 2); }
+    ctx.restore();
+    ctx.strokeStyle = ink; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(ccx, ccy, cr0 + 10, 0, Math.PI * 2); ctx.stroke();
+    text(ctx, `СЕРИЯ ${s.serial.slice(4, 6)}  № ${serialDigits(s.serial)}`, M + 40, 86, { font: font(24, F.ptmono), color: acc, ls: 2 });
+    if (+s.rating > 0) stars(ctx, M + 40, 118, 12, +s.rating, acc, alpha(ink, .15));
+    const tx = M + 40, tw = ccx - cr0 - 40 - tx;
+    let y = titleBlock(ctx, s.title, { x: tx, y: 140, w: tw, h: 190, family: F.osw, weight: 700, max: 120, min: 44, lh: .98, color: ink, upper: true });
+    // red diagonal band carrying the tagline
+    ctx.save(); ctx.translate(tx - 10, Math.min(y + 50, 392)); ctx.rotate(-0.06);
+    ctx.fillStyle = acc; ctx.fillRect(-30, -40, tw + 210, 66);
+    const band = s.tagline || credits(s) || 'КИНО';
+    text(ctx, band.toUpperCase(), 0, 6, { font: font(30, F.osw, 500), color: paper, ls: 2, maxW: tw + 150 });
+    ctx.restore();
+    ctx.fillStyle = ink; ctx.fillRect(tx, 452, PX - tx - 50, 6);
+    fieldRow(ctx, locFields(s), tx, 496, PX - tx - 50, { labelFont: font(17, F.osw, 500), labelColor: acc, labelLS: 3, gap: 40, valueFont: font(28, F.ptmono), valueColor: ink });
+    // control stub
+    ctx.fillStyle = ink; ctx.fillRect(PX, 0, W - PX, 70);
+    const scx = PX + (W - PX) / 2;
+    text(ctx, 'КОНТРОЛЬ', scx, 48, { font: font(30, F.osw, 700), color: paper, align: 'center', ls: 10 });
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const x = seats.length === 1 ? scx : PX + (W - PX) * (i ? .72 : .28);
+      text(ctx, lab(s, k), x, 134, { font: font(20, F.osw, 500), color: acc, align: 'center', ls: 4 });
+      text(ctx, v, x, 250, { font: font(104, F.osw, 700), color: ink, align: 'center', maxW: seats.length === 1 ? 300 : 160 });
+    });
+    const p = fmtPrice(s); if (p) { text(ctx, 'ЦЕНА', scx, 316, { font: font(18, F.osw, 500), color: acc, align: 'center', ls: 4 }); text(ctx, p, scx, 356, { font: font(32, F.ptmono), color: ink, align: 'center' }); }
+    ctx.fillStyle = acc; ctx.fillRect(PX + 50, 410, W - PX - 100, 86);
+    text(ctx, `${s.serial.slice(4, 6)} ${serialDigits(s.serial)}`, scx, 468, { font: font(40, F.ptmono), color: paper, align: 'center', ls: 3 });
+    text(ctx, s.serial, scx, 546, { font: font(17, F.ptmono), color: alpha(ink, .6), align: 'center', ls: 3 });
+  },
+
+  boarding(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper, HB = 96;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = acc; ctx.fillRect(0, 0, W, HB);
+    const onAcc = luminance(acc) > .45 ? '#0E1A30' : '#FFFFFF';
+    plane(ctx, 74, HB / 2, 1.3, onAcc);
+    text(ctx, 'BOARDING PASS', 120, 60, { font: font(28, F.inst, 700), color: onAcc, ls: 6 });
+    text(ctx, 'ADMIT ONE', PX - 60, 60, { font: font(20, F.inst, 600), color: alpha(onAcc, .85), align: 'right', ls: 5 });
+    text(ctx, 'SEAT', PX + 50, 60, { font: font(20, F.inst, 600), color: alpha(onAcc, .85), ls: 5 });
+    const from = code3(s.home ? 'Home' : s.cinema, 'CIN'), to = code3(s.title, 'FLM');
+    const hasP = !!img, pw = 150, ph = 225, ppx = PX - 60 - pw, ppy = HB + 34;
+    if (hasP) { ctx.save(); ctx.beginPath(); ctx.roundRect(ppx, ppy, pw, ph, 12); ctx.clip(); drawCover(ctx, img, ppx, ppy, pw, ph, +s.posterX, +s.posterY); ctx.restore(); }
+    text(ctx, 'FROM', 70, 168, { font: font(16, F.inst, 600), color: alpha(ink, .5), ls: 3 });
+    text(ctx, from, 64, 280, { font: font(124, F.inst, 700), color: ink, ls: 2 });
+    text(ctx, s.home ? (s.cinema || 'Home') : (s.cinema || 'Cinema'), 70, 318, { font: font(22, F.inst, 500), color: alpha(ink, .65), maxW: 360 });
+    const tox = 560;
+    text(ctx, 'TO', tox, 168, { font: font(16, F.inst, 600), color: alpha(ink, .5), ls: 3 });
+    text(ctx, to, tox - 6, 280, { font: font(124, F.inst, 700), color: ink, ls: 2 });
+    text(ctx, [s.title, s.year].filter(Boolean).join(', '), tox, 318, { font: font(22, F.inst, 500), color: alpha(ink, .65), maxW: (hasP ? ppx : PX - 60) - tox - 20 });
+    ctx.save(); ctx.strokeStyle = alpha(acc, .7); ctx.lineWidth = 2.5; ctx.setLineDash([3, 9]); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(370, 236); ctx.quadraticCurveTo(455, 180, 530, 236); ctx.stroke(); ctx.restore();
+    plane(ctx, 452, 205, 1.1, acc);
+    if (s.tagline) text(ctx, s.tagline, 70, 382, { font: font(24, F.inst, 400, 'italic'), color: alpha(ink, .7), maxW: (hasP ? ppx : PX - 60) - 90 });
+    ctx.fillStyle = alpha(ink, .12); ctx.fillRect(70, 420, PX - 130, 2);
+    const seat = s.home ? (s.seat || 'Sofa') : `${s.row || ''}${s.seat || '—'}`;
+    const list = [['Passenger', s.loggedBy || 'Guest'], ['Date', fmtDate(s)], ['Boarding', fmtTime(s)]];
+    if (!s.home) list.push(['Gate', s.screen || '—']);
+    list.push(['Seat', seat], ['Class', s.format || 'Economy']);
+    fieldRow(ctx, list, 70, 470, PX - 130, { labelFont: font(15, F.inst, 600), labelColor: alpha(ink, .5), labelLS: 2, upperLabels: true, gap: 42, valueFont: font(28, F.plex, 600), valueColor: ink });
+    // stub
+    const sx = PX + 50, sw = W - PX - 100;
+    text(ctx, seat, sx - 4, 220, { font: font(110, F.inst, 700), color: ink, maxW: sw });
+    text(ctx, `${from} → ${to}`, sx, 276, { font: font(28, F.plex, 600), color: alpha(ink, .75) });
+    text(ctx, `${fmtDate(s)}  ${fmtTime(s)}`, sx, 316, { font: font(22, F.plex, 400), color: alpha(ink, .6), maxW: sw });
+    pdf417(ctx, sx, 372, sw, 110, s.serial, ink);
+    text(ctx, s.serial, sx, 532, { font: font(18, F.plex, 600), color: alpha(ink, .55), ls: 3 });
+  },
+
+  receipt(ctx, s, img) {
+    const ink = s.ink, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    // faint thermal fade bands
+    const g = ctx.createLinearGradient(0, 0, W, 0); g.addColorStop(0, 'rgba(0,0,0,.025)'); g.addColorStop(.5, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.035)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const cx = PX / 2;
+    text(ctx, (s.home ? 'HOME CINEMA' : (s.cinema || 'CINEMA')).toUpperCase(), cx, 80, { font: font(30, F.plex, 700), color: ink, align: 'center', ls: 4, maxW: PX - 200 });
+    text(ctx, s.home ? 'Watched at home' : ('Admission ticket' + (s.screen ? ', ' + s.screen : '')), cx, 112, { font: font(20, F.plex, 400), color: alpha(ink, .75), align: 'center' });
+    const dash = yy => { ctx.save(); ctx.strokeStyle = alpha(ink, .55); ctx.lineWidth = 2; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(90, yy); ctx.lineTo(PX - 90, yy); ctx.stroke(); ctx.restore(); };
+    dash(134);
+    let y = titleBlock(ctx, s.title, { x: cx, y: 150, w: PX - 260, h: 120, family: F.plex, weight: 700, max: 70, min: 34, lh: 1.08, color: ink, upper: true, align: 'center', maxLines: 2 });
+    if (s.tagline) text(ctx, s.tagline, cx, y + 30, { font: font(20, F.plex, 400), color: alpha(ink, .7), align: 'center', maxW: PX - 260 });
+    dash(Math.max(y + 54, 290));
+    const top = Math.max(y + 96, 332), lf = font(23, F.plex, 600), lc = ink;
+    const left = [['DATE', fmtDate(s)], ['TIME', fmtTime(s)], [s.home ? 'VIA' : 'SCREEN', (s.home ? s.platform : s.screen) || '-'], ['FORMAT', s.format || '-']];
+    const right = s.home ? [['SEAT', s.seat || 'Sofa'], ['RATING', +s.rating > 0 ? (+s.rating) + '/5' : '-'], ['LIKED', s.liked ? 'YES' : 'NO']]
+      : [['ROW', s.row || '-'], ['SEAT', s.seat || '-'], ['RATING', +s.rating > 0 ? (+s.rating) + '/5' : '-']];
+    left.forEach(([k, v], i) => leader(ctx, k, String(v), 110, 440, top + i * 38, lf, lc));
+    right.forEach(([k, v], i) => leader(ctx, k, String(v), 640, 440, top + i * 38, lf, lc));
+    const p = fmtPrice(s);
+    if (p) { leader(ctx, 'TOTAL', p, 640, 440, top + 3 * 38 + 6, font(30, F.plex, 700), ink); }
+    text(ctx, '*** ENJOY THE FILM ***', cx, H - 44, { font: font(18, F.plex, 600), color: alpha(ink, .75), align: 'center', ls: 3 });
+    // stub with QR
+    const scx = PX + (W - PX) / 2;
+    text(ctx, 'SCAN AT ENTRANCE', scx, 80, { font: font(16, F.plex, 600), color: alpha(ink, .7), align: 'center', ls: 3 });
+    drawQR(ctx, scx - 120, 112, 240, s.serial, ink, paper);
+    text(ctx, s.serial, scx, 410, { font: font(24, F.plex, 700), color: ink, align: 'center', ls: 3 });
+    const seatT = s.home ? (s.seat || 'Sofa') : `ROW ${s.row || '-'}  SEAT ${s.seat || '-'}`;
+    text(ctx, seatT, scx, 456, { font: font(22, F.plex, 600), color: ink, align: 'center', maxW: W - PX - 80 });
+    if (p) text(ctx, p, scx, 494, { font: font(22, F.plex, 600), color: alpha(ink, .75), align: 'center' });
+  },
+
+  istanbul(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper, turq = '#2A9D8F';
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    // tile frame
+    const o = 18, b = 34;
+    ctx.fillStyle = ink;
+    ctx.fillRect(o, o, PX - 2 * o, b); ctx.fillRect(o, H - o - b, PX - 2 * o, b);
+    ctx.fillRect(o, o, b, H - 2 * o); ctx.fillRect(PX - o - b, o, b, H - 2 * o);
+    let k = 0;
+    for (let x = o + b / 2; x <= PX - o - b / 2 + 1; x += 46, k++) { star8(ctx, x, o + b / 2, 9, k % 2 ? turq : paper); star8(ctx, x, H - o - b / 2, 9, k % 2 ? turq : paper); }
+    k = 0;
+    for (let y = o + b / 2 + 46; y <= H - o - b / 2 - 40; y += 46, k++) { star8(ctx, o + b / 2, y, 9, k % 2 ? paper : turq); star8(ctx, PX - o - b / 2, y, 9, k % 2 ? paper : turq); }
+    ctx.strokeStyle = acc; ctx.lineWidth = 2; ctx.strokeRect(o + b + 8, o + b + 8, PX - 2 * (o + b + 8), H - 2 * (o + b + 8));
+    // pointed arch poster
+    const ax = 96, ay = 92, aw = 210, ah = 432;
+    ctx.save(); pointedArch(ctx, ax, ay, aw, ah); ctx.clip();
+    if (img) drawCover(ctx, img, ax, ay, aw, ah, +s.posterX, +s.posterY); else { ctx.fillStyle = alpha(turq, .25); ctx.fillRect(ax, ay, aw, ah); }
+    ctx.restore();
+    ctx.strokeStyle = ink; ctx.lineWidth = 4; pointedArch(ctx, ax, ay, aw, ah); ctx.stroke();
+    ctx.strokeStyle = acc; ctx.lineWidth = 1.5; pointedArch(ctx, ax - 9, ay - 12, aw + 18, ah + 12); ctx.stroke();
+    const x = 350, w = PX - x - 100, cx = x + w / 2;
+    text(ctx, 'SİNEMA BİLETİ', cx, 122, { font: font(26, F.inst, 700), color: acc, align: 'center', ls: 6 });
+    let y = titleBlock(ctx, s.title, { x: cx, y: 140, w, h: s.tagline ? 160 : 200, family: F.abril, max: 96, min: 40, lh: 1.04, color: ink, align: 'center' });
+    y += 22; star8(ctx, cx, y, 8, acc); ctx.fillStyle = turq; ctx.fillRect(cx - 170, y - 1, 140, 2); ctx.fillRect(cx + 30, y - 1, 140, 2);
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: cx, y: y + 16, w, h: Math.max(34, 400 - y), family: F.corm, weight: 600, style: 'italic', max: 32, min: 22, lh: 1.15, color: alpha(ink, .85), align: 'center', maxLines: 2 });
+    const cr = credits(s); if (cr && y + 34 <= 428) { y += 34; text(ctx, cr, cx, y, { font: font(18, F.inst, 600), color: turq, align: 'center', ls: 2, maxW: w }); }
+    if (+s.rating > 0 && y + 30 <= 446) stars(ctx, cx - 5 * 2.25 * 12 / 2, y + 30, 12, +s.rating, acc, alpha(ink, .15));
+    fieldRow(ctx, locFields(s), x, 492, w, { labelFont: font(14, F.inst, 700), labelColor: acc, labelLS: 3, gap: 38, valueFont: font(27, F.inst, 700), valueColor: ink });
+    // stub
+    ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.strokeRect(PX + 24, 24, W - PX - 48, H - 48);
+    ctx.lineWidth = 1.5; ctx.strokeStyle = acc; ctx.strokeRect(PX + 34, 34, W - PX - 68, H - 68);
+    const scx = PX + (W - PX) / 2, sw = W - PX - 120;
+    const seats = seatFields(s);
+    seats.forEach(([kk, v], i) => {
+      const xx = seats.length === 1 ? scx : PX + 60 + sw * (i ? .75 : .25);
+      text(ctx, lab(s, kk), xx, 110, { font: font(17, F.inst, 700), color: acc, align: 'center', ls: 3 });
+      text(ctx, v, xx, 210, { font: font(88, F.abril), color: ink, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
+    });
+    const p = fmtPrice(s); if (p) { text(ctx, 'FİYAT', scx, 268, { font: font(15, F.inst, 700), color: acc, align: 'center', ls: 3 }); text(ctx, p, scx, 304, { font: font(28, F.inst, 700), color: ink, align: 'center' }); }
+    barcode(ctx, PX + 60, 360, sw, 100, s.serial, ink);
+    text(ctx, s.serial, scx, 494, { font: font(16, F.inst, 600), color: alpha(ink, .6), align: 'center', ls: 4 });
+    text(ctx, 'İYİ SEYİRLER', scx, 548, { font: font(20, F.inst, 700), color: turq, align: 'center', ls: 5 });
+  },
+});
 
 </script>
 <script>
@@ -1358,8 +1708,10 @@ refreshCollection();
 if (document.fonts) {
   const specs = ['900 40px "Playfair Display"', 'italic 400 40px "Playfair Display"', '400 40px "Courier Prime"', '700 40px "Courier Prime"',
     '400 40px "Instrument Sans"', '500 40px "Instrument Sans"', '600 40px "Instrument Sans"', '700 40px "Instrument Sans"', '400 40px "Archivo Black"',
-    '400 40px "Alfa Slab One"', '400 40px Monoton', '700 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', 'italic 600 40px "Cormorant Garamond"', '500 40px Caveat', '700 40px Caveat'];
-  Promise.all(specs.map(f => document.fonts.load(f).catch(() => null))).then(() => schedule());
+    '400 40px "Alfa Slab One"', '400 40px Monoton', '700 40px Oswald', '500 40px Oswald', '400 40px "PT Mono"', '600 40px "IBM Plex Mono"', '700 40px "IBM Plex Mono"', '400 40px "Abril Fatface"', '400 40px "Rozha One"', '700 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', 'italic 600 40px "Cormorant Garamond"', '500 40px Caveat', '700 40px Caveat'];
+  const extra = [['800 40px "Shippori Mincho"', '鑑賞券一般列番日付開映劇場座席方式場所配信映Ab'], ['600 40px "Shippori Mincho"', '鑑賞券一般列番日付開映劇場座席方式場所配信映Ab'],
+    ['700 40px Oswald', 'КИНОБИЛЕТКОНТРОЛЬ'], ['500 40px Oswald', 'ДАТАСЕАНСРЯДМЕСТОЦЕНА'], ['400 40px "PT Mono"', 'СЕРИЯ№'], ['400 40px "Rozha One"', 'सिनेमा'], ['700 40px "Instrument Sans"', 'SİNEMA BİLETİ İYİ']];
+  Promise.all([...specs.map(f => document.fonts.load(f).catch(() => null)), ...extra.map(([f, t]) => document.fonts.load(f, t).catch(() => null))]).then(() => schedule());
   document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => schedule());
 }
 
