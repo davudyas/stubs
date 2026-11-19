@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stubs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --velvet:#1E0F17; --velvet-2:#2A1621; --velvet-3:#3A2131; --velvet-4:#4A2B3E;
+  --brass:#D6A84E; --brass-hi:#F2CD7E; --screen:#F3ECDF; --dust:#BBA1AF;
+  --line:rgba(243,236,223,.12); --ui:'Instrument Sans',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--velvet);color:var(--screen);font:15px/1.5 var(--ui);min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+a{color:var(--brass-hi)}
+
+/* ---- header: the marquee ---- */
+.top{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:22px 28px 18px;max-width:1500px;margin:0 auto}
+.marquee{position:relative;padding:8px 26px 10px;border-radius:14px;background:linear-gradient(#2E1824,#24121C)}
+.marquee::before{content:"";position:absolute;inset:0;border-radius:14px;border:6px dotted var(--brass);filter:drop-shadow(0 0 4px rgba(242,205,126,.75));animation:bulbs 1.3s steps(6) 1 both}
+@keyframes bulbs{0%{opacity:.15;filter:none}40%{opacity:.7}55%{opacity:.25}100%{opacity:1}}
+.logo{font-family:Limelight,serif;font-size:40px;line-height:1;color:var(--brass-hi);letter-spacing:.04em;text-shadow:0 0 18px rgba(242,205,126,.35)}
+.sub{margin:0;color:var(--dust);max-width:30ch}
+.tabs{margin-left:auto;display:flex;gap:6px;background:var(--velvet-2);padding:5px;border-radius:12px}
+.tabs button{border:0;background:none;padding:9px 16px;border-radius:8px;cursor:pointer;color:var(--dust);font-weight:600}
+.tabs button[aria-selected=true]{background:var(--velvet-4);color:var(--screen)}
+.count{display:inline-block;min-width:22px;padding:0 6px;margin-left:4px;border-radius:99px;background:var(--brass);color:var(--velvet);font-size:12px;line-height:20px;text-align:center}
+.count:empty{display:none}
+
+/* ---- make view ---- */
+.app{display:grid;grid-template-columns:minmax(320px,390px) minmax(0,1fr);gap:30px;padding:0 28px 48px;max-width:1500px;margin:0 auto}
+.app[hidden],.wall[hidden]{display:none}
+.controls{display:flex;flex-direction:column;gap:12px}
+details.group{background:var(--velvet-2);border-radius:14px;border:1px solid var(--line)}
+details.group>summary{list-style:none;cursor:pointer;padding:14px 18px;font-weight:700;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+details.group>summary::-webkit-details-marker{display:none}
+details.group>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--dust);border-bottom:2px solid var(--dust);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
+details.group[open]>summary::after{transform:rotate(225deg) translateY(-2px)}
+.fields{padding:2px 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 12px}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f.full{grid-column:1/-1}
+.f>span,.f>label{font-size:13px;color:var(--dust);font-weight:500}
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
+input:hover,select:hover,textarea:hover{border-color:var(--line)}
+input::placeholder,textarea::placeholder{color:rgba(187,161,175,.55)}
+textarea{resize:vertical;min-height:84px}
+input[type=date],input[type=time]{color-scheme:dark}
+.toggle{grid-column:1/-1;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px}
+.toggle input{appearance:none;width:38px;height:22px;border-radius:99px;background:var(--velvet-4);position:relative;cursor:pointer;flex:none;transition:background .2s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--screen);transition:transform .2s}
+.toggle input:checked{background:var(--brass)}
+.toggle input:checked::after{transform:translateX(16px);background:var(--velvet)}
+input[type=range]{width:100%;accent-color:var(--brass)}
+.rating-row{display:flex;align-items:center;gap:12px}
+.rating-row output{font-size:20px;color:var(--brass-hi);min-width:6.5em;letter-spacing:2px}
+.drop{grid-column:1/-1;display:flex;gap:14px;align-items:center;padding:12px;border:1.5px dashed var(--velvet-4);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--brass);background:rgba(214,168,78,.08)}
+.drop img{width:54px;height:80px;object-fit:cover;border-radius:5px;background:var(--velvet-3);flex:none}
+.drop .ph{width:54px;height:80px;border-radius:5px;background:var(--velvet-3);display:grid;place-items:center;color:var(--dust);flex:none;font-size:22px}
+.drop p{margin:0;font-size:13.5px;color:var(--dust)}
+.drop strong{color:var(--screen);display:block;font-size:14.5px;margin-bottom:2px}
+.links{grid-column:1/-1;font-size:13px;color:var(--dust);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.linkbtn{background:none;border:0;padding:0;color:var(--brass-hi);text-decoration:underline;cursor:pointer;font-size:13px}
+.swatches{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.swatches button{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.2);cursor:pointer;padding:0}
+.swatches button:hover{transform:scale(1.08)}
+.colors{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.colors label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--dust)}
+input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:var(--velvet-3);padding:4px;cursor:pointer}
+.serial-row{display:flex;gap:8px}
+.search{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:2px}
+.search input[type=search]{width:100%;background:var(--velvet-3);border:1px solid var(--velvet-4);border-radius:10px;padding:11px 13px 11px 38px;color:var(--screen);background-image:radial-gradient(circle at 17px 50%,transparent 5px,var(--dust) 5.5px,var(--dust) 7px,transparent 7.5px);background-repeat:no-repeat}
+.search input[type=search]:focus{border-color:var(--brass)}
+.hint{margin:0;font-size:13px;color:var(--dust)}
+.results{display:flex;flex-direction:column;gap:4px;max-height:330px;overflow:auto}
+.results:empty{display:none}
+.res{display:flex;gap:11px;align-items:center;background:none;border:0;border-radius:9px;padding:6px;text-align:left;cursor:pointer;width:100%}
+.res:hover,.res:focus-visible{background:var(--velvet-3)}
+.res img,.res .noimg{width:36px;height:54px;border-radius:4px;object-fit:cover;background:var(--velvet-4);flex:none}
+.res b{display:block;font-weight:600;font-size:14px;line-height:1.25}
+.res small{color:var(--dust);font-size:12.5px}
+.posters{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.posters button{padding:0;border:2px solid transparent;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--velvet-3);aspect-ratio:2/3}
+.posters button[aria-pressed=true]{border-color:var(--brass)}
+.posters img{width:100%;height:100%;object-fit:cover;display:block}
+.keybox>summary{cursor:pointer;font-size:13px;color:var(--dust);width:max-content}
+.keybox[open]>summary{margin-bottom:8px}
+.key-row{display:flex;gap:8px;margin-bottom:6px}
+.key-row input{flex:1;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
+.serial-row input{flex:1}
+
+/* ---- stage ---- */
+.stage{position:sticky;top:16px;align-self:start;display:flex;flex-direction:column;gap:18px}
+.beam{perspective:2200px;padding:26px 8px 30px;border-radius:20px;background:radial-gradient(120% 90% at 50% -10%,rgba(242,205,126,.17),rgba(242,205,126,.04) 45%,transparent 70%);filter:drop-shadow(0 22px 26px rgba(0,0,0,.5))}
+.flip{position:relative;aspect-ratio:1600/620;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.75,.25,1)}
+.flip canvas{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip #cBack{transform:rotateY(180deg)}
+.flip.is-back{transform:rotateY(180deg)}
+.stagebar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;background:var(--velvet-2);padding:4px;border-radius:10px}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:7px;cursor:pointer;color:var(--dust);font-weight:600}
+.seg button[aria-pressed=true]{background:var(--velvet-4);color:var(--screen)}
+.btn{border:1px solid var(--line);background:var(--velvet-2);padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600;white-space:nowrap}
+.btn:hover{background:var(--velvet-3)}
+.btn.primary{background:var(--brass);border-color:var(--brass);color:var(--velvet)}
+.btn.primary:hover{background:var(--brass-hi)}
+.spacer{flex:1}
+.menu{position:relative}
+.menu>summary{list-style:none}
+.menu>summary::-webkit-details-marker{display:none}
+.menu .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;background:var(--velvet-3);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:240px;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.menu .pop button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:8px;cursor:pointer}
+.menu .pop button:hover{background:var(--velvet-4)}
+.menu .pop small{display:block;color:var(--dust);font-size:12px}
+.tpl-title{margin:0;font-size:14px;color:var(--dust);font-weight:500}
+.templates{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.tpl{background:none;border:0;padding:0;cursor:pointer;text-align:left;color:var(--dust);font-size:13px;font-weight:600}
+.tpl canvas{display:block;width:100%;height:auto;border-radius:6px;outline:2px solid transparent;outline-offset:3px;transition:outline-color .15s}
+.tpl[aria-pressed=true]{color:var(--screen)}
+.tpl[aria-pressed=true] canvas{outline-color:var(--brass)}
+.tpl span{display:block;margin-top:6px}
+
+/* ---- wall ---- */
+.wall{max-width:1500px;margin:0 auto;padding:0 28px 60px}
+.wall-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin:6px 0 22px}
+.wall-head h2{margin:0;font-family:Limelight,serif;font-weight:400;font-size:30px;color:var(--brass-hi)}
+.wall-head p{margin:0;color:var(--dust)}
+.wall-head select{width:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:26px 22px}
+.stub{display:flex;flex-direction:column;gap:10px}
+.stub canvas{width:100%;height:auto;display:block;cursor:pointer;filter:drop-shadow(0 10px 14px rgba(0,0,0,.4));transition:transform .2s}
+.stub:nth-child(3n+1) canvas{transform:rotate(-.8deg)}
+.stub:nth-child(3n+2) canvas{transform:rotate(.6deg)}
+.stub canvas:hover{transform:rotate(0) translateY(-3px)}
+.stub-meta{display:flex;align-items:center;gap:8px}
+.stub-meta b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stub-meta small{color:var(--dust);white-space:nowrap}
+.stub-meta .spacer{flex:1}
+.mini{border:0;background:none;color:var(--dust);cursor:pointer;padding:4px 8px;border-radius:7px;font-size:13px;font-weight:600}
+.mini:hover{background:var(--velvet-2);color:var(--screen)}
+.mini.danger{color:#FF9C8A}
+.empty{border:1.5px dashed var(--velvet-4);border-radius:18px;padding:60px 24px;text-align:center;color:var(--dust)}
+.empty h3{color:var(--screen);margin:0 0 6px;font-size:20px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;background:var(--screen);color:var(--velvet);padding:11px 18px;border-radius:12px;font-weight:600;transition:opacity .25s,transform .25s;pointer-events:none;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
+
+@media (max-width:1100px){.templates{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:980px){
+  .app{grid-template-columns:1fr;padding:0 16px 40px}
+  .stage{position:static;order:-1}
+  .top{padding:18px 16px 14px}
+  .tabs{margin-left:0;width:100%}
+  .tabs button{flex:1}
+  .wall{padding:0 16px 50px}
+}
+@media (max-width:520px){.logo{font-size:32px}.fields{grid-template-columns:1fr}.colors{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="marquee"><span class="logo">Stubs</span></div>
+  <p class="sub">Make a ticket stub for every film you watch, and keep them all in one place.</p>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tabMake" aria-selected="true" aria-controls="viewMake">Make a stub</button>
+    <button role="tab" id="tabWall" aria-selected="false" aria-controls="viewWall">My stubs<span class="count" id="count"></span></button>
+  </nav>
+</header>
+
+<main class="app" id="viewMake">
+  <form class="controls" id="form" autocomplete="off" onsubmit="return false">
+    <details class="group" open>
+      <summary>Film</summary>
+      <div class="fields">
+        <div class="search" id="searchBox">
+          <div class="search-row">
+            <label class="sr" for="q">Search for a film</label>
+            <input type="search" id="q" placeholder="Search for a film to fill everything in" autocomplete="off">
+          </div>
+          <p class="hint" id="searchHint" hidden></p>
+          <div class="results" id="results" role="listbox" aria-label="Search results"></div>
+          <div class="pick" id="posterPickWrap" hidden>
+            <p class="hint">Pick a poster</p>
+            <div class="posters" id="posterPick"></div>
+          </div>
+          <details class="keybox" id="keyBox">
+            <summary>TMDB key</summary>
+            <div class="key-row"><input type="password" id="tmdbKey" placeholder="API key or read access token" autocomplete="off"><button type="button" class="btn" id="saveKey">Save key</button></div>
+            <p class="hint">Search uses The Movie Database. Get a free key in your <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">TMDB account settings</a>. It stays in this browser.</p>
+          </details>
+        </div>
+        <label class="f full"><span>Title</span><input type="text" name="title" maxlength="90"></label>
+        <label class="f full"><span>Tagline</span><input type="text" name="tagline" maxlength="110" placeholder="A line that sums it up"></label>
+        <label class="f full"><span>Director</span><input type="text" name="director" maxlength="60"></label>
+        <label class="f"><span>Year</span><input type="number" name="year" min="1888" max="2100"></label>
+        <label class="f"><span>Runtime (min)</span><input type="number" name="runtime" min="1" max="999"></label>
+        <label class="drop" id="drop">
+          <input type="file" id="posterFile" accept="image/*" class="sr">
+          <span class="ph" id="posterPh" aria-hidden="true">▦</span>
+          <img id="posterThumb" alt="" hidden>
+          <p><strong id="dropTitle">Add a poster</strong>Drop an image here, paste one, or click to choose a file.</p>
+        </label>
+        <div class="links">
+          <span>Find one:</span>
+          <a id="lnkTmdb" href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>
+          <a id="lnkLb" href="https://letterboxd.com/" target="_blank" rel="noopener">Letterboxd</a>
+          <span class="spacer"></span>
+          <button type="button" class="linkbtn" id="removePoster" hidden>Remove poster</button>
+        </div>
+      </div>
+    </details>
+
+    <details class="group" open>
+      <summary>Screening</summary>
+      <div class="fields">
+        <label class="f"><span>Date</span><input type="date" name="date"></label>
+        <label class="f"><span>Time</span><input type="time" name="time"></label>
+        <label class="toggle"><input type="checkbox" name="usFormat"> US date and 12-hour time</label>
+        <label class="toggle"><input type="checkbox" name="home"> Watched at home</label>
+        <label class="f full"><span id="lblCinema">Cinema</span><input type="text" name="cinema" maxlength="40"></label>
+        <label class="f" data-cinema><span>Screen</span><input type="text" name="screen" maxlength="16" placeholder="Saal 2"></label>
+        <label class="f" data-home hidden><span>Via</span><input type="text" name="platform" maxlength="20" placeholder="MUBI, Blu-ray…"></label>
+        <label class="f"><span>Format</span>
+          <select name="format"><option value="">None</option><option>2D</option><option>3D</option><option>35mm</option><option>70mm</option><option>IMAX</option><option>Dolby Cinema</option><option>4DX</option><option>OmU</option><option>OV</option><option>4K UHD</option><option>Blu-ray</option><option>Streaming</option></select>
+        </label>
+        <label class="f" data-cinema><span>Row</span><input type="text" name="row" maxlength="4"></label>
+        <label class="f"><span>Seat</span><input type="text" name="seat" maxlength="8"></label>
+        <label class="f" data-cinema><span>Price</span><input type="number" name="price" step="0.01" min="0"></label>
+        <label class="f" data-cinema><span>Currency</span>
+          <select name="currency"><option>€</option><option>$</option><option>£</option><option>₺</option><option>CHF </option><option>¥</option></select>
+        </label>
+      </div>
+    </details>
+
+    <details class="group" open>
+      <summary>Your take</summary>
+      <div class="fields">
+        <div class="f full"><label for="rating">Rating</label>
+          <div class="rating-row"><input type="range" id="rating" name="rating" min="0" max="5" step="0.5"><output id="ratingOut" for="rating"></output></div>
+        </div>
+        <label class="toggle"><input type="checkbox" name="liked"> Liked it</label>
+        <label class="f full"><span>Watched with</span><input type="text" name="withWho" maxlength="50" placeholder="Nobody, or a name or two"></label>
+        <label class="f full"><span>Note for the back</span><textarea name="note" maxlength="320" placeholder="What stayed with you?"></textarea></label>
+        <label class="f full"><span>Your Letterboxd name</span><input type="text" name="loggedBy" maxlength="30"></label>
+      </div>
+    </details>
+
+    <details class="group" open>
+      <summary>Look</summary>
+      <div class="fields">
+        <div class="colors">
+          <label>Paper<input type="color" name="paper"></label>
+          <label>Ink<input type="color" name="ink"></label>
+          <label>Accent<input type="color" name="accent"></label>
+        </div>
+        <div class="swatches" id="swatches" hidden><span style="font-size:13px;color:var(--dust)">Accent from poster:</span></div>
+        <label class="f full"><span>Poster strength</span><input type="range" name="posterOpacity" min="0" max="0.5" step="0.01"></label>
+        <label class="f"><span>Poster left–right</span><input type="range" name="posterX" min="0" max="1" step="0.01"></label>
+        <label class="f"><span>Poster top–bottom</span><input type="range" name="posterY" min="0" max="1" step="0.01"></label>
+        <label class="toggle"><input type="checkbox" name="grain"> Paper grain</label>
+        <label class="toggle"><input type="checkbox" name="stamp"> "Watched" stamp</label>
+        <div class="f full"><label for="serial">Ticket number</label>
+          <div class="serial-row"><input type="text" id="serial" name="serial" maxlength="14"><button type="button" class="btn" id="shuffle">Shuffle</button></div>
+        </div>
+      </div>
+    </details>
+  </form>
+
+  <section class="stage" aria-label="Ticket preview">
+    <div class="beam"><div class="flip" id="flip" role="img" aria-label="Ticket preview"><canvas id="cFront"></canvas><canvas id="cBack"></canvas></div></div>
+    <div class="stagebar">
+      <div class="seg" role="group" aria-label="Show side">
+        <button type="button" data-side="front" aria-pressed="true">Front</button>
+        <button type="button" data-side="back" aria-pressed="false">Back</button>
+      </div>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="newBtn">New stub</button>
+      <details class="menu" id="dlMenu">
+        <summary class="btn">Download</summary>
+        <div class="pop">
+          <button type="button" data-dl="front">Front <small>PNG, 3200 × 1240</small></button>
+          <button type="button" data-dl="back">Back <small>PNG, 3200 × 1240</small></button>
+          <button type="button" data-dl="story">Story <small>PNG, 1080 × 1920, both sides</small></button>
+          <button type="button" id="copyBtn">Copy image <small>The side you're looking at</small></button>
+        </div>
+      </details>
+      <button type="button" class="btn primary" id="saveBtn">Save to My stubs</button>
+    </div>
+    <p class="tpl-title">Style</p>
+    <div class="templates" id="templates"></div>
+  </section>
+</main>
+
+<section class="wall" id="viewWall" hidden>
+  <div class="wall-head">
+    <h2>My stubs</h2>
+    <p id="wallStats"></p>
+    <span class="spacer" style="flex:1"></span>
+    <label class="sr" for="sortSel">Sort</label>
+    <select id="sortSel"><option value="date">Newest screening first</option><option value="rating">Highest rated first</option><option value="title">Title A–Z</option></select>
+  </div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<footer>Stubs, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Stubs: ticket renderer (canvas) ===== */
+const W = 1600, H = 620, PX = 1190, R = 34, NR = 28;
+const F = {
+  play: '"Playfair Display", Georgia, serif',
+  cour: '"Courier Prime", "Courier New", monospace',
+  inst: '"Instrument Sans", system-ui, sans-serif',
+  arch: '"Archivo Black", Impact, sans-serif',
+  alfa: '"Alfa Slab One", Rockwell, serif',
+  mono: 'Monoton, Impact, sans-serif',
+  corm: '"Cormorant Garamond", Garamond, serif',
+  cav: 'Caveat, cursive',
+};
+
+const TEMPLATES = {
+  classic:  { name: 'Classic',  paper: '#F7F1E3', ink: '#1F1A17', accent: '#9B2C2C', dark: false },
+  poster:   { name: 'Poster',   paper: '#141416', ink: '#F4F1EA', accent: '#E8B931', dark: true },
+  minimal:  { name: 'Minimal',  paper: '#FFFFFF', ink: '#111111', accent: '#2F5BEA', dark: false },
+  carnival: { name: 'Carnival', paper: '#D9412B', ink: '#FFF3DC', accent: '#2B1B12', dark: true },
+  neon:     { name: 'Midnight', paper: '#0D1030', ink: '#E9F0FF', accent: '#FF3EA5', dark: true },
+  gala:     { name: 'Gala',     paper: '#17271F', ink: '#F3E9D2', accent: '#D4AF37', dark: true },
+};
+
+/* ---------- small helpers ---------- */
+function font(size, family, weight = '', style = '') { return `${style} ${weight} ${size}px ${family}`.trim(); }
+function setLS(ctx, px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
+function alpha(hex, a) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+function mix(hexA, hexB, t) {
+  const p = x => { const n = parseInt(x.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const a = p(hexA), b = p(hexB);
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+function luminance(hex) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+  return .2126 * c[0] + .7152 * c[1] + .0722 * c[2];
+}
+function text(ctx, str, x, y, o = {}) {
+  ctx.save();
+  ctx.font = o.font; ctx.fillStyle = o.color || '#000';
+  ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.base || 'alphabetic';
+  setLS(ctx, o.ls || 0);
+  if (o.alpha != null) ctx.globalAlpha = o.alpha;
+  if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = o.glowBlur || 24; ctx.fillText(str, x, y); }
+  if (o.maxW) {
+    let size = parseFloat(o.font.match(/(\d+(\.\d+)?)px/)[1]);
+    while (ctx.measureText(str).width > o.maxW && size > 8) { size -= 1; ctx.font = o.font.replace(/(\d+(\.\d+)?)px/, size + 'px'); }
+  }
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function wrapLines(ctx, str, w) {
+  const words = String(str).split(/\s+/).filter(Boolean);
+  const lines = []; let cur = '';
+  for (const wd of words) {
+    const t = cur ? cur + ' ' + wd : wd;
+    if (ctx.measureText(t).width <= w || !cur) cur = t; else { lines.push(cur); cur = wd; }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [''];
+}
+/* Fit a title into a box: tries 1–3 lines, picks the largest size that fits. */
+function titleBlock(ctx, str, o) {
+  str = (o.upper ? String(str || '').toUpperCase() : String(str || '')) || 'Untitled';
+  ctx.save();
+  setLS(ctx, o.ls || 0);
+  let best = null;
+  for (let n = 1; n <= (o.maxLines || 3); n++) {
+    for (let size = o.max; size >= o.min; size -= 2) {
+      ctx.font = font(size, o.family, o.weight, o.style);
+      const lines = wrapLines(ctx, str, o.w);
+      if (lines.length <= n && lines.every(l => ctx.measureText(l).width <= o.w) && lines.length * size * o.lh <= o.h) {
+        if (!best || size > best.size) best = { size, lines };
+        break;
+      }
+    }
+  }
+  if (!best) {
+    ctx.font = font(o.min, o.family, o.weight, o.style);
+    let lines = wrapLines(ctx, str, o.w).slice(0, o.maxLines || 3);
+    best = { size: o.min, lines };
+  }
+  ctx.fillStyle = o.color; ctx.textAlign = o.align || 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.font = font(best.size, o.family, o.weight, o.style);
+  best.lines.forEach((l, i) => {
+    const y = o.y + best.size * 0.86 + i * best.size * o.lh;
+    if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = 30; ctx.fillText(l, o.x, y); ctx.shadowBlur = 10; }
+    ctx.fillText(l, o.x, y);
+  });
+  ctx.restore();
+  return o.y + best.lines.length * best.size * o.lh;
+}
+function drawCover(ctx, img, x, y, w, h, fx = .5, fy = .5) {
+  const s = Math.max(w / img.width, h / img.height);
+  const sw = w / s, sh = h / s;
+  const sx = (img.width - sw) * fx, sy = (img.height - sh) * fy;
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+function starPath(ctx, cx, cy, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r;
+    ctx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
+  }
+  ctx.closePath();
+}
+function stars(ctx, x, y, size, rating, color, empty) {
+  const gap = size * 2.25;
+  for (let i = 0; i < 5; i++) {
+    const cx = x + size + i * gap, cy = y;
+    starPath(ctx, cx, cy, size);
+    ctx.fillStyle = empty; ctx.fill();
+    if (rating >= i + 1) { starPath(ctx, cx, cy, size); ctx.fillStyle = color; ctx.fill(); }
+    else if (rating >= i + .5) {
+      ctx.save(); ctx.beginPath(); ctx.rect(cx - size, cy - size, size, size * 2); ctx.clip();
+      starPath(ctx, cx, cy, size); ctx.fillStyle = color; ctx.fill(); ctx.restore();
+    }
+  }
+  return x + 5 * gap;
+}
+function heart(ctx, cx, cy, s, color) {
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s / 20, s / 20);
+  ctx.beginPath();
+  ctx.moveTo(0, 7);
+  ctx.bezierCurveTo(-14, -3, -10, -16, 0, -9);
+  ctx.bezierCurveTo(10, -16, 14, -3, 0, 7);
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill(); ctx.restore();
+}
+/* Code 39 barcode */
+const C39 = {'0':'nnnwwnwnn','1':'wnnwnnnnw','2':'nnwwnnnnw','3':'wnwwnnnnn','4':'nnnwwnnnw','5':'wnnwwnnnn','6':'nnwwwnnnn','7':'nnnwnnwnw','8':'wnnwnnwnn','9':'nnwwnnwnn','A':'wnnnnwnnw','B':'nnwnnwnnw','C':'wnwnnwnnn','D':'nnnnwwnnw','E':'wnnnwwnnn','F':'nnwnwwnnn','G':'nnnnnwwnw','H':'wnnnnwwnn','I':'nnwnnwwnn','J':'nnnnwwwnn','K':'wnnnnnnww','L':'nnwnnnnww','M':'wnwnnnnwn','N':'nnnnwnnww','O':'wnnnwnnwn','P':'nnwnwnnwn','Q':'nnnnnnwww','R':'wnnnnnwwn','S':'nnwnnnwwn','T':'nnnnwnwwn','U':'wwnnnnnnw','V':'nwwnnnnnw','W':'wwwnnnnnn','X':'nwnnwnnnw','Y':'wwnnwnnnn','Z':'nwwnwnnnn','-':'nwnnnnwnw','*':'nwnnwnwnn'};
+function barcode(ctx, x, y, w, h, str, color) {
+  const s = '*' + String(str).toUpperCase().replace(/[^0-9A-Z-]/g, '') + '*';
+  const mods = [];
+  for (const ch of s) { const p = C39[ch]; if (!p) continue; for (let i = 0; i < 9; i++) mods.push([i % 2 === 0, p[i] === 'w' ? 2.6 : 1]); mods.push([false, 1]); }
+  const total = mods.reduce((a, m) => a + m[1], 0);
+  const u = w / total; let cx = x;
+  ctx.fillStyle = color;
+  for (const [bar, m] of mods) { if (bar) ctx.fillRect(cx, y, m * u, h); cx += m * u; }
+}
+function serialDigits(serial) { let h = 7; for (const c of String(serial)) h = (h * 31 + c.charCodeAt(0)) % 1000000; return String(h).padStart(6, '0'); }
+
+/* ---------- data helpers ---------- */
+function fmtDate(s) {
+  if (!s.date) return '—';
+  const [y, m, d] = s.date.split('-');
+  return s.usFormat ? `${m}/${d}/${y}` : `${d}.${m}.${y}`;
+}
+function fmtTime(s) {
+  if (!s.time) return '—';
+  let [h, mi] = s.time.split(':').map(Number);
+  if (s.usFormat) { const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${h}:${String(mi).padStart(2, '0')} ${ap}`; }
+  return `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`;
+}
+function fmtPrice(s) {
+  if (s.home || s.price === '' || s.price == null) return '';
+  const n = Number(s.price); if (isNaN(n)) return String(s.price);
+  const v = n.toFixed(2);
+  return s.currency === '€' && !s.usFormat ? v.replace('.', ',') + ' €' : (s.currency || '') + v;
+}
+function mainFields(s) {
+  const f = [['Date', fmtDate(s)], ['Time', fmtTime(s)]];
+  if (s.home) { f.push(['Where', s.cinema || 'Home']); if (s.platform) f.push(['Via', s.platform]); }
+  else { f.push(['Cinema', s.cinema || '—']); if (s.screen) f.push(['Screen', s.screen]); }
+  if (s.format) f.push(['Format', s.format]);
+  return f;
+}
+function seatFields(s) {
+  return s.home ? [['Seat', s.seat || 'Sofa']] : [['Row', s.row || '—'], ['Seat', s.seat || '—']];
+}
+function credits(s) {
+  return [s.director, s.year, s.runtime ? s.runtime + ' min' : ''].filter(Boolean).join(', ');
+}
+/* Lay fields out in even columns, shrinking values that run long. */
+function fieldRow(ctx, list, x, y, w, o) {
+  // columns sized by how much each value needs, so long cinema names get room
+  ctx.save(); ctx.font = o.valueFont; setLS(ctx, 0);
+  const need = list.map(([k, v]) => Math.max(ctx.measureText(String(v)).width, 70) + 34);
+  ctx.restore();
+  const tot = need.reduce((a, b) => a + b, 0), k = w / tot;
+  let cx = x;
+  list.forEach(([lab, v], i) => {
+    const colW = need[i] * k;
+    text(ctx, o.upperLabels ? lab.toUpperCase() : lab, cx, y, { font: o.labelFont, color: o.labelColor, ls: o.labelLS || 0 });
+    text(ctx, String(v), cx, y + o.gap, { font: o.valueFont, color: o.valueColor, maxW: colW - 22, glow: o.glow });
+    cx += colW;
+  });
+}
+
+/* ---------- shared pieces ---------- */
+function grainCanvas() {
+  if (grainCanvas.c) return grainCanvas.c;
+  const c = document.createElement('canvas'); c.width = c.height = 220;
+  const g = c.getContext('2d'), d = g.createImageData(220, 220);
+  for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  g.putImageData(d, 0, 0); grainCanvas.c = c; return c;
+}
+function frameConcave(ctx, x0, y0, x1, y1, r) {
+  ctx.beginPath();
+  ctx.moveTo(x0 + r, y0); ctx.lineTo(x1 - r, y0);
+  ctx.arc(x1, y0, r, Math.PI, Math.PI / 2, true);
+  ctx.lineTo(x1, y1 - r);
+  ctx.arc(x1, y1, r, -Math.PI / 2, Math.PI, true);
+  ctx.lineTo(x0 + r, y1);
+  ctx.arc(x0, y1, r, 0, -Math.PI / 2, true);
+  ctx.lineTo(x0, y0 + r);
+  ctx.arc(x0, y0, r, Math.PI / 2, 0, true);
+  ctx.closePath();
+}
+function archPath(ctx, x, y, w, h) {
+  ctx.beginPath();
+  ctx.moveTo(x, y + h); ctx.lineTo(x, y + w / 2);
+  ctx.arc(x + w / 2, y + w / 2, w / 2, Math.PI, 0);
+  ctx.lineTo(x + w, y + h); ctx.closePath();
+}
+function goldGrad(ctx, y0, y1, base) {
+  const g = ctx.createLinearGradient(0, y0, 0, y1);
+  g.addColorStop(0, mix(base, '#ffffff', .45)); g.addColorStop(.5, base); g.addColorStop(1, mix(base, '#000000', .35));
+  return g;
+}
+function stamp(ctx, s, x, y, color) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.16); ctx.scale(.8, .8); ctx.globalAlpha = .82;
+  ctx.strokeStyle = color; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.roundRect(-150, -58, 300, 116, 14); ctx.stroke();
+  ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-140, -48, 280, 96, 9); ctx.stroke();
+  text(ctx, 'WATCHED', 0, 6, { font: font(52, F.alfa), color, align: 'center', ls: 4 });
+  text(ctx, fmtDate(s), 0, 36, { font: font(20, F.cour, 700), color, align: 'center', ls: 3 });
+  // scuff the ink so it reads as a rubber stamp
+  ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = .5;
+  ctx.drawImage(grainCanvas(), -150, -58, 300, 116);
+  ctx.restore();
+}
+
+/* ---------- templates: front ---------- */
+const FRONT = {
+  classic(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    if (img) { ctx.save(); ctx.globalAlpha = +s.posterOpacity; ctx.filter = 'grayscale(1) contrast(1.15)'; drawCover(ctx, img, 0, 0, PX, H, +s.posterX, +s.posterY); ctx.restore(); }
+    ctx.fillStyle = alpha(ink, .06); ctx.fillRect(PX, 0, W - PX, H);
+    ctx.strokeStyle = alpha(ink, .35); ctx.lineWidth = 2; ctx.strokeRect(26, 26, PX - 52, H - 52);
+    ctx.lineWidth = 1; ctx.strokeRect(34, 34, PX - 68, H - 68);
+    text(ctx, 'ADMIT ONE', 74, 98, { font: font(22, F.cour, 700), color: ink, ls: 6 });
+    if (+s.rating > 0) stars(ctx, PX - 74 - 5 * 2.25 * 15, 91, 15, +s.rating, acc, alpha(ink, .15));
+    let y = titleBlock(ctx, s.title, { x: 72, y: 124, w: PX - 150, h: s.tagline ? 180 : 220, family: F.play, weight: 900, max: 120, min: 44, lh: 1.02, color: acc });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: 74, y: y + 14, w: PX - 160, h: Math.max(40, 400 - y), family: F.play, style: 'italic', weight: 400, max: 34, min: 22, lh: 1.18, color: alpha(ink, .8), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 40 <= 432) text(ctx, cr, 74, y + 40, { font: font(22, F.cour), color: alpha(ink, .7) });
+    ctx.fillStyle = alpha(ink, .35); ctx.fillRect(74, 452, PX - 148, 2);
+    fieldRow(ctx, mainFields(s), 74, 494, PX - 148, { labelFont: font(17, F.cour, 700), labelColor: alpha(ink, .55), labelLS: 3, upperLabels: true, gap: 40, valueFont: font(30, F.cour, 700), valueColor: ink });
+    // stub
+    const sx = PX + 40, sw = W - PX - 80, cx = PX + (W - PX) / 2;
+    text(ctx, 'ADMIT ONE', cx, 98, { font: font(22, F.cour, 700), color: ink, align: 'center', ls: 6 });
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const x = seats.length === 1 ? cx : sx + sw * (i ? .75 : .25);
+      text(ctx, k.toUpperCase(), x, 168, { font: font(17, F.cour, 700), color: alpha(ink, .55), align: 'center', ls: 3 });
+      text(ctx, v, x, 262, { font: font(86, F.play, 900), color: acc, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 - 10 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, cx, 340, { font: font(32, F.cour, 700), color: ink, align: 'center' });
+    barcode(ctx, sx + 10, 410, sw - 20, 96, s.serial, ink);
+    text(ctx, s.serial, cx, 548, { font: font(20, F.cour, 700), color: alpha(ink, .7), align: 'center', ls: 4 });
+  },
+
+  poster(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper, PW = 440;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    if (img) {
+      drawCover(ctx, img, 0, 0, PW, H, +s.posterX, +s.posterY);
+      const g = ctx.createLinearGradient(PW - 160, 0, PW, 0); g.addColorStop(0, alpha(paper, 0)); g.addColorStop(1, alpha(paper, 1));
+      ctx.fillStyle = g; ctx.fillRect(PW - 160, 0, 161, H);
+    } else {
+      ctx.fillStyle = acc; ctx.fillRect(0, 0, PW, H);
+      text(ctx, (s.title || '?').trim().charAt(0).toUpperCase(), PW / 2, 450, { font: font(380, F.arch), color: paper, align: 'center' });
+    }
+    const x = PW + 30, w = PX - x - 60;
+    text(ctx, 'ADMIT ONE', x, 92, { font: font(20, F.inst, 700), color: acc, ls: 7 });
+    if (+s.rating > 0) stars(ctx, PX - 60 - 5 * 2.25 * 14, 85, 14, +s.rating, acc, alpha(ink, .18));
+    let y = titleBlock(ctx, s.title, { x, y: 118, w, h: s.tagline ? 180 : 220, family: F.arch, max: 110, min: 40, lh: .98, color: ink, upper: true });
+    ctx.fillStyle = acc; ctx.fillRect(x, y + 14, 90, 8);
+    y += 40;
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x, y, w, h: Math.max(36, 430 - y), family: F.inst, weight: 500, max: 30, min: 20, lh: 1.22, color: alpha(ink, .75), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 38 <= 452) text(ctx, cr, x, y + 38, { font: font(22, F.inst, 500), color: alpha(ink, .5) });
+    fieldRow(ctx, mainFields(s), x, 500, w, { labelFont: font(16, F.inst, 600), labelColor: alpha(ink, .5), gap: 38, valueFont: font(28, F.inst, 700), valueColor: ink });
+    // stub in accent
+    ctx.fillStyle = acc; ctx.fillRect(PX, 0, W - PX, H);
+    const sInk = luminance(acc) > .4 ? '#141416' : '#F7F3EA';
+    const cx = PX + (W - PX) / 2, sx = PX + 40, sw = W - PX - 80;
+    const seats = seatFields(s);
+    const seat = seats[seats.length - 1];
+    text(ctx, seat[0].toUpperCase(), sx, 92, { font: font(20, F.inst, 700), color: sInk, ls: 7 });
+    text(ctx, seat[1], sx - 6, 260, { font: font(170, F.arch), color: sInk, maxW: sw });
+    if (seats.length > 1) text(ctx, 'Row ' + seats[0][1], sx, 318, { font: font(34, F.inst, 700), color: sInk });
+    const p = fmtPrice(s); if (p) text(ctx, p, sx + sw, 318, { font: font(34, F.inst, 700), color: sInk, align: 'right' });
+    barcode(ctx, sx, 400, sw, 100, s.serial, sInk);
+    text(ctx, s.serial, cx, 544, { font: font(20, F.inst, 600), color: sInk, align: 'center', ls: 5 });
+  },
+
+  minimal(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    const hasP = !!img, pw = 172, ph = 258, px = PX - 80 - pw, py = 80;
+    if (hasP) drawCover(ctx, img, px, py, pw, ph, +s.posterX, +s.posterY);
+    ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(88, 92, 9, 0, Math.PI * 2); ctx.fill();
+    text(ctx, 'Admit one', 108, 100, { font: font(22, F.inst, 500), color: alpha(ink, .6) });
+    const tw = (hasP ? px - 40 : PX - 80) - 80;
+    let y = titleBlock(ctx, s.title, { x: 80, y: 132, w: tw, h: 200, family: F.inst, weight: 600, max: 96, min: 40, lh: 1.04, color: ink, ls: -2 });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: 80, y: y + 12, w: tw, h: 72, family: F.inst, weight: 400, max: 28, min: 20, lh: 1.25, color: alpha(ink, .55), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 36 <= 396) { y += 36; text(ctx, cr, 80, y, { font: font(21, F.inst, 400), color: alpha(ink, .45) }); }
+    if (+s.rating > 0 && y + 30 <= 412) stars(ctx, 80, y + 30, 12, +s.rating, acc, alpha(ink, .12));
+    ctx.fillStyle = alpha(ink, .15); ctx.fillRect(80, 438, PX - 160, 1.5);
+    fieldRow(ctx, mainFields(s), 80, 482, PX - 160, { labelFont: font(16, F.inst, 500), labelColor: alpha(ink, .45), gap: 38, valueFont: font(26, F.inst, 500), valueColor: ink });
+    // stub
+    ctx.fillStyle = alpha(ink, .025); ctx.fillRect(PX, 0, W - PX, H);
+    const sx = PX + 50, sw = W - PX - 100;
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      text(ctx, k, sx, 112 + i * 140, { font: font(18, F.inst, 500), color: alpha(ink, .45) });
+      text(ctx, v, sx, 196 + i * 140, { font: font(76, F.inst, 500), color: ink, maxW: sw, ls: -2 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, sx + sw, 112, { font: font(22, F.inst, 500), color: alpha(ink, .6), align: 'right' });
+    barcode(ctx, sx, 440, sw, 62, s.serial, ink);
+    text(ctx, s.serial, sx, 540, { font: font(17, F.inst, 500), color: alpha(ink, .45), ls: 3 });
+  },
+
+  carnival(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    if (img) { ctx.save(); ctx.globalAlpha = Math.min(1, +s.posterOpacity * 2.2); ctx.globalCompositeOperation = 'multiply'; ctx.filter = 'grayscale(1) contrast(1.4)'; drawCover(ctx, img, 0, 0, PX, H, +s.posterX, +s.posterY); ctx.restore(); }
+    ctx.strokeStyle = ink; ctx.lineWidth = 5; frameConcave(ctx, 30, 30, PX - 30, H - 30, 34); ctx.stroke();
+    ctx.lineWidth = 2; frameConcave(ctx, 42, 42, PX - 42, H - 42, 30); ctx.stroke();
+    ctx.strokeStyle = ink; ctx.lineWidth = 5; frameConcave(ctx, PX + 30, 30, W - 30, H - 30, 34); ctx.stroke();
+    const cx = PX / 2;
+    text(ctx, '★  ADMIT ONE  ★', cx, 112, { font: font(30, F.alfa), color: ink, align: 'center', ls: 6 });
+    let y = titleBlock(ctx, s.title, { x: cx, y: 136, w: PX - 220, h: s.tagline ? 170 : 210, family: F.alfa, max: 104, min: 40, lh: 1.0, color: ink, upper: true, align: 'center', ls: 2 });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: cx, y: y + 16, w: PX - 260, h: Math.max(34, 400 - y), family: F.cour, weight: 700, max: 28, min: 20, lh: 1.25, color: ink, align: 'center', maxLines: 2 });
+    if (+s.rating > 0 && y + 36 <= 425) stars(ctx, cx - 5 * 2.25 * 15 / 2, y + 36, 15, +s.rating, ink, alpha(acc, .35));
+    ctx.fillStyle = ink; ctx.fillRect(110, 448, PX - 220, 3);
+    fieldRow(ctx, mainFields(s), 110, 492, PX - 220, { labelFont: font(16, F.cour, 700), labelColor: alpha(ink, .75), labelLS: 3, upperLabels: true, gap: 40, valueFont: font(30, F.cour, 700), valueColor: ink });
+    // stub
+    const scx = PX + (W - PX) / 2;
+    text(ctx, 'ADMIT', scx, 150, { font: font(84, F.alfa), color: ink, align: 'center', ls: 2 });
+    text(ctx, 'ONE', scx, 236, { font: font(84, F.alfa), color: ink, align: 'center', ls: 6 });
+    const seats = seatFields(s).map(([k, v]) => `${k} ${v}`).join('   ');
+    text(ctx, seats.toUpperCase(), scx, 312, { font: font(28, F.cour, 700), color: ink, align: 'center', maxW: W - PX - 110 });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 356, { font: font(26, F.cour, 700), color: ink, align: 'center' });
+    text(ctx, 'Nº ' + serialDigits(s.serial), scx, 470, { font: font(54, F.cour, 700), color: acc, align: 'center', ls: 3 });
+    text(ctx, 'KEEP THIS COUPON', scx, 530, { font: font(17, F.cour, 700), color: alpha(ink, .8), align: 'center', ls: 4 });
+  },
+
+  neon(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    if (img) {
+      ctx.save(); ctx.globalAlpha = Math.min(.75, +s.posterOpacity * 3.5); ctx.filter = 'blur(14px) saturate(1.5)';
+      drawCover(ctx, img, -40, -40, W + 80, H + 80, +s.posterX, +s.posterY); ctx.restore();
+      const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, alpha(paper, .55)); g.addColorStop(1, alpha(paper, .92));
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    ctx.save(); ctx.strokeStyle = acc; ctx.lineWidth = 3; ctx.shadowColor = acc; ctx.shadowBlur = 22;
+    ctx.beginPath(); ctx.roundRect(28, 28, PX - 56, H - 56, 20); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(PX + 28, 28, W - PX - 56, H - 56, 20); ctx.stroke(); ctx.restore();
+    text(ctx, 'ADMIT ONE', 80, 104, { font: font(22, F.cour, 700), color: acc, ls: 8, glow: acc, glowBlur: 14 });
+    if (+s.rating > 0) stars(ctx, PX - 80 - 5 * 2.25 * 15, 97, 15, +s.rating, acc, alpha(ink, .15));
+    let y = titleBlock(ctx, s.title, { x: 78, y: 140, w: PX - 160, h: s.tagline ? 180 : 220, family: F.mono, max: 96, min: 36, lh: 1.12, color: ink, upper: true, glow: acc });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: 80, y: y + 10, w: PX - 170, h: Math.max(34, 410 - y), family: F.cour, max: 28, min: 20, lh: 1.25, color: alpha(ink, .85), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 40 <= 440) text(ctx, cr, 80, y + 40, { font: font(22, F.cour), color: alpha(ink, .6) });
+    fieldRow(ctx, mainFields(s), 80, 490, PX - 160, { labelFont: font(16, F.cour, 700), labelColor: acc, labelLS: 3, upperLabels: true, gap: 40, valueFont: font(30, F.cour, 700), valueColor: ink });
+    const cx = PX + (W - PX) / 2, sx = PX + 60, sw = W - PX - 120;
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const x = seats.length === 1 ? cx : sx + sw * (i ? .78 : .22);
+      text(ctx, k.toUpperCase(), x, 110, { font: font(17, F.cour, 700), color: alpha(ink, .7), align: 'center', ls: 4 });
+      text(ctx, v, x, 220, { font: font(80, F.mono), color: acc, align: 'center', glow: acc, glowBlur: 26, maxW: seats.length === 1 ? sw : sw / 2 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, cx, 300, { font: font(30, F.cour, 700), color: ink, align: 'center' });
+    barcode(ctx, sx, 380, sw, 100, s.serial, ink);
+    text(ctx, s.serial, cx, 528, { font: font(19, F.cour, 700), color: alpha(ink, .7), align: 'center', ls: 5 });
+  },
+
+  gala(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    const gold = goldGrad(ctx, 0, H, acc);
+    ctx.strokeStyle = gold; ctx.lineWidth = 3; ctx.strokeRect(24, 24, PX - 48, H - 48);
+    ctx.lineWidth = 1; ctx.strokeRect(34, 34, PX - 68, H - 68);
+    ctx.lineWidth = 3; ctx.strokeRect(PX + 24, 24, W - PX - 48, H - 48);
+    // corner ornaments
+    for (const [x, y, dx, dy] of [[34, 34, 1, 1], [PX - 34, 34, -1, 1], [34, H - 34, 1, -1], [PX - 34, H - 34, -1, -1]]) {
+      ctx.beginPath(); ctx.moveTo(x + dx * 46, y); ctx.lineTo(x + dx * 46, y + dy * 12); ctx.lineTo(x + dx * 12, y + dy * 12); ctx.lineTo(x + dx * 12, y + dy * 46); ctx.lineTo(x, y + dy * 46); ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    const ax = 80, ay = 70, aw = 250, ah = 480;
+    ctx.save(); archPath(ctx, ax, ay, aw, ah); ctx.clip();
+    if (img) drawCover(ctx, img, ax, ay, aw, ah, +s.posterX, +s.posterY); else { ctx.fillStyle = mix(paper, acc, .18); ctx.fillRect(ax, ay, aw, ah); }
+    ctx.restore();
+    ctx.strokeStyle = gold; ctx.lineWidth = 3; archPath(ctx, ax, ay, aw, ah); ctx.stroke();
+    ctx.lineWidth = 1; archPath(ctx, ax - 10, ay - 10, aw + 20, ah + 10); ctx.stroke();
+    const x = 390, w = PX - x - 80, cx = x + w / 2;
+    text(ctx, 'Admit one', cx, 112, { font: font(34, F.corm, 600, 'italic'), color: gold, align: 'center' });
+    let y = titleBlock(ctx, s.title, { x: cx, y: 136, w, h: s.tagline ? 160 : 200, family: F.corm, weight: 700, max: 104, min: 40, lh: 1.0, color: ink, upper: true, align: 'center', ls: 3 });
+    // ornament
+    y += 22; ctx.fillStyle = gold; ctx.fillRect(cx - 160, y, 130, 1.5); ctx.fillRect(cx + 30, y, 130, 1.5);
+    ctx.save(); ctx.translate(cx, y + .75); ctx.rotate(Math.PI / 4); ctx.fillRect(-7, -7, 14, 14); ctx.restore();
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x: cx, y: y + 16, w, h: Math.max(36, 400 - y), family: F.corm, weight: 500, style: 'italic', max: 32, min: 22, lh: 1.15, color: alpha(ink, .85), align: 'center', maxLines: 2 });
+    const cr = credits(s); if (cr && y + 34 <= 430) { y += 34; text(ctx, cr, cx, y, { font: font(17, F.inst, 600), color: gold, align: 'center', ls: 3, maxW: w }); }
+    if (+s.rating > 0 && y + 32 <= 450) stars(ctx, cx - 5 * 2.25 * 12 / 2, y + 32, 12, +s.rating, acc, alpha(ink, .15));
+    fieldRow(ctx, mainFields(s), x, 500, w, { labelFont: font(14, F.inst, 600), labelColor: acc, labelLS: 3, upperLabels: true, gap: 38, valueFont: font(30, F.corm, 700), valueColor: ink });
+    const scx = PX + (W - PX) / 2, sx = PX + 60, sw = W - PX - 120;
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const xx = seats.length === 1 ? scx : sx + sw * (i ? .75 : .25);
+      text(ctx, k, xx, 122, { font: font(30, F.corm, 600, 'italic'), color: gold, align: 'center' });
+      text(ctx, v, xx, 220, { font: font(86, F.corm, 700), color: ink, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 290, { font: font(30, F.corm, 700), color: ink, align: 'center' });
+    barcode(ctx, sx, 370, sw, 110, s.serial, gold);
+    text(ctx, s.serial, scx, 528, { font: font(16, F.inst, 600), color: acc, align: 'center', ls: 5 });
+  },
+};
+
+/* ---------- back side (shared, themed per template) ---------- */
+const BACK_FONTS = {
+  classic: [F.play, 900, ''], poster: [F.arch, '', ''], minimal: [F.inst, 600, ''],
+  carnival: [F.alfa, '', ''], neon: [F.mono, '', ''], gala: [F.corm, 700, ''],
+};
+function drawBack(ctx, s) {
+  const ink = s.ink, acc = s.accent, paper = s.paper, t = s.template;
+  ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+  const lineCol = alpha(ink, .12);
+  ctx.strokeStyle = alpha(ink, .25); ctx.lineWidth = 2;
+  if (t === 'carnival') { ctx.strokeStyle = ink; ctx.lineWidth = 4; frameConcave(ctx, 30, 30, PX - 30, H - 30, 34); ctx.stroke(); frameConcave(ctx, PX + 30, 30, W - 30, H - 30, 34); ctx.stroke(); }
+  else if (t === 'gala') { ctx.strokeStyle = goldGrad(ctx, 0, H, acc); ctx.strokeRect(24, 24, PX - 48, H - 48); ctx.strokeRect(PX + 24, 24, W - PX - 48, H - 48); }
+  else if (t === 'neon') { ctx.save(); ctx.strokeStyle = acc; ctx.shadowColor = acc; ctx.shadowBlur = 18; ctx.beginPath(); ctx.roundRect(28, 28, PX - 56, H - 56, 20); ctx.stroke(); ctx.restore(); }
+  else if (t !== 'minimal') ctx.strokeRect(26, 26, PX - 52, H - 52);
+  const [fam, wt] = BACK_FONTS[t] || BACK_FONTS.classic;
+  const x = 84, w = PX - 168;
+  const labelCol = t === 'carnival' ? alpha(ink, .8) : alpha(ink, .55);
+  text(ctx, (s.home ? 'Watched at home' : 'Seen') + ', ' + fmtDate(s), x, 100, { font: font(20, F.cour, 700), color: labelCol, ls: 3 });
+  let y = titleBlock(ctx, s.title, { x, y: 118, w: w - 360, h: 120, family: fam, weight: wt, max: 58, min: 30, lh: 1.05, color: t === 'classic' ? acc : ink, upper: t === 'poster' || t === 'carnival' || t === 'neon', maxLines: 2 });
+  // rating block on the right
+  const rx = PX - 84 - 5 * 2.25 * 26;
+  if (+s.rating > 0) stars(ctx, rx, 160, 26, +s.rating, t === 'carnival' ? ink : acc, alpha(ink, .14));
+  else text(ctx, 'No rating', PX - 84, 170, { font: font(24, F.cour, 700), color: alpha(ink, .4), align: 'right' });
+  if (s.liked) heart(ctx, PX - 100, 222, 30, t === 'carnival' ? ink : acc);
+  const withLine = s.withWho ? 'With ' + s.withWho : '';
+  if (withLine) text(ctx, withLine, x, Math.max(y + 40, 270), { font: font(26, F.cour, 700), color: alpha(ink, .75), maxW: w });
+  // ruled note area
+  const top = 310, lh = 52, nLines = 5;
+  ctx.fillStyle = lineCol;
+  for (let i = 0; i < nLines; i++) ctx.fillRect(x, top + 18 + i * lh, w, 2);
+  if (s.note) {
+    ctx.save(); ctx.font = font(40, F.cav, 500);
+    const lines = [];
+    for (const para of String(s.note).split(/\n/)) lines.push(...wrapLines(ctx, para, w - 10));
+    ctx.fillStyle = t === 'carnival' || t === 'neon' || t === 'gala' || t === 'poster' ? ink : mix(ink, acc, .35);
+    lines.slice(0, nLines).forEach((l, i) => ctx.fillText(l, x + 4, top + 8 + i * lh));
+    ctx.restore();
+  } else {
+    text(ctx, 'Your thoughts go here.', x + 4, top + 8, { font: font(40, F.cav, 500), color: alpha(ink, .28) });
+  }
+  // stub back
+  const cx = PX + (W - PX) / 2, sx = PX + 56, sw = W - PX - 112;
+  if (t === 'poster') { ctx.fillStyle = acc; ctx.fillRect(PX, 0, W - PX, H); }
+  else if (t !== 'carnival' && t !== 'gala') { ctx.fillStyle = alpha(ink, .05); ctx.fillRect(PX, 0, W - PX, H); }
+  const sInk = t === 'poster' ? (luminance(acc) > .4 ? '#141416' : '#F7F3EA') : ink;
+  text(ctx, 'Logged by', cx, 120, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center', ls: 3 });
+  text(ctx, s.loggedBy || 'davudiswatchin', cx, 176, { font: font(42, F.cav, 700), color: sInk, align: 'center', maxW: sw });
+  if (s.loggedBy) text(ctx, 'letterboxd.com/' + s.loggedBy, cx, 216, { font: font(17, F.cour, 700), color: alpha(sInk, .6), align: 'center', maxW: sw });
+  barcode(ctx, sx, 380, sw, 96, s.serial, t === 'gala' ? goldGrad(ctx, 380, 476, acc) : sInk);
+  text(ctx, s.serial, cx, 524, { font: font(19, F.cour, 700), color: alpha(sInk, .7), align: 'center', ls: 5 });
+}
+
+/* ---------- compose ---------- */
+function renderTicket(canvas, s, side, img, scale = 1) {
+  canvas.width = Math.round(W * scale); canvas.height = Math.round(H * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(0, 0, W, H, R); ctx.clip();
+  try {
+    if (side === 'back') drawBack(ctx, s);
+    else {
+      (FRONT[s.template] || FRONT.classic)(ctx, s, img);
+      if (s.stamp) stamp(ctx, s, PX - 190, 372, s.template === 'carnival' ? s.ink : s.accent);
+    }
+  } catch (e) { console.error(e); }
+  if (s.grain) {
+    ctx.globalAlpha = TEMPLATES[s.template]?.dark ? .07 : .09;
+    ctx.globalCompositeOperation = TEMPLATES[s.template]?.dark ? 'screen' : 'multiply';
+    ctx.fillStyle = ctx.createPattern(grainCanvas(), 'repeat'); ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  }
+  ctx.restore();
+  // notches + perforation, punched out for real so exported PNGs are transparent there
+  ctx.save(); ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.arc(PX, 0, NR, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(PX, H, NR, 0, Math.PI * 2); ctx.fill();
+  for (let y = NR + 18; y <= H - NR - 14; y += 19) { ctx.beginPath(); ctx.arc(PX, y, 3.6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+  return canvas;
+}
+
+/* 1080×1920 story: blurred poster backdrop with front and back stacked */
+function renderStory(s, img, frontC, backC) {
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1920;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = mix(s.paper, '#000000', TEMPLATES[s.template]?.dark ? .3 : .6); ctx.fillRect(0, 0, 1080, 1920);
+  if (img) {
+    ctx.save(); ctx.filter = 'blur(46px) saturate(1.2)'; ctx.globalAlpha = .9; drawCover(ctx, img, -120, -120, 1320, 2160); ctx.restore();
+    ctx.fillStyle = 'rgba(0,0,0,.38)'; ctx.fillRect(0, 0, 1080, 1920);
+  }
+  const tw = 960, th = tw * H / W;
+  const put = (src, cy, rot) => {
+    ctx.save(); ctx.translate(540, cy); ctx.rotate(rot);
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 50; ctx.shadowOffsetY = 24;
+    ctx.drawImage(src, -tw / 2, -th / 2, tw, th); ctx.restore();
+  };
+  put(frontC, 760, -0.045);
+  put(backC, 1210, 0.035);
+  text(ctx, s.loggedBy ? '@' + s.loggedBy : '', 540, 1780, { font: font(34, F.inst, 600), color: 'rgba(255,255,255,.85)', align: 'center' });
+  return c;
+}
+
+</script>
+<script>
+/* ===== Stubs: app ===== */
+const $ = s => document.querySelector(s);
+const form = $('#form');
+const today = () => new Date().toISOString().slice(0, 10);
+function makeSerial() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let r = '';
+  for (let i = 0; i < 6; i++) r += c[Math.floor(Math.random() * c.length)];
+  return 'STB-' + r;
+}
+function defaults() {
+  const t = TEMPLATES.classic;
+  return {
+    id: null, title: 'Paris, Texas', tagline: 'A man walks out of the desert and tries to go home.',
+    director: 'Wim Wenders', year: '1984', runtime: '147', poster: '',
+    date: today(), time: '20:15', usFormat: false, home: false,
+    cinema: 'Arthouse Kino', screen: 'Saal 2', platform: '', format: 'OmU',
+    row: 'F', seat: '14', price: '9.50', currency: '€',
+    rating: '4.5', liked: true, withWho: '', note: '', loggedBy: 'davudiswatchin',
+    template: 'classic', paper: t.paper, ink: t.ink, accent: t.accent,
+    posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false,
+    serial: makeSerial(), palette: [],
+  };
+}
+let S = defaults();
+let side = 'front';
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
+
+/* ---------- images ---------- */
+const imgCache = new Map();
+function getImg(src, onload) {
+  if (!src) return null;
+  let e = imgCache.get(src);
+  if (!e) { const im = new Image(); e = { im, ok: false, cbs: [] }; im.onload = () => { e.ok = true; e.cbs.forEach(f => f()); e.cbs = []; }; im.src = src; imgCache.set(src, e); }
+  if (e.ok) return e.im;
+  if (onload) e.cbs.push(onload);
+  return null;
+}
+function loadImg(src) { return new Promise(res => { if (!src) return res(null); const im = getImg(src, () => res(imgCache.get(src).im)); if (im) res(im); }); }
+
+/* ---------- rendering ---------- */
+let raf = 0, thumbT = 0;
+function schedule(withThumbs = true) {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => {
+    const img = getImg(S.poster, () => schedule());
+    renderTicket($('#cFront'), S, 'front', img, 1);
+    renderTicket($('#cBack'), S, 'back', img, 1);
+    $('#flip').setAttribute('aria-label', `${side === 'front' ? 'Front' : 'Back'} of the ticket for ${S.title || 'Untitled'}`);
+  });
+  if (withThumbs) { clearTimeout(thumbT); thumbT = setTimeout(renderThumbs, 160); }
+  saveDraft();
+}
+function buildTemplates() {
+  const wrap = $('#templates');
+  for (const [key, t] of Object.entries(TEMPLATES)) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tpl'; b.dataset.tpl = key;
+    b.setAttribute('aria-pressed', String(S.template === key));
+    b.innerHTML = `<canvas width="400" height="155"></canvas><span>${t.name}</span>`;
+    b.addEventListener('click', () => applyTemplate(key));
+    wrap.appendChild(b);
+  }
+}
+function renderThumbs() {
+  const img = getImg(S.poster);
+  document.querySelectorAll('.tpl').forEach(b => {
+    const k = b.dataset.tpl, t = TEMPLATES[k];
+    const s = { ...S, template: k, stamp: false, grain: false };
+    if (S.template !== k) Object.assign(s, { paper: t.paper, ink: t.ink, accent: t.accent });
+    renderTicket(b.querySelector('canvas'), s, 'front', img, .25);
+    b.setAttribute('aria-pressed', String(S.template === k));
+  });
+}
+function applyTemplate(key) {
+  const t = TEMPLATES[key];
+  Object.assign(S, { template: key, paper: t.paper, ink: t.ink, accent: t.accent });
+  fillForm(); schedule();
+}
+
+/* ---------- form binding ---------- */
+function fillForm() {
+  for (const el of form.elements) {
+    if (!el.name || !(el.name in S)) continue;
+    if (el.type === 'checkbox') el.checked = !!S[el.name];
+    else el.value = S[el.name] ?? '';
+  }
+  syncUI();
+}
+function stars5(r) { r = +r; let s = ''; for (let i = 1; i <= 5; i++) s += r >= i ? '★' : r >= i - .5 ? '½' : ''; return s || 'No rating'; }
+function syncUI() {
+  $('#ratingOut').textContent = stars5(S.rating);
+  const home = !!S.home;
+  document.querySelectorAll('[data-cinema]').forEach(e => e.hidden = home);
+  document.querySelectorAll('[data-home]').forEach(e => e.hidden = !home);
+  $('#lblCinema').textContent = home ? 'Where' : 'Cinema';
+  const q = encodeURIComponent((S.title || '').trim());
+  $('#lnkTmdb').href = q ? `https://www.themoviedb.org/search/movie?query=${q}` : 'https://www.themoviedb.org/';
+  $('#lnkLb').href = q ? `https://letterboxd.com/search/films/${q}/` : 'https://letterboxd.com/';
+  const has = !!S.poster;
+  $('#posterThumb').hidden = !has; $('#posterPh').hidden = has; $('#removePoster').hidden = !has;
+  if (has) $('#posterThumb').src = S.poster;
+  $('#dropTitle').textContent = has ? 'Poster added' : 'Add a poster';
+  const sw = $('#swatches');
+  sw.querySelectorAll('button').forEach(b => b.remove());
+  sw.hidden = !(S.palette && S.palette.length);
+  (S.palette || []).forEach(hex => {
+    const b = document.createElement('button'); b.type = 'button'; b.style.background = hex; b.title = hex; b.setAttribute('aria-label', 'Use ' + hex + ' as accent');
+    b.addEventListener('click', () => { S.accent = hex; form.elements.accent.value = hex; schedule(); });
+    sw.appendChild(b);
+  });
+  $('#saveBtn').textContent = S.id ? 'Update stub' : 'Save to My stubs';
+}
+form.addEventListener('input', e => {
+  const el = e.target; if (!el.name) return;
+  S[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+  if (['rating', 'home', 'title'].includes(el.name)) syncUI();
+  schedule(el.type !== 'range' || el.name === 'posterOpacity' ? true : true);
+});
+form.addEventListener('change', e => { if (e.target.name === 'serial') { S.serial = e.target.value.toUpperCase().replace(/[^0-9A-Z-]/g, '') || makeSerial(); e.target.value = S.serial; schedule(); } });
+$('#shuffle').addEventListener('click', () => { S.serial = makeSerial(); form.elements.serial.value = S.serial; schedule(); });
+
+/* ---------- poster ---------- */
+async function takePoster(file, fromSearch = false) {
+  if (!file || !file.type.startsWith('image/')) { toast('That file isn\'t an image. Try a JPG, PNG or WebP.'); return; }
+  const url = URL.createObjectURL(file);
+  const im = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; }).catch(() => null);
+  URL.revokeObjectURL(url);
+  if (!im) { toast('That image couldn\'t be opened. Try another file.'); return; }
+  const max = 640, sc = Math.min(1, max / Math.max(im.width, im.height));
+  const c = document.createElement('canvas'); c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
+  c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+  let q = .84, data = c.toDataURL('image/jpeg', q);
+  while (data.length > 170000 && q > .5) { q -= .08; data = c.toDataURL('image/jpeg', q); }
+  S.poster = data; S.palette = extractPalette(c);
+  if (S.palette[0]) { S.accent = pickAccent(S.palette); }
+  fillForm(); schedule();
+  toast(fromSearch ? 'Filled in from TMDB. Poster colours are under Look.' : 'Poster added. Its colours are under Look.');
+}
+function extractPalette(src) {
+  const c = document.createElement('canvas'); c.width = 48; c.height = 72;
+  const g = c.getContext('2d'); g.drawImage(src, 0, 0, 48, 72);
+  const d = g.getImageData(0, 0, 48, 72).data, b = new Map();
+  for (let i = 0; i < d.length; i += 4) {
+    const k = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | (d[i + 2] >> 4);
+    const e = b.get(k) || [0, 0, 0, 0]; e[0] += d[i]; e[1] += d[i + 1]; e[2] += d[i + 2]; e[3]++; b.set(k, e);
+  }
+  const cols = [...b.values()].map(([r, gg, bb, n]) => {
+    r /= n; gg /= n; bb /= n; const mx = Math.max(r, gg, bb), mn = Math.min(r, gg, bb);
+    const sat = mx ? (mx - mn) / mx : 0; return { r, g: gg, b: bb, n, sat, score: n * (.35 + sat) };
+  }).sort((a, c2) => c2.score - a.score);
+  const out = [];
+  for (const c1 of cols) {
+    if (out.length >= 6) break;
+    if (out.every(o => Math.hypot(o.r - c1.r, o.g - c1.g, o.b - c1.b) > 70)) out.push(c1);
+  }
+  return out.map(o => '#' + [o.r, o.g, o.b].map(v => Math.round(v).toString(16).padStart(2, '0')).join(''));
+}
+function pickAccent(pal) {
+  // most saturated colour that still contrasts with the current paper
+  const paperL = luminance(S.paper);
+  const ranked = pal.map(h => {
+    const n = parseInt(h.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), sat = mx ? (mx - mn) / mx : 0;
+    const L = luminance(h), con = (Math.max(L, paperL) + .05) / (Math.min(L, paperL) + .05);
+    return { h, v: sat * 2 + Math.min(con, 7) / 3.5 };
+  }).sort((a, b) => b.v - a.v);
+  return ranked[0].h;
+}
+const drop = $('#drop');
+$('#posterFile').addEventListener('change', e => { takePoster(e.target.files[0]); e.target.value = ''; });
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => takePoster(e.dataTransfer.files[0]));
+document.addEventListener('paste', e => {
+  const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+  if (item) { e.preventDefault(); takePoster(item.getAsFile()); }
+});
+$('#removePoster').addEventListener('click', e => { e.preventDefault(); S.poster = ''; S.palette = []; fillForm(); schedule(); });
+
+/* ---------- TMDB search (works when Stubs runs on its own website) ---------- */
+// Paste your TMDB key between the quotes to let everyone who visits your site search without adding their own.
+const TMDB_KEY_BUILTIN = '';
+const TMDB_IMG = 'https://image.tmdb.org/t/p/';
+function tmdbKey() { if (TMDB_KEY_BUILTIN) return TMDB_KEY_BUILTIN; try { return localStorage.getItem('stubs.tmdbKey') || ''; } catch (e) { return ''; } }
+async function tmdb(path, params = {}) {
+  const key = tmdbKey().trim();
+  const u = new URL('https://api.themoviedb.org/3' + path);
+  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  const opt = {};
+  if (key.startsWith('eyJ')) opt.headers = { Authorization: 'Bearer ' + key, accept: 'application/json' };
+  else u.searchParams.set('api_key', key);
+  const r = await fetch(u, opt);
+  if (r.status === 401) { const e = new Error('key'); e.kind = 'key'; throw e; }
+  if (!r.ok) throw new Error('http ' + r.status);
+  return r.json();
+}
+const qEl = $('#q'), hint = $('#searchHint'), results = $('#results');
+function setHint(msg) { hint.hidden = !msg; hint.innerHTML = msg || ''; }
+function initSearch() {
+  const credit = $('#tmdbCredit');
+  if (inArtifact) {
+    $('#searchBox').querySelector('.search-row').hidden = true; $('#keyBox').hidden = true; credit.hidden = true;
+    setHint('Poster search works when Stubs runs on its own website. Here, add a poster below.');
+    return;
+  }
+  if (!tmdbKey()) { $('#keyBox').open = true; setHint('Add your TMDB key below to search for films and posters.'); }
+  if (TMDB_KEY_BUILTIN) $('#keyBox').hidden = true;
+}
+$('#saveKey').addEventListener('click', () => {
+  const v = $('#tmdbKey').value.trim();
+  try { localStorage.setItem('stubs.tmdbKey', v); } catch (e) {}
+  $('#tmdbKey').value = ''; $('#keyBox').open = false;
+  setHint(v ? '' : 'Add your TMDB key below to search for films and posters.');
+  toast(v ? 'Key saved. Try a search.' : 'Key removed.');
+  if (v && qEl.value.trim()) runSearch();
+});
+let qT, qSeq = 0;
+qEl.addEventListener('input', () => { clearTimeout(qT); qT = setTimeout(runSearch, 320); });
+qEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); clearTimeout(qT); runSearch(); } if (e.key === 'ArrowDown') { const f = results.querySelector('.res'); if (f) { e.preventDefault(); f.focus(); } } });
+results.addEventListener('keydown', e => {
+  const items = [...results.querySelectorAll('.res')], i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown' && i < items.length - 1) { e.preventDefault(); items[i + 1].focus(); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); (i > 0 ? items[i - 1] : qEl).focus(); }
+  if (e.key === 'Escape') { results.innerHTML = ''; qEl.focus(); }
+});
+async function runSearch() {
+  const q = qEl.value.trim(), seq = ++qSeq;
+  if (q.length < 2) { results.innerHTML = ''; return; }
+  if (!tmdbKey()) { $('#keyBox').open = true; setHint('Add your TMDB key below to search for films and posters.'); return; }
+  setHint('Searching…');
+  try {
+    const m = q.match(/^(.*?)\s*\(?((?:18|19|20)\d{2})\)?$/);
+    const params = { query: m && m[1] ? m[1] : q, include_adult: 'false' };
+    if (m && m[1]) params.year = m[2];
+    const j = await tmdb('/search/movie', params);
+    if (seq !== qSeq) return;
+    results.innerHTML = '';
+    const list = (j.results || []).slice(0, 8);
+    setHint(list.length ? '' : `No films found for "${q.replace(/[<>&]/g, '')}". Check the spelling or add the year.`);
+    for (const mv of list) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'res'; b.setAttribute('role', 'option');
+      const year = (mv.release_date || '').slice(0, 4);
+      b.innerHTML = (mv.poster_path ? `<img alt="" loading="lazy" src="${TMDB_IMG}w92${mv.poster_path}">` : '<span class="noimg"></span>') + '<span><b></b><small></small></span>';
+      b.querySelector('b').textContent = mv.title;
+      b.querySelector('small').textContent = [year, mv.original_title !== mv.title ? mv.original_title : ''].filter(Boolean).join(', ') || 'Year unknown';
+      b.addEventListener('click', () => chooseFilm(mv.id));
+      results.appendChild(b);
+    }
+  } catch (e) {
+    if (seq !== qSeq) return;
+    setHint(e.kind === 'key' ? 'TMDB didn\'t accept that key. Check it in your TMDB settings and save it again.' : 'TMDB can\'t be reached right now. Check your connection and try again.');
+    if (e.kind === 'key') $('#keyBox').open = true;
+  }
+}
+async function posterFromTmdb(path) {
+  const r = await fetch(TMDB_IMG + 'w780' + path);
+  if (!r.ok) throw new Error('img');
+  await takePoster(await r.blob(), true);
+}
+async function chooseFilm(id) {
+  results.innerHTML = ''; setHint('Loading the film…');
+  try {
+    const lang = (navigator.language || 'en').slice(0, 2);
+    const d = await tmdb('/movie/' + id, { append_to_response: 'credits,images', include_image_language: `en,${lang},null` });
+    const dir = (d.credits?.crew || []).filter(c => c.job === 'Director').map(c => c.name).slice(0, 2).join(' & ');
+    Object.assign(S, { title: d.title || S.title, tagline: d.tagline || '', director: dir, year: (d.release_date || '').slice(0, 4), runtime: d.runtime ? String(d.runtime) : '' });
+    qEl.value = '';
+    fillForm(); schedule();
+    const posters = [];
+    if (d.poster_path) posters.push(d.poster_path);
+    for (const p of (d.images?.posters || []).sort((a, b) => b.vote_average - a.vote_average)) if (!posters.includes(p.file_path)) posters.push(p.file_path);
+    const pick = $('#posterPick'); pick.innerHTML = '';
+    posters.slice(0, 15).forEach((p, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(i === 0)); b.setAttribute('aria-label', 'Poster ' + (i + 1));
+      b.innerHTML = `<img alt="" loading="lazy" src="${TMDB_IMG}w154${p}">`;
+      b.addEventListener('click', async () => {
+        pick.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        try { await posterFromTmdb(p); } catch (e) { toast('That poster couldn\'t be loaded. Try another.'); }
+      });
+      pick.appendChild(b);
+    });
+    $('#posterPickWrap').hidden = posters.length < 2;
+    setHint('');
+    if (posters[0]) await posterFromTmdb(posters[0]); else toast('Filled in. TMDB has no poster for this one, so add your own.');
+  } catch (e) {
+    setHint(e.kind === 'key' ? 'TMDB didn\'t accept that key. Check it and save it again.' : 'That film couldn\'t be loaded. Try again.');
+  }
+}
+
+/* ---------- side flip ---------- */
+function setSide(v) {
+  side = v; $('#flip').classList.toggle('is-back', v === 'back');
+  document.querySelectorAll('[data-side]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === v)));
+  schedule(false);
+}
+document.querySelectorAll('[data-side]').forEach(b => b.addEventListener('click', () => setSide(b.dataset.side)));
+$('#flip').addEventListener('click', () => setSide(side === 'front' ? 'back' : 'front'));
+
+/* ---------- platform capabilities (all optional) ---------- */
+const inArtifact = !!(window.claude && typeof window.claude.use === 'function');
+const capDownloads = inArtifact ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+
+async function saveBlob(filename, blob) {
+  const dl = await capDownloads;
+  if (dl) {
+    try { await dl.save({ filename, data: blob }); toast('Downloaded ' + filename); }
+    catch (e) {
+      if (e && e.code === 'declined') return;
+      if (e && e.code === 'rate_limited') { toast('A download is already waiting for you to confirm.'); return; }
+      toast('Downloads aren\'t available here. Use Copy image instead.');
+    }
+    return;
+  }
+  if (inArtifact) { toast('Downloads aren\'t available here. Use Copy image instead.'); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Downloaded ' + filename);
+}
+const toBlob = c => new Promise(r => c.toBlob(r, 'image/png'));
+function slug(s) { return (String(s.title || 'stub').toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40) || 'stub'); }
+async function exportCanvas(kind, s = S) {
+  const img = await loadImg(s.poster);
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  if (kind === 'story') {
+    const f = renderTicket(document.createElement('canvas'), s, 'front', img, 1);
+    const b = renderTicket(document.createElement('canvas'), s, 'back', img, 1);
+    return renderStory(s, img, f, b);
+  }
+  return renderTicket(document.createElement('canvas'), s, kind, img, 2);
+}
+async function download(kind, s = S) {
+  const c = await exportCanvas(kind, s);
+  const blob = await toBlob(c);
+  await saveBlob(`${slug(s)}-${kind}.png`, blob);
+}
+document.querySelectorAll('[data-dl]').forEach(b => b.addEventListener('click', () => { $('#dlMenu').open = false; download(b.dataset.dl); }));
+$('#copyBtn').addEventListener('click', async () => {
+  $('#dlMenu').open = false;
+  try {
+    const c = await exportCanvas(side);
+    const blob = await toBlob(c);
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    toast('Copied. Paste it into a post or a chat.');
+  } catch (e) { toast('Your browser blocked copying images here. Try Download instead.'); }
+});
+document.addEventListener('click', e => { const m = $('#dlMenu'); if (m.open && !m.contains(e.target)) m.open = false; });
+
+/* ---------- storage: claude db per person, or this browser ---------- */
+const LS_KEY = 'stubs.collection.v1', DRAFT_KEY = 'stubs.draft.v1';
+const store = {
+  mode: 'local', col: null,
+  ready: (async () => {
+    if (!inArtifact) return;
+    try {
+      const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+      if (!db || !user) return;
+      const id = await user.id();
+      if (!id) return;
+      store.col = db.collection('data/users/' + id);
+      store.mode = 'db';
+    } catch (e) { /* stay local */ }
+  })(),
+  async list() {
+    await this.ready;
+    if (this.mode === 'db') {
+      try {
+        const snap = await Promise.race([this.col.get(), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 10000))]);
+        return snap.docs.filter(d => d.exists && d.id.startsWith('stub-')).map(d => ({ ...d.data(), id: d.id }));
+      } catch (e) { toast('Your saved stubs can\'t be reached right now.'); return this.localList(); }
+    }
+    return this.localList();
+  },
+  localList() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { return []; } },
+  localWrite(list) { localStorage.setItem(LS_KEY, JSON.stringify(list)); },
+  async put(stub) {
+    await this.ready;
+    if (this.mode === 'db') { await this.col.doc(stub.id).set(stub); return; }
+    const list = this.localList().filter(x => x.id !== stub.id); list.push(stub); this.localWrite(list);
+  },
+  async remove(id) {
+    await this.ready;
+    if (this.mode === 'db') { await this.col.doc(id).delete(); return; }
+    this.localWrite(this.localList().filter(x => x.id !== id));
+  },
+};
+let collection = [];
+async function refreshCollection() { collection = await store.list(); $('#count').textContent = collection.length || ''; if (!$('#viewWall').hidden) renderWall(); }
+
+function clean(s) { const o = { ...s }; delete o.id; return o; }
+$('#saveBtn').addEventListener('click', async () => {
+  const btn = $('#saveBtn'); btn.disabled = true;
+  const isNew = !S.id;
+  if (isNew) S.id = 'stub-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const stub = { ...clean(S), id: S.id, savedAt: Date.now() };
+  try {
+    await store.put(stub);
+    toast(isNew ? 'Saved to My stubs.' : 'Stub updated.');
+    syncUI(); refreshCollection();
+  } catch (e) {
+    if (isNew) S.id = null;
+    toast(e && e.code === 'quota_exceeded' ? 'Your collection is full. Delete a few stubs to make room.' : e && e.name === 'QuotaExceededError' ? 'This browser is out of space. Delete a few stubs, or use smaller posters.' : 'That stub couldn\'t be saved. Try again in a moment.');
+  } finally { btn.disabled = false; }
+});
+$('#newBtn').addEventListener('click', () => {
+  const keep = { loggedBy: S.loggedBy, usFormat: S.usFormat, currency: S.currency, template: S.template, paper: S.paper, ink: S.ink, accent: S.accent, grain: S.grain };
+  S = { ...defaults(), ...keep, title: '', tagline: '', director: '', year: '', runtime: '', rating: '0', liked: false, cinema: S.cinema, price: '', row: '', seat: '', screen: '', format: '' };
+  fillForm(); setSide('front'); schedule();
+  $('#posterPickWrap').hidden = true; $('#posterPick').innerHTML = '';
+  if (!inArtifact) qEl.focus(); else form.elements.title.focus();
+});
+
+/* ---------- wall ---------- */
+function stats(list) {
+  if (!list.length) return '';
+  const cine = list.filter(x => !x.home).length, rated = list.filter(x => +x.rating > 0);
+  const avg = rated.length ? (rated.reduce((a, x) => a + +x.rating, 0) / rated.length).toFixed(1) : null;
+  let t = `${list.length} ${list.length === 1 ? 'film' : 'films'} so far, ${cine} of them in a cinema.`;
+  if (avg) t += ` Average rating ${avg} stars.`;
+  return t;
+}
+function renderWall() {
+  const grid = $('#grid'); grid.innerHTML = '';
+  $('#wallStats').textContent = stats(collection);
+  if (!collection.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><h3>No stubs yet</h3><p>Make a ticket for the last film you saw, then press Save to My stubs.</p><p><button class="btn primary" id="emptyGo">Make a stub</button></p>${store.mode === 'local' && inArtifact ? '' : ''}</div>`;
+    $('#emptyGo').addEventListener('click', () => showView('make'));
+    return;
+  }
+  const sort = $('#sortSel').value;
+  const list = [...collection].sort((a, b) =>
+    sort === 'rating' ? (+b.rating - +a.rating) :
+    sort === 'title' ? String(a.title).localeCompare(String(b.title)) :
+    (String(b.date) + String(b.time)).localeCompare(String(a.date) + String(a.time)));
+  for (const st of list) {
+    const el = document.createElement('div'); el.className = 'stub';
+    const c = document.createElement('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', 'Open ' + (st.title || 'Untitled'));
+    el.appendChild(c);
+    const meta = document.createElement('div'); meta.className = 'stub-meta';
+    meta.innerHTML = `<b></b><small></small><span class="spacer"></span><button class="mini" data-a="dl">Download</button><button class="mini danger" data-a="del">Delete</button>`;
+    meta.querySelector('b').textContent = st.title || 'Untitled';
+    meta.querySelector('small').textContent = fmtDate(st);
+    el.appendChild(meta); grid.appendChild(el);
+    renderTicket(c, st, 'front', null, .42);
+    if (st.poster) loadImg(st.poster).then(im => renderTicket(c, st, 'front', im, .42));
+    const open = () => { S = { ...defaults(), ...st }; fillForm(); setSide('front'); showView('make'); schedule(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    c.addEventListener('click', open);
+    c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    meta.querySelector('[data-a=dl]').addEventListener('click', () => download('front', st));
+    const del = meta.querySelector('[data-a=del]');
+    del.addEventListener('click', async () => {
+      if (del.dataset.armed !== '1') { del.dataset.armed = '1'; del.textContent = 'Confirm delete'; setTimeout(() => { del.dataset.armed = ''; del.textContent = 'Delete'; }, 3500); return; }
+      try { await store.remove(st.id); if (S.id === st.id) { S.id = null; syncUI(); } toast('Stub deleted.'); refreshCollection(); }
+      catch (e) { toast('That stub couldn\'t be deleted. Try again in a moment.'); }
+    });
+  }
+}
+$('#sortSel').addEventListener('change', renderWall);
+function showView(v) {
+  const make = v === 'make';
+  $('#viewMake').hidden = !make; $('#viewWall').hidden = make;
+  $('#tabMake').setAttribute('aria-selected', String(make)); $('#tabWall').setAttribute('aria-selected', String(!make));
+  if (!make) renderWall();
+}
+$('#tabMake').addEventListener('click', () => showView('make'));
+$('#tabWall').addEventListener('click', () => { showView('wall'); refreshCollection(); });
+
+/* ---------- draft (this browser only, a convenience) ---------- */
+let draftT;
+function saveDraft() { clearTimeout(draftT); draftT = setTimeout(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); } catch (e) {} }, 500); }
+function loadDraft() { try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d && typeof d === 'object') S = { ...defaults(), ...d }; } catch (e) {} }
+
+/* ---------- boot ---------- */
+loadDraft();
+initSearch();
+buildTemplates();
+fillForm();
+schedule();
+refreshCollection();
+if (document.fonts) {
+  const specs = ['900 40px "Playfair Display"', 'italic 400 40px "Playfair Display"', '400 40px "Courier Prime"', '700 40px "Courier Prime"',
+    '400 40px "Instrument Sans"', '500 40px "Instrument Sans"', '600 40px "Instrument Sans"', '700 40px "Instrument Sans"', '400 40px "Archivo Black"',
+    '400 40px "Alfa Slab One"', '400 40px Monoton', '700 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', 'italic 600 40px "Cormorant Garamond"', '500 40px Caveat', '700 40px Caveat'];
+  Promise.all(specs.map(f => document.fonts.load(f).catch(() => null))).then(() => schedule());
+  document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => schedule());
+}
+
+</script>
+</body>
+</html>
