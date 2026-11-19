@@ -809,8 +809,7 @@ function drawBack(ctx, s) {
     text(ctx, fmtDate(s), cx, 182, { font: font(46, F.cav, 700), color: sInk, align: 'center', maxW: sw });
     text(ctx, fmtTime(s), cx, 222, { font: font(20, F.cour, 700), color: alpha(sInk, .6), align: 'center' });
   }
-  barcode(ctx, sx, 380, sw, 96, s.serial, t === 'gala' ? goldGrad(ctx, 380, 476, acc) : sInk);
-  text(ctx, s.serial, cx, 524, { font: font(19, F.cour, 700), color: alpha(sInk, .7), align: 'center', ls: 5 });
+  // back stub: no barcode or ticket number, only the text at the top
 }
 
 /* ---------- compose ---------- */
