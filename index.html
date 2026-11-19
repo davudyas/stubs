@@ -91,6 +91,27 @@
   --glow:215,38,30; --marquee-bg:#FFFFFF; --scheme:light; --shadow:.18; --on-accent:#FFFFFF;
   --logo-font:"Josefin Sans","Futura",sans-serif; --logo-weight:400; --logo-transform:uppercase; --logo-ls:.32em; --logo-size:30px; --logo-color:#15181C; --logo-glow:0; --danger:#B3261E; --ok:#2E7D32;
 }
+.adm-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.adm-stat{background:var(--velvet-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.adm-stat b{display:block;font-size:28px;font-family:var(--logo-font);font-weight:var(--logo-weight);color:var(--logo-color)}
+.adm-stat span{color:var(--dust);font-size:13px}
+.adm-tabs{width:max-content;margin-bottom:14px}
+.adm-tabs button[aria-selected=true]{background:var(--velvet-4);color:var(--screen)}
+#admSearch{max-width:360px;margin-bottom:12px}
+.adm-list{display:flex;flex-direction:column;gap:10px}
+.adm-row{background:var(--velvet-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.adm-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.adm-top .who{display:flex;align-items:center;gap:10px;min-width:180px;flex:1}
+.adm-top .who b{font-size:16px}
+.adm-top .who small{display:block;color:var(--dust)}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--velvet-4);color:var(--screen);margin-left:6px;vertical-align:2px}
+.badge.on{background:var(--ok);color:#10210f}.badge.bad{background:var(--danger);color:#2a0a08}.badge.adm{background:var(--brass);color:var(--on-accent)}
+.adm-actions{display:flex;flex-wrap:wrap;gap:6px}
+.adm-actions .btn{padding:6px 11px;font-size:13px}
+.adm-tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+.adm-tickets .stub canvas{cursor:default}
+.temp-pw{font:600 22px/1.3 "IBM Plex Mono",monospace;letter-spacing:.08em;background:var(--velvet-3);padding:12px 14px;border-radius:10px;margin:12px 0;user-select:all}
+@media (max-width:700px){.adm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .account{display:flex;align-items:center;gap:10px}
 .whoami{font-weight:600;color:var(--screen)}
 .settings{max-height:90vh;overflow:auto}
@@ -330,6 +351,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   <nav class="tabs" role="tablist" aria-label="Views">
     <button role="tab" id="tabMake" aria-selected="true" aria-controls="viewMake">Make a ticket</button>
     <button role="tab" id="tabWall" aria-selected="false" aria-controls="viewWall">My tickets<span class="count" id="count"></span></button>
+    <button role="tab" id="tabAdmin" aria-selected="false" aria-controls="viewAdmin" hidden>Moderation</button>
   </nav>
   <div class="account" id="account" hidden>
     <button type="button" class="btn" id="loginBtn">Log in</button>
@@ -506,6 +528,26 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   <div class="grid" id="profGrid"></div>
 </section>
 
+<section class="wall admin" id="viewAdmin" hidden>
+  <div class="wall-head">
+    <h2>Moderation</h2>
+    <p class="hint">Only you can see this page.</p>
+    <span class="spacer" style="flex:1"></span>
+    <button type="button" class="btn" id="admRefresh">Refresh</button>
+  </div>
+  <div class="adm-stats" id="admStats"></div>
+  <div class="seg adm-tabs" role="tablist" aria-label="Moderation sections">
+    <button type="button" role="tab" data-adm="users" aria-selected="true">Users</button>
+    <button type="button" role="tab" data-adm="shares" aria-selected="false">Share links</button>
+  </div>
+  <div id="admUsers">
+    <label class="sr" for="admSearch">Search users</label>
+    <input type="text" id="admSearch" placeholder="Search users" autocomplete="off">
+    <div class="adm-list" id="admList"></div>
+  </div>
+  <div id="admShares" hidden><div class="adm-list" id="admShareList"></div></div>
+</section>
+
 <section class="wall" id="viewWall" hidden>
   <div class="wall-head">
     <h2>My tickets</h2>
@@ -612,6 +654,13 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
       <span class="spacer"></span>
       <button type="button" class="btn primary" id="setClose">Done</button>
     </div>
+  </div>
+</div>
+<div class="modal" id="admModal" hidden role="dialog" aria-modal="true" aria-labelledby="admModalTitle">
+  <div class="modal-card">
+    <h3 id="admModalTitle"></h3>
+    <div id="admModalBody"></div>
+    <div class="share-actions"><span class="spacer"></span><button type="button" class="btn primary" id="admModalClose">Done</button></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -2457,6 +2506,8 @@ function syncAccountUI() {
   if (inArtifact) return;
   $('#account').hidden = false;
   $('#loginBtn').hidden = !!session; $('#whoami').hidden = !session;
+  $('#tabAdmin').hidden = !(session && session.admin);
+  if (!(session && session.admin) && !$('#viewAdmin').hidden) showView('make');
   if (session) { const w = $('#whoami'); w.innerHTML = ''; w.append(avatarEl(session.username, session.avatar), document.createTextNode('@' + session.username)); }
 }
 let authMode = 'login';
@@ -2496,8 +2547,8 @@ $('#authForm').addEventListener('submit', async e => {
   try {
     const r = await fetch('/api/auth', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: authMode, username, password }) });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok) return show(data.error === 'locked' ? `Too many tries. Wait ${data.minutes || 10} minutes and try again.` : AUTH_ERRORS[data.error] || 'That didn\'t work. Try again in a moment.');
-    setSession({ username: data.username, token: data.token, public: false });
+    if (!r.ok) return show(data.error === 'banned' ? 'This account has been blocked.' : data.error === 'locked' ? `Too many tries. Wait ${data.minutes || 10} minutes and try again.` : AUTH_ERRORS[data.error] || 'That didn\'t work. Try again in a moment.');
+    setSession({ username: data.username, token: data.token, public: !!data.public, avatar: data.avatar || 0, admin: !!data.admin });
     checkSession();
     closeAuth();
     toast(authMode === 'signup' ? `Welcome, @${data.username}. Your account is ready.` : `Logged in as @${data.username}.`);
@@ -2616,7 +2667,7 @@ $('#pwForm').addEventListener('submit', async e => {
     const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'change_password', current: cur, password: nw }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) return show(d.error === 'wrong_current' ? 'Your current password isn\'t right.' : 'That didn\'t work. Try again in a moment.');
-    setSession({ username: d.username, token: d.token, public: !!d.public, avatar: d.avatar || 0 });
+    setSession({ ...session, username: d.username, token: d.token, public: !!d.public, avatar: d.avatar || 0 });
     ['pwCur', 'pwNew', 'pwNew2'].forEach(i => $('#' + i).value = '');
     toast('Password changed. Other devices are logged out.');
   } catch (e2) { if (e2.code !== 'logged_out') show('Ticket Store can\'t be reached right now.'); }
@@ -2632,7 +2683,7 @@ $('#delForm').addEventListener('submit', async e => {
   try {
     const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'delete_account', current: pw }) });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok) return show(d.error === 'wrong_current' ? 'That password isn\'t right.' : 'That didn\'t work. Try again in a moment.');
+    if (!r.ok) return show(d.error === 'wrong_current' ? 'That password isn\'t right.' : d.error === 'admin_account' ? 'The admin account can\'t be deleted.' : 'That didn\'t work. Try again in a moment.');
     setSession(null); S.id = null; syncUI(); closeSettings(); toast('Your account and its tickets are deleted.'); refreshCollection();
   } catch (e2) { if (e2.code !== 'logged_out') show('Ticket Store can\'t be reached right now.'); }
   finally { btn.disabled = false; btn.dataset.armed = ''; btn.textContent = 'Delete my account'; }
@@ -2650,7 +2701,7 @@ $('#moveBtn').addEventListener('click', async () => {
 async function checkSession() {
   syncAccountUI();
   if (!session || inArtifact) return;
-  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.ok) { const d = await r.json(); setSession({ ...session, public: !!d.public, avatar: d.avatar || 0 }); syncSettings(); } } catch (e) {}
+  try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.ok) { const d = await r.json(); setSession({ ...session, public: !!d.public, avatar: d.avatar || 0, admin: !!d.admin }); syncSettings(); } } catch (e) {}
 }
 
 function clean(s) { const o = { ...s }; delete o.id; return o; }
@@ -2725,7 +2776,8 @@ function renderWall() {
 $('#sortSel').addEventListener('change', renderWall);
 function showView(v) {
   if (!['shared', 'profile'].includes(v) && (location.search || location.pathname !== '/')) history.replaceState(null, '', '/');
-  $('#viewMake').hidden = v !== 'make'; $('#viewWall').hidden = v !== 'wall'; $('#viewShared').hidden = v !== 'shared'; $('#viewProfile').hidden = v !== 'profile';
+  $('#viewMake').hidden = v !== 'make'; $('#viewWall').hidden = v !== 'wall'; $('#viewShared').hidden = v !== 'shared'; $('#viewProfile').hidden = v !== 'profile'; $('#viewAdmin').hidden = v !== 'admin';
+  $('#tabAdmin').setAttribute('aria-selected', String(v === 'admin'));
   $('#tabMake').setAttribute('aria-selected', String(v === 'make')); $('#tabWall').setAttribute('aria-selected', String(v === 'wall'));
   if (v === 'wall') renderWall();
   if (v === 'make') schedule();
@@ -2973,6 +3025,137 @@ async function openProfileFromUrl() {
   return true;
 }
 openProfileFromUrl();
+
+/* ---------- moderation (admin only; the server checks every request) ---------- */
+let admUsers = [];
+async function adm(action, extra = {}) {
+  const r = await api('/api/admin', { method: 'POST', body: JSON.stringify({ action, ...extra }) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(d.error || 'http'); e.code = d.error; throw e; }
+  return d;
+}
+function admToast(e) { if (e.code === 'logged_out') return; toast(e.code === 'forbidden' ? 'Only the admin can do that.' : e.code === 'admin_account' ? 'That can\'t be done to the admin account.' : 'That didn\'t work. Try again in a moment.'); }
+function confirmBtn(btn, label, run) {
+  btn.addEventListener('click', async () => {
+    if (btn.dataset.armed !== '1') { const old = btn.textContent; btn.dataset.armed = '1'; btn.dataset.old = old; btn.textContent = label; setTimeout(() => { if (btn.dataset.armed === '1') { btn.dataset.armed = ''; btn.textContent = old; } }, 4000); return; }
+    btn.dataset.armed = ''; btn.textContent = btn.dataset.old; btn.disabled = true;
+    try { await run(); } catch (e) { admToast(e); } finally { btn.disabled = false; }
+  });
+}
+function admModal(title, nodeOrText) {
+  $('#admModalTitle').textContent = title; const b = $('#admModalBody'); b.innerHTML = '';
+  if (typeof nodeOrText === 'string') { const p = document.createElement('p'); p.textContent = nodeOrText; b.appendChild(p); } else b.appendChild(nodeOrText);
+  $('#admModal').hidden = false; $('#admModalClose').focus();
+}
+$('#admModalClose').addEventListener('click', () => { $('#admModal').hidden = true; });
+$('#admModal').addEventListener('click', e => { if (e.target.id === 'admModal') $('#admModal').hidden = true; });
+function admStat(n, label) { const d = document.createElement('div'); d.className = 'adm-stat'; d.innerHTML = '<b></b><span></span>'; d.querySelector('b').textContent = Number(n).toLocaleString(); d.querySelector('span').textContent = label; return d; }
+async function loadAdmin() {
+  $('#admList').innerHTML = '<p class="hint">Loading…</p>';
+  try {
+    const d = await adm('overview'); admUsers = d.users;
+    const st = $('#admStats'); st.innerHTML = '';
+    st.append(admStat(d.totals.users, 'Accounts'), admStat(d.totals.tickets, 'Saved tickets'), admStat(d.totals.shares, 'Share links'), admStat(d.totals.visits, 'Visitors'));
+    renderAdmUsers();
+  } catch (e) { $('#admList').innerHTML = ''; admToast(e); }
+}
+function renderAdmUsers() {
+  const q = $('#admSearch').value.trim().toLowerCase(), list = $('#admList'); list.innerHTML = '';
+  const rows = admUsers.filter(u => !q || u.username.includes(q));
+  if (!rows.length) { list.innerHTML = '<p class="hint">No accounts match.</p>'; return; }
+  for (const u of rows) {
+    const row = document.createElement('div'); row.className = 'adm-row';
+    const top = document.createElement('div'); top.className = 'adm-top';
+    const who = document.createElement('div'); who.className = 'who';
+    who.appendChild(avatarEl(u.username, u.avatar));
+    const info = document.createElement('div'); const nm = document.createElement('b'); nm.textContent = '@' + u.username; info.appendChild(nm);
+    if (u.admin) { const bg = document.createElement('span'); bg.className = 'badge adm'; bg.textContent = 'Admin'; info.appendChild(bg); }
+    if (u.banned) { const bg = document.createElement('span'); bg.className = 'badge bad'; bg.textContent = 'Banned'; info.appendChild(bg); }
+    if (u.public) { const bg = document.createElement('span'); bg.className = 'badge on'; bg.textContent = 'Public wall'; info.appendChild(bg); }
+    const sm = document.createElement('small'); sm.textContent = `Joined ${u.created ? new Date(u.created).toLocaleDateString() : '—'}, ${u.tickets} ${u.tickets === 1 ? 'ticket' : 'tickets'}`; info.appendChild(sm);
+    who.appendChild(info); top.appendChild(who);
+    const act = document.createElement('div'); act.className = 'adm-actions';
+    const mk = (label, cls = '') => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + cls; b.textContent = label; act.appendChild(b); return b; };
+    const tBtn = mk('Tickets');
+    let open = false, tWrap = null;
+    tBtn.addEventListener('click', async () => {
+      if (open) { tWrap.remove(); open = false; tBtn.textContent = 'Tickets'; return; }
+      tBtn.disabled = true;
+      try { const d = await adm('user_tickets', { u: u.username }); tWrap = renderAdmTickets(u, d.tickets); row.appendChild(tWrap); open = true; tBtn.textContent = 'Hide tickets'; }
+      catch (e) { admToast(e); } finally { tBtn.disabled = false; }
+    });
+    if (u.public) { const b = mk('Make wall private'); b.addEventListener('click', async () => { try { await adm('make_private', { u: u.username }); u.public = false; renderAdmUsers(); toast('@' + u.username + '\'s wall is private now.'); } catch (e) { admToast(e); } }); }
+    if (u.avatar) { const b = mk('Remove picture'); b.addEventListener('click', async () => { try { await adm('remove_avatar', { u: u.username }); u.avatar = 0; renderAdmUsers(); toast('Picture removed.'); } catch (e) { admToast(e); } }); }
+    if (!u.admin) {
+      const rp = mk('Reset password');
+      confirmBtn(rp, 'Confirm reset', async () => {
+        const d = await adm('reset_password', { u: u.username });
+        const box = document.createElement('div');
+        const p1 = document.createElement('p'); p1.textContent = `Give @${u.username} this temporary password. They're logged out everywhere and can change it in their settings after logging in.`;
+        const pw = document.createElement('div'); pw.className = 'temp-pw'; pw.textContent = d.password;
+        const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'btn'; cp.textContent = 'Copy password';
+        cp.addEventListener('click', () => copyText(d.password, 'Password copied.'));
+        box.append(p1, pw, cp); admModal('New password for @' + u.username, box);
+      });
+      const bn = mk(u.banned ? 'Unban' : 'Ban', u.banned ? '' : 'danger');
+      confirmBtn(bn, u.banned ? 'Confirm unban' : 'Confirm ban', async () => {
+        await adm('ban', { u: u.username, banned: !u.banned }); u.banned = !u.banned; if (u.banned) u.public = false; renderAdmUsers();
+        toast(u.banned ? '@' + u.username + ' is banned and logged out.' : '@' + u.username + ' can log in again.');
+      });
+      const del = mk('Delete account', 'danger');
+      confirmBtn(del, 'Delete everything?', async () => {
+        await adm('delete_user', { u: u.username }); admUsers = admUsers.filter(x => x !== u); renderAdmUsers(); toast('@' + u.username + ' and their tickets are deleted.'); loadAdmin();
+      });
+    }
+    top.appendChild(act); row.appendChild(top); list.appendChild(row);
+  }
+}
+function renderAdmTickets(u, list) {
+  const wrap = document.createElement('div'); wrap.className = 'adm-tickets';
+  if (!list.length) { const p = document.createElement('p'); p.className = 'hint'; p.textContent = 'No tickets.'; wrap.appendChild(p); return wrap; }
+  for (const t of list) {
+    const st = { ...defaults(), ...t };
+    const el = document.createElement('div'); el.className = 'stub';
+    const c = document.createElement('canvas'); el.appendChild(c);
+    const meta = document.createElement('div'); meta.className = 'stub-meta';
+    meta.innerHTML = '<b></b><small></small><span class="spacer"></span>';
+    meta.querySelector('b').textContent = st.title || 'Untitled'; meta.querySelector('small').textContent = fmtDate(st);
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'mini danger'; del.textContent = 'Delete'; meta.appendChild(del);
+    confirmBtn(del, 'Confirm', async () => { await adm('delete_ticket', { u: u.username, id: t.id }); el.remove(); u.tickets = Math.max(0, u.tickets - 1); toast('Ticket deleted.'); });
+    el.appendChild(meta); wrap.appendChild(el);
+    renderTicket(c, st, 'front', null, .3);
+    if (st.poster && /^data:image\//.test(st.poster)) loadImg(st.poster).then(im => renderTicket(c, st, 'front', im, .3));
+  }
+  return wrap;
+}
+async function loadShares() {
+  const list = $('#admShareList'); list.innerHTML = '<p class="hint">Loading…</p>';
+  try {
+    const d = await adm('shares'); list.innerHTML = '';
+    if (!d.shares.length) { list.innerHTML = '<p class="hint">No share links yet.</p>'; return; }
+    for (const sh of d.shares) {
+      const row = document.createElement('div'); row.className = 'adm-row';
+      const top = document.createElement('div'); top.className = 'adm-top';
+      const who = document.createElement('div'); who.className = 'who';
+      const info = document.createElement('div'); const nm = document.createElement('b'); nm.textContent = sh.title || 'Untitled'; info.appendChild(nm);
+      const sm = document.createElement('small'); sm.textContent = `${sh.who ? 'From ' + sh.who + ', ' : ''}${sh.created ? new Date(sh.created).toLocaleString() : ''}`; info.appendChild(sm);
+      who.appendChild(info); top.appendChild(who);
+      const act = document.createElement('div'); act.className = 'adm-actions';
+      const op = document.createElement('a'); op.className = 'btn'; op.href = '/t/' + sh.id; op.target = '_blank'; op.rel = 'noopener'; op.textContent = 'Open'; act.appendChild(op);
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'btn danger'; del.textContent = 'Delete link'; act.appendChild(del);
+      confirmBtn(del, 'Confirm delete', async () => { await adm('delete_share', { id: sh.id }); row.remove(); toast('Share link deleted.'); });
+      top.appendChild(act); row.appendChild(top); list.appendChild(row);
+    }
+  } catch (e) { list.innerHTML = ''; admToast(e); }
+}
+document.querySelectorAll('[data-adm]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-adm]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+  const users = b.dataset.adm === 'users'; $('#admUsers').hidden = !users; $('#admShares').hidden = users;
+  if (!users) loadShares();
+}));
+$('#admSearch').addEventListener('input', renderAdmUsers);
+$('#admRefresh').addEventListener('click', () => { loadAdmin(); if (!$('#admShares').hidden) loadShares(); });
+$('#tabAdmin').addEventListener('click', () => { if (!(session && session.admin)) return; showView('admin'); loadAdmin(); });
 
 </script>
 </body>

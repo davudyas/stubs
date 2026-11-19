@@ -1,6 +1,6 @@
 // Ticket Store: sign up, log in, log out and "who am I", with username + password only.
 import { getStore } from '@netlify/blobs';
-import { stores, json, normUser, USER_RE, hashPassword, sameHash, createSession, tokenFrom, sessionFrom } from '../lib/account.mjs';
+import { stores, json, normUser, USER_RE, hashPassword, sameHash, createSession, tokenFrom, sessionFrom, isAdmin } from '../lib/account.mjs';
 
 const MAX_FAILS = 6, LOCK_MS = 10 * 60 * 1000;
 
@@ -15,7 +15,7 @@ export default async (req) => {
     if (!sess) return json({ error: 'not_logged_in' }, 401);
     const { username, user } = sess;
     const avatars = getStore({ name: 'avatars' });
-    if (action === 'me') return json({ username, public: !!user.public, avatar: user.avatar || 0 });
+    if (action === 'me') return json({ username, public: !!user.public, avatar: user.avatar || 0, admin: isAdmin(username) });
     if (action === 'set_avatar') {
       const m = typeof body.image === 'string' && body.image.match(/^data:image\/jpeg;base64,([A-Za-z0-9+/=]+)$/);
       if (!m || m[1].length > 160_000) return json({ error: 'bad_image' }, 400);
@@ -47,6 +47,7 @@ export default async (req) => {
       return json({ username, token: await createSession(username), public: !!user.public, avatar: user.avatar || 0 });
     }
     if (action === 'delete_account') {
+      if (isAdmin(username)) return json({ error: 'admin_account' }, 403);
       const { tickets } = stores();
       const { blobs } = await tickets.list({ prefix: username + '/' });
       await Promise.all(blobs.map(b => tickets.delete(b.key)));
@@ -70,7 +71,7 @@ export default async (req) => {
     if (await users.get(username)) return json({ error: 'taken' }, 409);
     const { salt, hash } = await hashPassword(password);
     await users.setJSON(username, { username, salt, hash, created: Date.now() });
-    return json({ username, token: await createSession(username) }, 201);
+    return json({ username, token: await createSession(username), admin: isAdmin(username) }, 201);
   }
 
   if (action === 'login') {
@@ -78,13 +79,14 @@ export default async (req) => {
     if (f.until > Date.now()) return json({ error: 'locked', minutes: Math.ceil((f.until - Date.now()) / 60000) }, 429);
     const user = await users.get(username, { type: 'json' });
     const ok = user && sameHash((await hashPassword(password, user.salt)).hash, user.hash);
+    if (ok && user.banned) return json({ error: 'banned' }, 403);
     if (!ok) {
       const count = f.count + 1;
       await fails.setJSON(username, { count: count >= MAX_FAILS ? 0 : count, until: count >= MAX_FAILS ? Date.now() + LOCK_MS : 0 });
       return json({ error: 'wrong' }, 401);
     }
     if (f.count) await fails.delete(username);
-    return json({ username, token: await createSession(username) });
+    return json({ username, token: await createSession(username), public: !!user.public, avatar: user.avatar || 0, admin: isAdmin(username) });
   }
   return json({ error: 'bad_action' }, 400);
 };

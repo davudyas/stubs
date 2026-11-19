@@ -6,7 +6,7 @@ export default async (req) => {
   if (!USER_RE.test(username)) return json({ error: 'not_found' }, 404);
   const { users, tickets } = stores();
   const user = await users.get(username, { type: 'json' });
-  if (!user || !user.public) return json({ error: 'not_found' }, 404);
+  if (!user || !user.public || user.banned) return json({ error: 'not_found' }, 404);
   const { blobs } = await tickets.list({ prefix: username + '/' });
   const all = (await Promise.all(blobs.map(b => tickets.get(b.key, { type: 'json' }).catch(() => null)))).filter(Boolean);
   all.sort((a, b) => (String(b.date) + String(b.time)).localeCompare(String(a.date) + String(a.time)));

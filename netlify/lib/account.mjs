@@ -3,6 +3,9 @@ import { getStore } from '@netlify/blobs';
 import { timingSafeEqual } from 'node:crypto';
 
 export const SESSION_DAYS = 180;
+// The site's admin. Only these accounts can open Moderation; every admin request is checked here on the server.
+export const ADMINS = new Set(['davud']);
+export const isAdmin = u => ADMINS.has(String(u || ''));
 export const USER_RE = /^[a-z0-9_.]{3,20}$/;
 
 export const stores = () => ({
@@ -48,7 +51,7 @@ export async function sessionFrom(req) {
   if (Date.now() - s.created > SESSION_DAYS * 864e5) { await sessions.delete(token); return null; }
   const user = await users.get(s.username, { type: 'json' });
   // account deleted, or password changed after this session started
-  if (!user || (user.since && s.created < user.since)) { await sessions.delete(token); return null; }
+  if (!user || user.banned || (user.since && s.created < user.since)) { await sessions.delete(token); return null; }
   return { token, username: s.username, user };
 }
 export async function userFrom(req) {
