@@ -6,7 +6,7 @@
 <title>Ticket Store</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Shippori+Mincho:wght@600;800&family=Rozha+One&family=Oswald:wght@500;700&family=PT+Mono&family=IBM+Plex+Mono:wght@400;600;700&family=Abril+Fatface&family=Shrikhand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo+Black&family=Caveat:wght@500;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600&family=Courier+Prime:wght@400;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Limelight&family=Monoton&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Shippori+Mincho:wght@600;800&family=Rozha+One&family=Oswald:wght@500;700&family=PT+Mono&family=IBM+Plex+Mono:wght@400;600;700&family=Abril+Fatface&family=Shrikhand&family=Bangers&family=VT323&family=Josefin+Sans:wght@400;700&display=swap" rel="stylesheet">
 <script>try{var th=localStorage.getItem("stubs.theme");if(th&&th!=="velvet")document.documentElement.dataset.theme=th}catch(e){}</script>
 <style>
 :root{
@@ -876,6 +876,14 @@ function renderTicket(canvas, s, side, img, scale = 1) {
   ctx.beginPath(); ctx.arc(PX, 0, NR, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(PX, H, NR, 0, Math.PI * 2); ctx.fill();
   for (let y = NR + 18; y <= H - NR - 14; y += 19) { ctx.beginPath(); ctx.arc(PX, y, 3.6, 0, Math.PI * 2); ctx.fill(); }
+  if (s.template === 'filmstrip') {
+    // sprocket holes, punched right through the film
+    for (let x = 18; x < W - 10; x += 36) {
+      if (Math.abs(x + 10 - PX) < 34) continue;
+      ctx.beginPath(); ctx.roundRect(x, 14, 20, 26, 4); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(x, H - 40, 20, 26, 4); ctx.fill();
+    }
+  }
   if (s.template === 'receipt') {
     // torn thermal-paper edges, top and bottom
     for (let x = 0; x < W; x += 22) {
@@ -1236,6 +1244,290 @@ Object.assign(FRONT, {
     const p = fmtPrice(s); if (p) { text(ctx, 'FİYAT', scx, 268, { font: font(15, F.inst, 700), color: acc, align: 'center', ls: 3 }); text(ctx, p, scx, 304, { font: font(28, F.inst, 700), color: ink, align: 'center' }); }
     ctx.restore();
     text(ctx, 'İYİ SEYİRLER', scx, 548, { font: font(20, F.inst, 700), color: turq, align: 'center', ls: 5 });
+  },
+});
+
+</script>
+<script>
+/* ===== Ticket Store: more styles ===== */
+Object.assign(F, {
+  bang: 'Bangers, Impact, sans-serif',
+  vt: 'VT323, "Courier New", monospace',
+  jos: '"Josefin Sans", "Futura", sans-serif',
+});
+Object.assign(TEMPLATES, {
+  polaroid:  { name: 'Polaroid',   paper: '#D6B08A', ink: '#2A2018', accent: '#C0392B', dark: false },
+  filmstrip: { name: 'Film strip', paper: '#111214', ink: '#F2EFE8', accent: '#F5B700', dark: true },
+  vhs:       { name: 'VHS',        paper: '#151515', ink: '#F4F4F4', accent: '#E63946', dark: true },
+  popart:    { name: 'Pop art',    paper: '#FFE14D', ink: '#111111', accent: '#E8322E', dark: false },
+  festival:  { name: 'Festival',   paper: '#FBFAF6', ink: '#1B1B1B', accent: '#B8902F', dark: false },
+  bauhaus:   { name: 'Bauhaus',    paper: '#F1EDE4', ink: '#1A1A1A', accent: '#E63B2E', dark: false },
+});
+Object.assign(BACK_FONTS, {
+  polaroid: [F.cav, 700, ''], filmstrip: [F.inst, 700, ''], vhs: [F.inst, 700, 'italic'],
+  popart: [F.bang, '', ''], festival: [F.corm, 700, ''], bauhaus: [F.jos, 700, ''],
+});
+UPPER_BACK.push('popart', 'bauhaus', 'vhs');
+
+function seatLine(s) { return s.home ? (s.seat || 'Sofa') : `Row ${s.row || '—'}  Seat ${s.seat || '—'}`; }
+function tape(ctx, x, y, w, h, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  ctx.fillStyle = 'rgba(245,238,214,.72)'; ctx.fillRect(-w / 2, -h / 2, w, h);
+  ctx.fillStyle = 'rgba(0,0,0,.05)'; for (let i = -w / 2; i < w / 2; i += 6) ctx.fillRect(i, -h / 2, 2, h);
+  ctx.restore();
+}
+function burst(ctx, cx, cy, r1, r2, n, rot) {
+  ctx.beginPath();
+  for (let i = 0; i < n * 2; i++) { const a = rot + i * Math.PI / n, r = i % 2 ? r2 : r1; ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+  ctx.closePath();
+}
+function halftone(ctx, x, y, w, h, color, step, maxR) {
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.fillStyle = color;
+  for (let j = 0, yy = y; yy < y + h + step; yy += step, j++) for (let xx = x + (j % 2 ? step / 2 : 0); xx < x + w + step; xx += step) {
+    const r = maxR * (0.35 + 0.65 * (xx - x) / w); ctx.beginPath(); ctx.arc(xx, yy, r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+function laurel(ctx, cx, cy, r, color) {
+  ctx.save(); ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineWidth = 3;
+  for (const side of [-1, 1]) {
+    const a0 = side < 0 ? Math.PI * .58 : Math.PI * .42, span = Math.PI * .78;
+    ctx.beginPath(); ctx.arc(cx, cy, r, a0, a0 - side * span, side > 0); ctx.stroke();
+    for (let i = 0; i <= 9; i++) {
+      const t = i / 9, a = a0 - side * span * t;
+      const px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
+      const dx = side < 0 ? -Math.sin(a) : Math.sin(a), dy = side < 0 ? Math.cos(a) : -Math.cos(a);
+      const base = Math.atan2(dy, dx) + Math.PI / 2, size = 1 - t * .35;
+      for (const off of [-0.55, 0.55]) {
+        ctx.save(); ctx.translate(px, py); ctx.rotate(base + off);
+        ctx.beginPath(); ctx.ellipse(0, -13 * size, 5.5 * size, 13 * size, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+Object.assign(FRONT, {
+  polaroid(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    // kraft fibres
+    const rnd = seeded('kraft'); ctx.strokeStyle = 'rgba(80,50,20,.08)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 260; i++) { const x = rnd() * W, y = rnd() * H; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 8 + rnd() * 18, y + (rnd() - .5) * 4); ctx.stroke(); }
+    // the instant photo
+    ctx.save(); ctx.translate(250, 306); ctx.rotate(-0.045);
+    ctx.shadowColor = 'rgba(40,20,5,.35)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
+    ctx.fillStyle = '#FBFAF7'; ctx.fillRect(-180, -236, 360, 466); ctx.shadowColor = 'transparent';
+    ctx.save(); ctx.beginPath(); ctx.rect(-158, -214, 316, 316); ctx.clip();
+    if (img) { ctx.filter = 'saturate(.85) contrast(1.05) sepia(.12)'; drawCover(ctx, img, -158, -214, 316, 316, +s.posterX, +s.posterY); }
+    else { ctx.fillStyle = '#2B2622'; ctx.fillRect(-158, -214, 316, 316); }
+    ctx.restore();
+    titleBlock(ctx, s.title, { x: 0, y: 112, w: 320, h: 104, family: F.cav, weight: 700, max: 54, min: 28, lh: 1, color: '#2A2420', align: 'center', maxLines: 2 });
+    ctx.restore();
+    tape(ctx, 250, 64, 150, 40, 0.05);
+    // notes beside the photo
+    const x = 500, w = PX - x - 70;
+    text(ctx, 'ADMIT ONE', x, 96, { font: font(22, F.cour, 700), color: ink, ls: 6 });
+    if (+s.rating > 0) stars(ctx, PX - 70 - 5 * 2.25 * 15, 89, 15, +s.rating, acc, alpha(ink, .15));
+    let y = 130;
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x, y, w, h: 180, family: F.cav, weight: 700, max: 52, min: 30, lh: 1.05, color: ink, maxLines: 3 });
+    else y = titleBlock(ctx, s.title, { x, y, w, h: 180, family: F.cav, weight: 700, max: 64, min: 34, lh: 1.05, color: ink, maxLines: 2 });
+    const cr = credits(s); if (cr && y + 40 <= 430) text(ctx, cr, x, y + 40, { font: font(22, F.cour, 700), color: alpha(ink, .7), maxW: w });
+    ctx.fillStyle = alpha(ink, .35); ctx.fillRect(x, 452, w, 2);
+    fieldRow(ctx, mainFields(s), x, 494, w, { labelFont: font(16, F.cour, 700), labelColor: alpha(ink, .65), labelLS: 3, upperLabels: true, gap: 40, valueFont: font(28, F.cour, 700), valueColor: ink });
+    const scx = PX + (W - PX) / 2, sw = W - PX - 90;
+    tape(ctx, scx, 70, 120, 34, -0.06);
+    if (s.home) text(ctx, s.seat || 'Sofa', scx, 300, { font: font(92, F.cav, 700), color: ink, align: 'center', maxW: sw });
+    else {
+      text(ctx, 'row ' + (s.row || '—'), scx, 250, { font: font(72, F.cav, 700), color: ink, align: 'center', maxW: sw });
+      text(ctx, 'seat ' + (s.seat || '—'), scx, 336, { font: font(72, F.cav, 700), color: ink, align: 'center', maxW: sw });
+    }
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 420, { font: font(28, F.cour, 700), color: ink, align: 'center' });
+  },
+
+  filmstrip(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    // edge print
+    for (let x = 40, n = 21; x < W - 80; x += 260, n++) text(ctx, `▸ ${n}  ADMIT ONE`, x, 62, { font: font(16, F.cour, 700), color: acc, ls: 3, alpha: .85 });
+    // frames: the poster three times
+    const fy = 82, fh = 286, gap = 14, fw = (PX - 70 - gap * 2) / 3;
+    for (let i = 0; i < 3; i++) {
+      const fx = 35 + i * (fw + gap);
+      ctx.save(); ctx.beginPath(); ctx.roundRect(fx, fy, fw, fh, 6); ctx.clip();
+      if (img) { ctx.filter = i === 1 ? 'none' : 'saturate(.75)'; drawCover(ctx, img, fx, fy, fw, fh, [.2, +s.posterX, .8][i], +s.posterY); }
+      else { ctx.fillStyle = '#26282C'; ctx.fillRect(fx, fy, fw, fh); }
+      ctx.restore();
+    }
+    let y = titleBlock(ctx, s.title, { x: 40, y: 388, w: PX - 330, h: 84, family: F.inst, weight: 700, max: 62, min: 30, lh: 1.02, color: ink, maxLines: 1 });
+    if (+s.rating > 0) stars(ctx, PX - 40 - 5 * 2.25 * 14, 424, 14, +s.rating, acc, alpha(ink, .2));
+    if (s.tagline) text(ctx, s.tagline, 42, 486, { font: font(22, F.inst, 400, 'italic'), color: alpha(ink, .7), maxW: PX - 90 });
+    fieldRow(ctx, mainFields(s), 42, 524, PX - 90, { labelFont: font(14, F.inst, 600), labelColor: acc, labelLS: 2, upperLabels: true, gap: 30, valueFont: font(22, F.cour, 700), valueColor: ink });
+    // stub
+    const scx = PX + (W - PX) / 2, sw = W - PX - 90;
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const x = seats.length === 1 ? scx : PX + 45 + sw * (i ? .75 : .25);
+      text(ctx, k.toUpperCase(), x, 200, { font: font(17, F.inst, 600), color: acc, align: 'center', ls: 4 });
+      text(ctx, v, x, 300, { font: font(88, F.inst, 700), color: ink, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 370, { font: font(28, F.cour, 700), color: ink, align: 'center' });
+  },
+
+  vhs(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    // rainbow stripes
+    const cols = ['#E63946', '#F4A261', '#F6D743', '#2A9D8F', '#3A86FF'];
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, PX, 420); ctx.clip();
+    ctx.translate(880, 420); ctx.rotate(-0.62);
+    cols.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(0, i * 30, 900, 26); });
+    ctx.restore();
+    // rental label
+    const lx = 60, ly = 64, lw = 720, lh = 330;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 18;
+    ctx.fillStyle = '#F7F4EC'; ctx.beginPath(); ctx.roundRect(lx, ly, lw, lh, 14); ctx.fill(); ctx.restore();
+    ctx.fillStyle = acc; ctx.fillRect(lx, ly + 18, lw, 46);
+    text(ctx, 'VIDEO RENTAL', lx + 24, ly + 51, { font: font(26, F.inst, 700, 'italic'), color: '#FFFFFF', ls: 4 });
+    text(ctx, 'PLEASE BE KIND, REWIND', lx + lw - 24, ly + 49, { font: font(16, F.inst, 700), color: '#FFFFFF', align: 'right', ls: 2 });
+    ctx.fillStyle = 'rgba(0,0,0,.12)';
+    for (let i = 0; i < 4; i++) ctx.fillRect(lx + 24, ly + 140 + i * 50, lw - 48, 2);
+    const hasP = !!img, pw = 150, ph = 225;
+    if (hasP) { ctx.save(); ctx.beginPath(); ctx.rect(lx + lw - 24 - pw, ly + 82, pw, ph); ctx.clip(); drawCover(ctx, img, lx + lw - 24 - pw, ly + 82, pw, ph, +s.posterX, +s.posterY); ctx.restore(); }
+    const tw = lw - 48 - (hasP ? pw + 24 : 0);
+    let y = titleBlock(ctx, s.title, { x: lx + 26, y: ly + 88, w: tw, h: 150, family: F.cav, weight: 700, max: 66, min: 34, lh: 1.05, color: '#1C2A6B', maxLines: 2 });
+    if (s.tagline) text(ctx, s.tagline, lx + 26, Math.min(y + 36, ly + lh - 56), { font: font(22, F.cour, 700), color: '#333', maxW: tw });
+    text(ctx, credits(s) || '', lx + 26, ly + lh - 22, { font: font(20, F.cour, 700), color: '#555', maxW: tw });
+    if (+s.rating > 0) stars(ctx, 840, 96, 15, +s.rating, '#F6D743', 'rgba(255,255,255,.15)');
+    text(ctx, 'HI-FI STEREO', 840, 160, { font: font(22, F.inst, 700, 'italic'), color: ink, ls: 3 });
+    text(ctx, 'SP  ' + (s.runtime ? s.runtime + ' MIN' : '120 MIN'), 840, 196, { font: font(30, F.vt), color: alpha(ink, .8) });
+    fieldRow(ctx, mainFields(s), 64, 470, PX - 128, { labelFont: font(15, F.inst, 700), labelColor: acc, labelLS: 2, upperLabels: true, gap: 44, valueFont: font(38, F.vt), valueColor: ink });
+    // stub: due date
+    const scx = PX + (W - PX) / 2, sw = W - PX - 80;
+    const due = (() => { if (!s.date) return '—'; const d = new Date(s.date + 'T12:00:00'); d.setDate(d.getDate() + 2); return fmtDate({ ...s, date: d.toISOString().slice(0, 10) }); })();
+    text(ctx, 'RETURN BY', scx, 150, { font: font(18, F.inst, 700), color: acc, align: 'center', ls: 5 });
+    text(ctx, due, scx, 206, { font: font(46, F.vt), color: ink, align: 'center', maxW: sw });
+    text(ctx, seatLine(s).toUpperCase(), scx, 300, { font: font(34, F.vt), color: ink, align: 'center', maxW: sw });
+    const p = fmtPrice(s); if (p) text(ctx, 'FEE ' + p, scx, 350, { font: font(34, F.vt), color: alpha(ink, .8), align: 'center' });
+    text(ctx, 'LATE FEES APPLY', scx, 450, { font: font(16, F.inst, 700, 'italic'), color: alpha(ink, .6), align: 'center', ls: 3 });
+  },
+
+  popart(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    halftone(ctx, 0, 0, PX, H, alpha(acc, .22), 18, 5);
+    ctx.strokeStyle = ink; ctx.lineWidth = 8; ctx.strokeRect(22, 22, PX - 44, H - 44);
+    // poster panel
+    const px = PX - 360, py = 50, pw = 300, ph = 380;
+    ctx.save(); ctx.translate(px + pw / 2, py + ph / 2); ctx.rotate(0.035);
+    ctx.fillStyle = '#fff'; ctx.fillRect(-pw / 2 - 10, -ph / 2 - 10, pw + 20, ph + 20);
+    ctx.save(); ctx.beginPath(); ctx.rect(-pw / 2, -ph / 2, pw, ph); ctx.clip();
+    if (img) { ctx.filter = 'contrast(1.3) saturate(1.4)'; drawCover(ctx, img, -pw / 2, -ph / 2, pw, ph, +s.posterX, +s.posterY); ctx.filter = 'none'; halftone(ctx, -pw / 2, -ph / 2, pw, ph, 'rgba(0,0,0,.18)', 10, 3); }
+    else { ctx.fillStyle = acc; ctx.fillRect(-pw / 2, -ph / 2, pw, ph); }
+    ctx.restore();
+    ctx.strokeStyle = ink; ctx.lineWidth = 6; ctx.strokeRect(-pw / 2 - 10, -ph / 2 - 10, pw + 20, ph + 20);
+    ctx.restore();
+    // burst with ADMIT ONE
+    ctx.save(); burst(ctx, 170, 118, 96, 66, 14, 0.2); ctx.fillStyle = acc; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = ink; ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.translate(170, 128); ctx.rotate(-0.12);
+    text(ctx, 'ADMIT', 0, -6, { font: font(36, F.bang), color: '#fff', align: 'center', ls: 2 });
+    text(ctx, 'ONE!', 0, 30, { font: font(36, F.bang), color: '#fff', align: 'center', ls: 2 }); ctx.restore();
+    const tx = 70, tw = px - tx - 50;
+    // title with offset shadow
+    ctx.save(); ctx.translate(5, 5);
+    titleBlock(ctx, s.title, { x: tx, y: 216, w: tw, h: 160, family: F.bang, max: 96, min: 44, lh: .98, color: acc, upper: true, ls: 2, maxLines: 2 });
+    ctx.restore();
+    let y = titleBlock(ctx, s.title, { x: tx, y: 216, w: tw, h: 160, family: F.bang, max: 96, min: 44, lh: .98, color: ink, upper: true, ls: 2, maxLines: 2 });
+    if (s.tagline) {
+      // speech bubble
+      ctx.save(); ctx.font = font(26, F.inst, 700); const lines = wrapLines(ctx, s.tagline, 420).slice(0, 2);
+      const bw = Math.min(460, Math.max(...lines.map(l => ctx.measureText(l).width)) + 50), bh = 30 + lines.length * 32, bx = 330, by = 52;
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = ink; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.ellipse(bx + bw / 2, by + bh / 2, bw / 2 + 10, bh / 2 + 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx + 40, by + bh - 4); ctx.lineTo(bx + 8, by + bh + 34); ctx.lineTo(bx + 80, by + bh); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.fillRect(bx + 36, by + bh - 12, 48, 10);
+      ctx.fillStyle = ink; ctx.textAlign = 'center';
+      lines.forEach((l, i) => ctx.fillText(l, bx + bw / 2, by + 44 + i * 32));
+      ctx.restore();
+    }
+    if (+s.rating > 0) stars(ctx, tx, Math.min(y + 30, 420), 15, +s.rating, ink, alpha(ink, .15));
+    ctx.fillStyle = ink; ctx.fillRect(tx, 450, PX - 140, 6);
+    fieldRow(ctx, mainFields(s), tx, 494, PX - 140, { labelFont: font(16, F.inst, 700), labelColor: ink, labelLS: 2, upperLabels: true, gap: 40, valueFont: font(34, F.bang), valueColor: ink });
+    // stub panel
+    ctx.fillStyle = acc; ctx.fillRect(PX, 0, W - PX, H);
+    halftone(ctx, PX, 0, W - PX, H, 'rgba(0,0,0,.14)', 16, 4);
+    ctx.strokeStyle = ink; ctx.lineWidth = 8; ctx.strokeRect(PX + 22, 22, W - PX - 44, H - 44);
+    const scx = PX + (W - PX) / 2, sw = W - PX - 100;
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const x = seats.length === 1 ? scx : PX + 50 + sw * (i ? .75 : .25);
+      text(ctx, k.toUpperCase(), x, 190, { font: font(28, F.bang), color: '#fff', align: 'center', ls: 3 });
+      text(ctx, v, x, 300, { font: font(112, F.bang), color: '#fff', align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 380, { font: font(40, F.bang), color: ink, align: 'center', ls: 2 });
+  },
+
+  festival(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper;
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    const gold = goldGrad(ctx, 0, H, acc);
+    ctx.fillStyle = gold; ctx.fillRect(0, 0, W, 14); ctx.fillRect(0, H - 14, W, 14);
+    // laurel badge
+    const lcx = 210, lcy = 300;
+    laurel(ctx, lcx, lcy, 128, gold);
+    text(ctx, 'OFFICIAL', lcx, lcy - 26, { font: font(20, F.inst, 700), color: acc, align: 'center', ls: 4 });
+    text(ctx, 'SELECTION', lcx, lcy + 2, { font: font(20, F.inst, 700), color: acc, align: 'center', ls: 4 });
+    text(ctx, (s.date || '').slice(0, 4) || String(new Date().getFullYear()), lcx, lcy + 48, { font: font(38, F.corm, 700), color: ink, align: 'center' });
+    ctx.fillStyle = alpha(ink, .15); ctx.fillRect(400, 60, 1.5, H - 120);
+    const hasP = !!img, pw = 170, ph = 255, ppx = PX - 60 - pw, ppy = 70;
+    if (hasP) { drawCover(ctx, img, ppx, ppy, pw, ph, +s.posterX, +s.posterY); ctx.strokeStyle = gold; ctx.lineWidth = 3; ctx.strokeRect(ppx - 8, ppy - 8, pw + 16, ph + 16); }
+    const x = 450, w = (hasP ? ppx - 40 : PX - 60) - x;
+    text(ctx, 'Screening pass', x, 100, { font: font(26, F.corm, 600, 'italic'), color: acc });
+    let y = titleBlock(ctx, s.title, { x, y: 120, w, h: s.tagline ? 160 : 200, family: F.corm, weight: 700, max: 92, min: 40, lh: 1.0, color: ink });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x, y: y + 10, w, h: Math.max(34, 400 - y), family: F.corm, weight: 500, style: 'italic', max: 30, min: 22, lh: 1.15, color: alpha(ink, .75), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 36 <= 430) text(ctx, cr.toUpperCase(), x, y + 36, { font: font(16, F.inst, 600), color: alpha(ink, .55), ls: 3, maxW: w });
+    if (+s.rating > 0) stars(ctx, x, 432, 12, +s.rating, acc, alpha(ink, .12));
+    fieldRow(ctx, mainFields(s), x, 494, PX - x - 60, { labelFont: font(14, F.inst, 600), labelColor: acc, labelLS: 3, upperLabels: true, gap: 38, valueFont: font(28, F.corm, 700), valueColor: ink });
+    const scx = PX + (W - PX) / 2, sw = W - PX - 110;
+    text(ctx, 'Admit one', scx, 150, { font: font(30, F.corm, 600, 'italic'), color: acc, align: 'center' });
+    laurel(ctx, scx, 290, 92, alpha(acc, .35));
+    text(ctx, s.home ? (s.seat || 'Sofa') : `${s.row || '—'} ${s.seat || '—'}`, scx, 318, { font: font(76, F.corm, 700), color: ink, align: 'center', maxW: sw });
+    if (!s.home) text(ctx, 'ROW  SEAT', scx, 356, { font: font(14, F.inst, 600), color: alpha(ink, .5), align: 'center', ls: 5 });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 440, { font: font(28, F.corm, 700), color: ink, align: 'center' });
+  },
+
+  bauhaus(ctx, s, img) {
+    const ink = s.ink, acc = s.accent, paper = s.paper, blue = '#2A59A8', yellow = '#F2C230';
+    ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+    // composition
+    ctx.fillStyle = blue; ctx.beginPath(); ctx.moveTo(PX - 420, H); ctx.lineTo(PX - 120, H); ctx.lineTo(PX - 270, H - 260); ctx.closePath(); ctx.fill();
+    const ccx = PX - 250, ccy = 230, cr0 = 170;
+    ctx.save(); ctx.beginPath(); ctx.arc(ccx, ccy, cr0, 0, Math.PI * 2); ctx.clip();
+    if (img) { ctx.filter = 'grayscale(1) contrast(1.25)'; drawCover(ctx, img, ccx - cr0, ccy - cr0, cr0 * 2, cr0 * 2, +s.posterX, +s.posterY); ctx.filter = 'none'; ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = yellow; ctx.fillRect(ccx - cr0, ccy - cr0, cr0 * 2, cr0 * 2); }
+    else { ctx.fillStyle = yellow; ctx.fillRect(ccx - cr0, ccy - cr0, cr0 * 2, cr0 * 2); }
+    ctx.restore();
+    ctx.fillStyle = acc; ctx.fillRect(PX - 470, 40, 120, 120);
+    ctx.fillStyle = ink; ctx.fillRect(60, 60, 14, H - 120);
+    const x = 110, w = PX - 520 - x;
+    text(ctx, 'ADMIT ONE', x, 96, { font: font(22, F.jos, 700), color: acc, ls: 8 });
+    let y = titleBlock(ctx, s.title, { x, y: 124, w, h: s.tagline ? 190 : 240, family: F.jos, weight: 700, max: 100, min: 40, lh: 1.0, color: ink, upper: true, ls: 2 });
+    if (s.tagline) y = titleBlock(ctx, s.tagline, { x, y: y + 12, w, h: Math.max(34, 410 - y), family: F.jos, weight: 400, max: 28, min: 20, lh: 1.25, color: alpha(ink, .75), maxLines: 2 });
+    const cr = credits(s); if (cr && y + 36 <= 432) { y += 36; text(ctx, cr.toUpperCase(), x, y, { font: font(17, F.jos, 700), color: blue, ls: 3, maxW: w }); }
+    if (+s.rating > 0 && y + 28 <= 448) stars(ctx, x, y + 28, 12, +s.rating, acc, alpha(ink, .12));
+    ctx.fillStyle = ink; ctx.fillRect(x, 466, PX - 520 - x + 140, 5);
+    fieldRow(ctx, mainFields(s), x, 506, PX - 470 - x, { labelFont: font(14, F.jos, 700), labelColor: blue, labelLS: 3, upperLabels: true, gap: 36, valueFont: font(26, F.jos, 700), valueColor: ink });
+    // stub
+    ctx.fillStyle = acc; ctx.fillRect(PX, 0, W - PX, 120);
+    const scx = PX + (W - PX) / 2, sw = W - PX - 100;
+    text(ctx, 'KINO', scx, 80, { font: font(44, F.jos, 700), color: paper, align: 'center', ls: 16 });
+    const seats = seatFields(s);
+    seats.forEach(([k, v], i) => {
+      const xx = seats.length === 1 ? scx : PX + 50 + sw * (i ? .75 : .25);
+      text(ctx, k.toUpperCase(), xx, 220, { font: font(16, F.jos, 700), color: blue, align: 'center', ls: 4 });
+      text(ctx, v, xx, 320, { font: font(96, F.jos, 700), color: ink, align: 'center', maxW: seats.length === 1 ? sw : sw / 2 });
+    });
+    const p = fmtPrice(s); if (p) text(ctx, p, scx, 400, { font: font(28, F.jos, 700), color: ink, align: 'center' });
+    ctx.fillStyle = yellow; ctx.beginPath(); ctx.arc(scx, H - 70, 34, 0, Math.PI * 2); ctx.fill();
   },
 });
 
@@ -1763,7 +2055,7 @@ refreshCollection();
 if (document.fonts) {
   const specs = ['900 40px "Playfair Display"', 'italic 400 40px "Playfair Display"', '400 40px "Courier Prime"', '700 40px "Courier Prime"',
     '400 40px "Instrument Sans"', '500 40px "Instrument Sans"', '600 40px "Instrument Sans"', '700 40px "Instrument Sans"', '400 40px "Archivo Black"',
-    '400 40px "Alfa Slab One"', '400 40px Monoton', '700 40px Oswald', '500 40px Oswald', '400 40px "PT Mono"', '600 40px "IBM Plex Mono"', '700 40px "IBM Plex Mono"', '400 40px "Abril Fatface"', '400 40px "Rozha One"', '700 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', 'italic 600 40px "Cormorant Garamond"', '500 40px Caveat', '700 40px Caveat'];
+    '400 40px "Alfa Slab One"', '400 40px Monoton', '700 40px Oswald', '500 40px Oswald', '400 40px "PT Mono"', '600 40px "IBM Plex Mono"', '700 40px "IBM Plex Mono"', '400 40px "Abril Fatface"', '400 40px "Rozha One"', '400 40px Bangers', '400 40px VT323', '700 40px "Josefin Sans"', '400 40px "Josefin Sans"', '700 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', 'italic 600 40px "Cormorant Garamond"', '500 40px Caveat', '700 40px Caveat'];
   const extra = [['800 40px "Shippori Mincho"', '鑑賞券一般列番日付開映劇場座席方式場所配信映Ab'], ['600 40px "Shippori Mincho"', '鑑賞券一般列番日付開映劇場座席方式場所配信映Ab'],
     ['700 40px Oswald', 'КИНОБИЛЕТКОНТРОЛЬ'], ['500 40px Oswald', 'ДАТАСЕАНСРЯДМЕСТОЦЕНА'], ['400 40px "PT Mono"', 'СЕРИЯ№'], ['400 40px "Rozha One"', 'सिनेमा'], ['700 40px "Instrument Sans"', 'SİNEMA BİLETİ İYİ']];
   Promise.all([...specs.map(f => document.fonts.load(f).catch(() => null)), ...extra.map(([f, t]) => document.fonts.load(f, t).catch(() => null))]).then(() => schedule());
