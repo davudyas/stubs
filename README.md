@@ -8,7 +8,10 @@ Live at **https://ticket-store.netlify.app**
 - Eighteen styles: Classic, Poster, Minimal, Carnival, Midnight, Gala; tickets from around the world (Tokyo, Bombay, Kino, Boarding pass, Receipt, Istanbul); and Polaroid, Film strip, VHS, Pop art, Festival and Bauhaus
 - A back side with your rating, note and Letterboxd name
 - Download the front, the back, or a 1080×1920 story image
+- Stickers you can drag, turn and resize on either side
+- Share links: `/?t=…` opens a ticket for anyone (stored with Netlify Blobs by `netlify/functions/share.mjs`)
 - Saved tickets live in **My tickets** in your browser
+- A visitor counter (`netlify/functions/visits.mjs`)
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).
 

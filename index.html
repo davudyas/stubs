@@ -133,7 +133,29 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 .beam{perspective:2200px;padding:26px 8px 30px;border-radius:20px;background:radial-gradient(120% 90% at 50% -10%,rgba(var(--glow),.17),rgba(var(--glow),.04) 45%,transparent 70%);filter:drop-shadow(0 22px 26px rgba(0,0,0,var(--shadow)))}
 .flip{position:relative;aspect-ratio:1600/620;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.75,.25,1)}
 .flip canvas{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.flip #cBack{transform:rotateY(180deg)}
+.flip canvas+canvas{transform:rotateY(180deg)}
+.flip{touch-action:pan-y}
+.flip.has-stickers{touch-action:none;cursor:pointer}
+.stickerbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:-6px}
+.stickerbar .hint{margin-right:auto}
+.btn.danger{color:var(--danger)}
+.btn.ghost{background:none}
+.st-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.st-head .hint{display:inline;margin-left:8px}
+.stickers{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px}
+.stickers button{background:var(--velvet-2);border:1px solid var(--line);border-radius:12px;padding:6px;cursor:pointer;aspect-ratio:1}
+.stickers button:hover{background:var(--velvet-3)}
+.stickers canvas{width:100%;height:100%;display:block}
+.shared{max-width:1100px;margin:0 auto;padding:10px 28px 50px;display:flex;flex-direction:column;gap:18px}
+.shared-from{margin:0;font-family:var(--logo-font);font-weight:var(--logo-weight);font-style:var(--logo-style);font-size:30px;color:var(--logo-color);text-align:center}
+.shared-note{margin:0;text-align:center;color:var(--dust)}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:grid;place-items:center;padding:16px}
+.modal-card{width:min(520px,100%);background:var(--velvet-2);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.modal-card h3{margin:0 0 6px;font-size:20px}
+.share-row{display:flex;gap:8px;margin:16px 0 12px}
+.share-row input{flex:1}
+.share-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+a.btn{text-decoration:none;color:inherit;display:inline-block}
 .flip.is-back{transform:rotateY(180deg)}
 .stagebar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .seg{display:flex;background:var(--velvet-2);padding:4px;border-radius:10px}
@@ -188,7 +210,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 .visits{display:flex;justify-content:center;align-items:baseline;gap:8px;margin:0 0 12px;font-size:15px;color:var(--screen)}
 .visits b{font-family:var(--logo-font);font-weight:var(--logo-weight);font-style:var(--logo-style);font-size:26px;color:var(--logo-color);text-shadow:0 0 14px rgba(var(--glow),var(--logo-glow))}
 
-@media (max-width:1100px){.templates{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1100px){.templates{grid-template-columns:repeat(3,minmax(0,1fr))}.stickers{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media (max-width:980px){
   .app{grid-template-columns:minmax(0,1fr);padding:0 16px 40px}
   .stage,.controls{min-width:0}
@@ -329,6 +351,15 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 
   <section class="stage" aria-label="Ticket preview">
     <div class="beam"><div class="flip" id="flip" role="img" aria-label="Ticket preview"><canvas id="cFront"></canvas><canvas id="cBack"></canvas></div></div>
+    <div class="stickerbar" id="stickerBar" hidden role="toolbar" aria-label="Selected sticker">
+      <span class="hint">Drag the sticker to move it.</span>
+      <button type="button" class="btn" data-st="left" aria-label="Turn sticker left">↺ Turn</button>
+      <button type="button" class="btn" data-st="right" aria-label="Turn sticker right">↻ Turn</button>
+      <button type="button" class="btn" data-st="smaller" aria-label="Make sticker smaller">− Smaller</button>
+      <button type="button" class="btn" data-st="bigger" aria-label="Make sticker bigger">+ Bigger</button>
+      <button type="button" class="btn danger" data-st="remove">Remove</button>
+      <button type="button" class="btn ghost" data-st="done">Done</button>
+    </div>
     <div class="stagebar">
       <div class="seg" role="group" aria-label="Show side">
         <button type="button" data-side="front" aria-pressed="true">Front</button>
@@ -345,12 +376,31 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
           <button type="button" id="copyBtn">Copy image <small>The side you're looking at</small></button>
         </div>
       </details>
+      <button type="button" class="btn" id="shareBtn">Share</button>
       <button type="button" class="btn primary" id="saveBtn">Save to My tickets</button>
     </div>
     <p class="tpl-title">Style</p>
     <div class="templates" id="templates"></div>
+    <div class="st-head"><p class="tpl-title">Stickers <span class="hint">Tap one to put it on the side you're looking at.</span></p><button type="button" class="linkbtn" id="clearStickers" hidden>Remove all from this side</button></div>
+    <div class="stickers" id="stickerPick"></div>
   </section>
 </main>
+
+<section class="shared" id="viewShared" hidden aria-live="polite">
+  <p class="shared-from" id="sharedFrom">Loading the ticket…</p>
+  <div class="beam" id="sharedBeam" hidden><div class="flip" id="sFlip" role="img" aria-label="Shared ticket"><canvas id="sFront"></canvas><canvas id="sBack"></canvas></div></div>
+  <div class="stagebar" id="sharedBar" hidden>
+    <div class="seg" role="group" aria-label="Show side">
+      <button type="button" data-sside="front" aria-pressed="true">Front</button>
+      <button type="button" data-sside="back" aria-pressed="false">Back</button>
+    </div>
+    <span class="spacer"></span>
+    <button type="button" class="btn" id="sDownload">Download</button>
+    <button type="button" class="btn" id="sSave">Save to My tickets</button>
+    <button type="button" class="btn primary" id="sMake">Make your own ticket</button>
+  </div>
+  <p class="shared-note" id="sharedNote" hidden></p>
+</section>
 
 <section class="wall" id="viewWall" hidden>
   <div class="wall-head">
@@ -364,6 +414,19 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 </section>
 
 <footer><p class="visits" id="visits" hidden><b id="visitsN"></b> <span id="visitsT">people have visited Ticket Store</span></p>Ticket Store, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></footer>
+<div class="modal" id="shareModal" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="modal-card">
+    <h3 id="shareTitle">Your ticket link is ready</h3>
+    <p class="hint">Anyone with this link can see the ticket, front and back.</p>
+    <div class="share-row"><label class="sr" for="shareUrl">Link</label><input type="text" id="shareUrl" readonly><button type="button" class="btn primary" id="copyLink">Copy link</button></div>
+    <div class="share-actions">
+      <button type="button" class="btn" id="nativeShare" hidden>Share…</button>
+      <a class="btn" id="waShare" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <span class="spacer"></span>
+      <button type="button" class="btn" id="closeShare">Close</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -845,7 +908,7 @@ function drawBack(ctx, s) {
 }
 
 /* ---------- compose ---------- */
-function renderTicket(canvas, s, side, img, scale = 1) {
+function renderTicket(canvas, s, side, img, scale = 1, opts = {}) {
   canvas.width = Math.round(W * scale); canvas.height = Math.round(H * scale);
   const ctx = canvas.getContext('2d');
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
@@ -864,6 +927,9 @@ function renderTicket(canvas, s, side, img, scale = 1) {
     ctx.globalCompositeOperation = TEMPLATES[s.template]?.dark ? 'screen' : 'multiply';
     ctx.fillStyle = ctx.createPattern(grainCanvas(), 'repeat'); ctx.fillRect(0, 0, W, H);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  }
+  if (Array.isArray(s.stickers) && s.stickers.length && typeof drawStickers === 'function') {
+    try { drawStickers(ctx, s.stickers.filter(t => (t.side || 'front') === side), opts.selected); } catch (e) { console.error(e); }
   }
   ctx.restore();
   // notches + perforation, punched out for real so exported PNGs are transparent there
@@ -1524,6 +1590,134 @@ Object.assign(FRONT, {
 
 </script>
 <script>
+/* ===== Ticket Store: stickers ===== */
+// Each sticker is drawn around (0,0) inside roughly -75..75, then given a white die-cut edge.
+const STICKERS = {
+  premiere: { name: 'Premiere', draw(g) {
+    const gr = g.createLinearGradient(0, -70, 0, 70); gr.addColorStop(0, '#F7D774'); gr.addColorStop(.5, '#D4A437'); gr.addColorStop(1, '#9C7420');
+    g.fillStyle = '#8E1B22'; g.beginPath(); g.moveTo(-34, 30); g.lineTo(-52, 74); g.lineTo(-30, 66); g.lineTo(-18, 80); g.lineTo(-6, 34); g.fill();
+    g.beginPath(); g.moveTo(34, 30); g.lineTo(52, 74); g.lineTo(30, 66); g.lineTo(18, 80); g.lineTo(6, 34); g.fill();
+    burst(g, 0, -4, 62, 54, 20, 0); g.fillStyle = gr; g.fill();
+    g.fillStyle = '#8E1B22'; g.beginPath(); g.arc(0, -4, 44, 0, Math.PI * 2); g.fill();
+    starPath(g, 0, -22, 10); g.fillStyle = '#F7D774'; g.fill();
+    text(g, 'PREMIERE', 0, 8, { font: font(15, F.inst, 700), color: '#FFF4D6', align: 'center', ls: 1.5 });
+    text(g, 'NIGHT', 0, 26, { font: font(12, F.inst, 700), color: '#F7D774', align: 'center', ls: 3 });
+  } },
+  soldout: { name: 'Sold out', draw(g) {
+    g.rotate(-0.22); g.fillStyle = '#FFF6F2'; g.beginPath(); g.roundRect(-84, -34, 168, 68, 10); g.fill();
+    g.strokeStyle = '#D62828'; g.lineWidth = 6; g.beginPath(); g.roundRect(-78, -28, 156, 56, 8); g.stroke();
+    text(g, 'SOLD OUT', 0, 12, { font: font(34, F.alfa), color: '#D62828', align: 'center', ls: 1 });
+  } },
+  glasses: { name: '3D glasses', draw(g) {
+    g.fillStyle = '#FFFFFF'; g.beginPath(); g.roundRect(-82, -32, 164, 64, 14); g.fill();
+    g.fillStyle = '#E63946'; g.beginPath(); g.roundRect(-72, -22, 64, 44, 10); g.fill();
+    g.fillStyle = '#2EC4D6'; g.beginPath(); g.roundRect(8, -22, 64, 44, 10); g.fill();
+    g.strokeStyle = '#111'; g.lineWidth = 5; g.beginPath(); g.roundRect(-82, -32, 164, 64, 14); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.45)'; g.fillRect(-64, -16, 18, 8); g.fillRect(16, -16, 18, 8);
+    text(g, '3D', 0, 54, { font: font(22, F.arch), color: '#111', align: 'center' });
+  } },
+  popcorn: { name: 'Popcorn', draw(g) {
+    g.fillStyle = '#FFF3D6';
+    for (const [x, y, r] of [[-36, -40, 20], [-12, -52, 22], [14, -50, 22], [38, -38, 19], [-24, -26, 18], [0, -32, 20], [26, -24, 18]]) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = '#F2C14E'; for (const [x, y] of [[-20, -44], [10, -40], [30, -46], [-36, -30]]) { g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill(); }
+    g.save(); g.beginPath(); g.moveTo(-50, -18); g.lineTo(50, -18); g.lineTo(36, 72); g.lineTo(-36, 72); g.closePath(); g.clip();
+    for (let i = -3; i < 4; i++) { g.fillStyle = i % 2 ? '#FFFFFF' : '#D62828'; g.fillRect(i * 16 - 8, -20, 16, 100); }
+    g.restore();
+    g.fillStyle = '#D62828'; g.beginPath(); g.roundRect(-54, -24, 108, 14, 4); g.fill();
+    text(g, 'POP', 0, 34, { font: font(20, F.arch), color: '#111', align: 'center' });
+  } },
+  heart: { name: 'Loved it', draw(g) {
+    heart(g, 0, 4, 128, '#E5383B');
+    g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(-26, -20, 12, 7, -0.6, 0, Math.PI * 2); g.fill();
+    text(g, 'LOVED IT', 0, 64, { font: font(17, F.inst, 700), color: '#B3121A', align: 'center', ls: 2 });
+  } },
+  fav: { name: 'Favourite', draw(g) {
+    const gr = g.createLinearGradient(0, -70, 0, 70); gr.addColorStop(0, '#FFE27A'); gr.addColorStop(1, '#E3A21A');
+    starPath(g, 0, 0, 72); g.fillStyle = gr; g.fill();
+    g.strokeStyle = '#B57A00'; g.lineWidth = 4; starPath(g, 0, 0, 72); g.stroke();
+    text(g, 'FAV', 0, 14, { font: font(30, F.arch), color: '#6B4300', align: 'center' });
+  } },
+  twice: { name: 'Saw it twice', draw(g) {
+    g.fillStyle = '#2A9D8F'; g.beginPath(); g.arc(0, 0, 66, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#E9F5F2'; g.lineWidth = 3; g.setLineDash([6, 6]); g.beginPath(); g.arc(0, 0, 56, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+    text(g, 'SAW IT', 0, -18, { font: font(16, F.inst, 700), color: '#E9F5F2', align: 'center', ls: 2 });
+    text(g, '2×', 0, 22, { font: font(44, F.arch), color: '#FFFFFF', align: 'center' });
+    text(g, 'TWICE', 0, 44, { font: font(14, F.inst, 700), color: '#E9F5F2', align: 'center', ls: 3 });
+  } },
+  cried: { name: 'Cried', draw(g) {
+    g.fillStyle = '#4EA8DE'; g.beginPath(); g.moveTo(0, -70); g.bezierCurveTo(30, -26, 46, 0, 46, 22); g.arc(0, 22, 46, 0, Math.PI, false); g.bezierCurveTo(-46, 0, -30, -26, 0, -70); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.beginPath(); g.ellipse(-16, 8, 7, 14, 0.3, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#1D3557'; g.beginPath(); g.roundRect(-50, 50, 100, 28, 8); g.fill();
+    text(g, 'CRIED', 0, 70, { font: font(18, F.inst, 700), color: '#FFFFFF', align: 'center', ls: 3 });
+  } },
+  tenten: { name: '10/10', draw(g) {
+    g.fillStyle = '#111111'; g.beginPath(); g.arc(0, 0, 66, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#FFD60A'; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, 58, 0, Math.PI * 2); g.stroke();
+    text(g, '10/10', 0, 14, { font: font(36, F.arch), color: '#FFD60A', align: 'center' });
+  } },
+  datenight: { name: 'Date night', draw(g) {
+    g.rotate(-0.08);
+    g.fillStyle = '#FF5D8F'; g.beginPath(); g.roundRect(-82, -26, 164, 52, 26); g.fill();
+    heart(g, -58, 0, 22, '#FFFFFF'); heart(g, 58, 0, 22, '#FFFFFF');
+    text(g, 'DATE NIGHT', 0, 8, { font: font(20, F.inst, 700), color: '#FFFFFF', align: 'center', ls: 1.5 });
+  } },
+  spoilers: { name: 'No spoilers', draw(g) {
+    g.rotate(0.06);
+    g.fillStyle = '#FFD60A'; g.beginPath(); g.roundRect(-80, -40, 160, 80, 10); g.fill();
+    g.save(); g.beginPath(); g.roundRect(-80, -40, 160, 80, 10); g.clip();
+    g.fillStyle = '#111'; for (let x = -100; x < 100; x += 24) { g.beginPath(); g.moveTo(x, -40); g.lineTo(x + 12, -40); g.lineTo(x + 2, -28); g.lineTo(x - 10, -28); g.fill(); g.beginPath(); g.moveTo(x, 40); g.lineTo(x + 12, 40); g.lineTo(x + 22, 28); g.lineTo(x + 10, 28); g.fill(); }
+    g.restore();
+    text(g, 'NO', 0, -4, { font: font(20, F.arch), color: '#111', align: 'center', ls: 2 });
+    text(g, 'SPOILERS', 0, 20, { font: font(20, F.arch), color: '#111', align: 'center', ls: 1 });
+  } },
+  clapper: { name: 'Clapper', draw(g) {
+    g.fillStyle = '#1B1B1B'; g.beginPath(); g.roundRect(-64, -14, 128, 80, 6); g.fill();
+    g.save(); g.translate(-64, -16); g.rotate(-0.28);
+    g.fillStyle = '#1B1B1B'; g.fillRect(0, -26, 132, 26);
+    g.fillStyle = '#FFFFFF'; for (let x = 6; x < 130; x += 30) { g.beginPath(); g.moveTo(x, -26); g.lineTo(x + 14, -26); g.lineTo(x + 4, 0); g.lineTo(x - 10, 0); g.fill(); }
+    g.restore();
+    g.fillStyle = '#FFFFFF'; for (let x = -58; x < 60; x += 30) { g.beginPath(); g.moveTo(x, -14); g.lineTo(x + 14, -14); g.lineTo(x + 4, 4); g.lineTo(x - 10, 4); g.fill(); }
+    g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 2; g.beginPath(); g.moveTo(-54, 32); g.lineTo(54, 32); g.moveTo(0, 12); g.lineTo(0, 58); g.stroke();
+    text(g, 'TAKE 1', -28, 52, { font: font(11, F.inst, 700), color: '#FFFFFF', align: 'center', ls: 1 });
+    text(g, 'SCENE', 28, 52, { font: font(11, F.inst, 700), color: '#FFFFFF', align: 'center', ls: 1 });
+  } },
+};
+const STICKER_BOX = 180, STICKER_R = 72;
+const stickerCache = new Map();
+function stickerArt(type) {
+  if (stickerCache.has(type)) return stickerCache.get(type);
+  const def = STICKERS[type]; if (!def) return null;
+  const S2 = 2, size = STICKER_BOX * S2;
+  const art = document.createElement('canvas'); art.width = art.height = size;
+  const a = art.getContext('2d'); a.scale(S2, S2); a.translate(STICKER_BOX / 2, STICKER_BOX / 2);
+  try { def.draw(a); } catch (e) { console.error(e); }
+  // white die-cut edge around the shape
+  const sil = document.createElement('canvas'); sil.width = sil.height = size;
+  const sg = sil.getContext('2d'); sg.drawImage(art, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#FFFFFF'; sg.fillRect(0, 0, size, size);
+  const out = document.createElement('canvas'); out.width = out.height = size;
+  const o = out.getContext('2d');
+  for (let i = 0; i < 16; i++) { const t = i / 16 * Math.PI * 2; o.drawImage(sil, Math.cos(t) * 9, Math.sin(t) * 9); }
+  o.drawImage(art, 0, 0);
+  stickerCache.set(type, out);
+  return out;
+}
+function drawStickers(ctx, list, selectedId) {
+  for (const st of list) {
+    const art = stickerArt(st.type); if (!art) continue;
+    ctx.save(); ctx.translate(+st.x, +st.y); ctx.rotate(+st.rot || 0); const k = Math.max(.3, Math.min(3, +st.k || 1)); ctx.scale(k, k);
+    ctx.shadowColor = 'rgba(0,0,0,.32)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
+    ctx.drawImage(art, -STICKER_BOX / 2, -STICKER_BOX / 2, STICKER_BOX, STICKER_BOX);
+    ctx.shadowColor = 'transparent';
+    if (st.id === selectedId) {
+      ctx.strokeStyle = '#2F80ED'; ctx.lineWidth = 3 / k; ctx.setLineDash([10 / k, 7 / k]);
+      ctx.beginPath(); ctx.arc(0, 0, STICKER_R + 14, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+</script>
+<script>
 /* ===== Ticket Store: app ===== */
 const $ = s => document.querySelector(s);
 const form = $('#form');
@@ -1544,7 +1738,7 @@ function defaults() {
     rating: '4.5', liked: true, withWho: '', note: '', loggedBy: '', letterboxd: '',
     template: 'classic', paper: t.paper, ink: t.ink, accent: t.accent,
     posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false,
-    serial: makeSerial(), palette: [],
+    serial: makeSerial(), palette: [], stickers: [],
   };
 }
 let S = defaults();
@@ -1567,13 +1761,17 @@ function getImg(src, onload) {
 function loadImg(src) { return new Promise(res => { if (!src) return res(null); const im = getImg(src, () => res(imgCache.get(src).im)); if (im) res(im); }); }
 
 /* ---------- rendering ---------- */
-let raf = 0, thumbT = 0;
+let raf = 0, thumbT = 0, dragOnly = null, selSticker = null;
 function schedule(withThumbs = true) {
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(() => {
     const img = getImg(S.poster, () => schedule());
-    renderTicket($('#cFront'), S, 'front', img, 1);
-    renderTicket($('#cBack'), S, 'back', img, 1);
+    if (dragOnly !== 'back') renderTicket($('#cFront'), S, 'front', img, 1, { selected: selSticker });
+    if (dragOnly !== 'front') renderTicket($('#cBack'), S, 'back', img, 1, { selected: selSticker });
+    dragOnly = null;
+    const onSide = (S.stickers || []).filter(t => (t.side || 'front') === side).length;
+    $('#flip').classList.toggle('has-stickers', onSide > 0);
+    $('#clearStickers').hidden = onSide === 0;
     $('#flip').setAttribute('aria-label', `${side === 'front' ? 'Front' : 'Back'} of the ticket for ${S.title || 'Untitled'}`);
   });
   if (withThumbs) { clearTimeout(thumbT); thumbT = setTimeout(renderThumbs, 160); }
@@ -1594,7 +1792,7 @@ function renderThumbs() {
   const img = getImg(S.poster);
   document.querySelectorAll('.tpl').forEach(b => {
     const k = b.dataset.tpl, t = TEMPLATES[k];
-    const s = { ...S, template: k, stamp: false, grain: false };
+    const s = { ...S, template: k, stamp: false, grain: false, stickers: [] };
     if (S.template !== k) Object.assign(s, { paper: t.paper, ink: t.ink, accent: t.accent });
     renderTicket(b.querySelector('canvas'), s, 'front', img, .25);
     b.setAttribute('aria-pressed', String(S.template === k));
@@ -1847,12 +2045,104 @@ async function chooseFilm(id) {
 
 /* ---------- side flip ---------- */
 function setSide(v) {
-  side = v; $('#flip').classList.toggle('is-back', v === 'back');
+  side = v; selSticker = null; if ($('#stickerBar')) $('#stickerBar').hidden = true; $('#flip').classList.toggle('is-back', v === 'back');
   document.querySelectorAll('[data-side]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === v)));
   schedule(false);
 }
 document.querySelectorAll('[data-side]').forEach(b => b.addEventListener('click', () => setSide(b.dataset.side)));
-$('#flip').addEventListener('click', () => setSide(side === 'front' ? 'back' : 'front'));
+/* ---------- stickers ---------- */
+const flipEl = $('#flip');
+function toTicket(e) { const r = flipEl.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+function sideStickers() { return (S.stickers || []).filter(t => (t.side || 'front') === side); }
+function hitSticker(p) {
+  const list = sideStickers();
+  for (let i = list.length - 1; i >= 0; i--) { const t = list[i]; if (Math.hypot(p.x - t.x, p.y - t.y) <= STICKER_R * (+t.k || 1) + 10) return t; }
+  return null;
+}
+function selected() { return (S.stickers || []).find(t => t.id === selSticker) || null; }
+function syncStickerBar() { $('#stickerBar').hidden = !selected(); }
+function selectSticker(id) { selSticker = id; syncStickerBar(); schedule(false); }
+let drag = null, downAt = null, moved = false;
+flipEl.addEventListener('pointerdown', e => {
+  const p = toTicket(e); downAt = p; moved = false;
+  const hit = hitSticker(p);
+  if (hit) {
+    e.preventDefault();
+    drag = { id: hit.id, dx: p.x - hit.x, dy: p.y - hit.y };
+    try { flipEl.setPointerCapture(e.pointerId); } catch (err) {}
+    // bring to front
+    S.stickers = S.stickers.filter(t => t !== hit).concat(hit);
+    selectSticker(hit.id);
+  }
+});
+flipEl.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const p = toTicket(e), t = selected(); if (!t) return;
+  if (Math.hypot(p.x - downAt.x, p.y - downAt.y) > 4) moved = true;
+  t.x = Math.max(0, Math.min(W, p.x - drag.dx)); t.y = Math.max(0, Math.min(H, p.y - drag.dy));
+  dragOnly = side; schedule(false);
+});
+function endDrag(e) {
+  if (drag) { drag = null; saveDraft(); return; }
+  if (!downAt) return;
+  const p = toTicket(e);
+  if (Math.hypot(p.x - downAt.x, p.y - downAt.y) > 6) { downAt = null; return; }
+  downAt = null;
+  if (selSticker) { selectSticker(null); return; }
+  setSide(side === 'front' ? 'back' : 'front');
+}
+flipEl.addEventListener('pointerup', endDrag);
+flipEl.addEventListener('pointercancel', () => { drag = null; downAt = null; });
+function addSticker(type) {
+  S.stickers = S.stickers || [];
+  if (S.stickers.length >= 24) { toast('That\'s a lot of stickers. Remove one to add another.'); return; }
+  const n = sideStickers().length;
+  const t = { id: 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), type, side,
+    x: PX * (.5 + ((n % 4) - 1.5) * .12), y: H * (.42 + (n % 2) * .14), rot: (Math.random() - .5) * .4, k: 1 };
+  S.stickers.push(t); selectSticker(t.id);
+  if (innerWidth < 980) $('.beam').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function buildStickerPick() {
+  const wrap = $('#stickerPick');
+  for (const [type, def] of Object.entries(STICKERS)) {
+    const b = document.createElement('button'); b.type = 'button'; b.title = def.name; b.setAttribute('aria-label', 'Add sticker: ' + def.name);
+    const c = document.createElement('canvas'); c.width = c.height = 120; b.appendChild(c);
+    b.addEventListener('click', () => addSticker(type));
+    wrap.appendChild(b);
+  }
+  drawStickerPick();
+}
+function drawStickerPick() {
+  stickerCache.clear();
+  document.querySelectorAll('#stickerPick canvas').forEach((c, i) => {
+    const type = Object.keys(STICKERS)[i], art = stickerArt(type), g = c.getContext('2d');
+    g.clearRect(0, 0, 120, 120); if (art) g.drawImage(art, 0, 0, 120, 120);
+  });
+}
+document.querySelectorAll('[data-st]').forEach(b => b.addEventListener('click', () => {
+  const t = selected(), a = b.dataset.st;
+  if (a === 'done') { selectSticker(null); return; }
+  if (!t) return;
+  if (a === 'left') t.rot = (+t.rot || 0) - Math.PI / 12;
+  if (a === 'right') t.rot = (+t.rot || 0) + Math.PI / 12;
+  if (a === 'smaller') t.k = Math.max(.4, (+t.k || 1) / 1.15);
+  if (a === 'bigger') t.k = Math.min(2.6, (+t.k || 1) * 1.15);
+  if (a === 'remove') { S.stickers = S.stickers.filter(x => x !== t); selSticker = null; syncStickerBar(); }
+  schedule(false);
+}));
+$('#clearStickers').addEventListener('click', () => { S.stickers = (S.stickers || []).filter(t => (t.side || 'front') !== side); selectSticker(null); });
+document.addEventListener('keydown', e => {
+  const t = selected(); if (!t) return;
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) return;
+  const step = e.shiftKey ? 40 : 10;
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); S.stickers = S.stickers.filter(x => x !== t); selectSticker(null); }
+  else if (e.key === 'Escape') selectSticker(null);
+  else if (e.key.startsWith('Arrow')) {
+    e.preventDefault();
+    if (e.key === 'ArrowLeft') t.x -= step; if (e.key === 'ArrowRight') t.x += step; if (e.key === 'ArrowUp') t.y -= step; if (e.key === 'ArrowDown') t.y += step;
+    schedule(false);
+  }
+});
 
 /* ---------- platform capabilities (all optional) ---------- */
 const inArtifact = !!(window.claude && typeof window.claude.use === 'function');
@@ -1994,7 +2284,7 @@ function renderWall() {
     const c = document.createElement('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', 'Open ' + (st.title || 'Untitled'));
     el.appendChild(c);
     const meta = document.createElement('div'); meta.className = 'stub-meta';
-    meta.innerHTML = `<b></b><small></small><span class="spacer"></span><button class="mini" data-a="dl">Download</button><button class="mini danger" data-a="del">Delete</button>`;
+    meta.innerHTML = `<b></b><small></small><span class="spacer"></span><button class="mini" data-a="share"${inArtifact ? ' hidden' : ''}>Share</button><button class="mini" data-a="dl">Download</button><button class="mini danger" data-a="del">Delete</button>`;
     meta.querySelector('b').textContent = st.title || 'Untitled';
     meta.querySelector('small').textContent = fmtDate(st);
     el.appendChild(meta); grid.appendChild(el);
@@ -2004,6 +2294,7 @@ function renderWall() {
     c.addEventListener('click', open);
     c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     meta.querySelector('[data-a=dl]').addEventListener('click', () => download('front', st));
+    meta.querySelector('[data-a=share]').addEventListener('click', () => shareTicket(st));
     const del = meta.querySelector('[data-a=del]');
     del.addEventListener('click', async () => {
       if (del.dataset.armed !== '1') { del.dataset.armed = '1'; del.textContent = 'Confirm delete'; setTimeout(() => { del.dataset.armed = ''; del.textContent = 'Delete'; }, 3500); return; }
@@ -2014,13 +2305,98 @@ function renderWall() {
 }
 $('#sortSel').addEventListener('change', renderWall);
 function showView(v) {
-  const make = v === 'make';
-  $('#viewMake').hidden = !make; $('#viewWall').hidden = make;
-  $('#tabMake').setAttribute('aria-selected', String(make)); $('#tabWall').setAttribute('aria-selected', String(!make));
-  if (!make) renderWall();
+  if (v !== 'shared' && new URLSearchParams(location.search).has('t')) history.replaceState(null, '', location.pathname);
+  $('#viewMake').hidden = v !== 'make'; $('#viewWall').hidden = v !== 'wall'; $('#viewShared').hidden = v !== 'shared';
+  $('#tabMake').setAttribute('aria-selected', String(v === 'make')); $('#tabWall').setAttribute('aria-selected', String(v === 'wall'));
+  if (v === 'wall') renderWall();
+  if (v === 'make') schedule();
 }
 $('#tabMake').addEventListener('click', () => showView('make'));
 $('#tabWall').addEventListener('click', () => { showView('wall'); refreshCollection(); });
+
+/* ---------- share links (on the Ticket Store website) ---------- */
+const SHARE_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'poster', 'date', 'time', 'usFormat', 'home', 'cinema', 'screen', 'platform', 'format',
+  'row', 'seat', 'price', 'currency', 'rating', 'liked', 'withWho', 'note', 'loggedBy', 'letterboxd', 'template', 'paper', 'ink', 'accent',
+  'posterOpacity', 'posterX', 'posterY', 'grain', 'stamp', 'serial', 'stickers'];
+const shareCache = new Map();
+function sharePayload(st) { const o = {}; for (const k of SHARE_KEYS) if (st[k] !== undefined) o[k] = st[k]; return o; }
+async function shareTicket(st = S) {
+  if (inArtifact) { toast('Sharing works on ticket-store.netlify.app.'); return; }
+  const body = JSON.stringify(sharePayload(st));
+  let id = shareCache.get(body);
+  if (!id) {
+    const btn = $('#shareBtn'); btn.disabled = true; const old = btn.textContent; btn.textContent = 'Making link…';
+    try {
+      const r = await fetch('/api/share', { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+      if (!r.ok) throw new Error(r.status === 413 ? 'big' : 'http');
+      id = (await r.json()).id; shareCache.set(body, id);
+    } catch (e) {
+      toast(e.message === 'big' ? 'This ticket is too big to share. Try a smaller poster.' : 'The link couldn\'t be made. Check your connection and try again.');
+      return;
+    } finally { btn.disabled = false; btn.textContent = old; }
+  }
+  openShare(location.origin + '/?t=' + id, st);
+}
+function openShare(url, st) {
+  const m = $('#shareModal'); $('#shareUrl').value = url;
+  const msg = `My ticket for ${st.title || 'a film'}: ${url}`;
+  $('#waShare').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  $('#nativeShare').hidden = !navigator.share;
+  $('#nativeShare').onclick = () => navigator.share({ title: st.title || 'Ticket', text: `My ticket for ${st.title || 'a film'}`, url }).catch(() => {});
+  m.hidden = false; $('#copyLink').focus();
+}
+$('#shareBtn').hidden = inArtifact;
+$('#shareBtn').addEventListener('click', () => shareTicket(S));
+$('#copyLink').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('#shareUrl').value); toast('Link copied.'); }
+  catch (e) { $('#shareUrl').select(); toast('Press Ctrl+C to copy the link.'); }
+});
+function closeShare() { $('#shareModal').hidden = true; $('#shareBtn').focus(); }
+$('#closeShare').addEventListener('click', closeShare);
+$('#shareModal').addEventListener('click', e => { if (e.target.id === 'shareModal') closeShare(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#shareModal').hidden) closeShare(); });
+
+let shared = null, sSide = 'front';
+function drawShared() {
+  if (!shared) return;
+  const img = getImg(shared.poster, drawShared);
+  renderTicket($('#sFront'), shared, 'front', img, 1); renderTicket($('#sBack'), shared, 'back', img, 1);
+}
+function setSSide(v) { sSide = v; $('#sFlip').classList.toggle('is-back', v === 'back'); document.querySelectorAll('[data-sside]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sside === v))); }
+document.querySelectorAll('[data-sside]').forEach(b => b.addEventListener('click', () => setSSide(b.dataset.sside)));
+$('#sFlip').addEventListener('click', () => setSSide(sSide === 'front' ? 'back' : 'front'));
+$('#sDownload').addEventListener('click', () => shared && download(sSide, shared));
+$('#sMake').addEventListener('click', () => showView('make'));
+$('#sSave').addEventListener('click', async () => {
+  if (!shared) return;
+  const stub = { ...defaults(), ...shared, id: 'stub-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), savedAt: Date.now() };
+  try { await store.put(stub); toast('Saved to My tickets.'); refreshCollection(); } catch (e) { toast('That ticket couldn\'t be saved. Try again in a moment.'); }
+});
+async function openSharedFromUrl() {
+  const id = new URLSearchParams(location.search).get('t');
+  if (!id || inArtifact) return false;
+  showView('shared');
+  try {
+    if (!/^[A-Za-z0-9_-]{8,24}$/.test(id)) throw new Error('bad');
+    const r = await fetch('/api/share?id=' + encodeURIComponent(id));
+    if (!r.ok) throw new Error('missing');
+    const data = await r.json();
+    if (data.poster && !/^data:image\//.test(data.poster)) data.poster = '';
+    if (!TEMPLATES[data.template]) data.template = 'classic';
+    shared = { ...defaults(), ...data };
+    const who = (shared.loggedBy || shared.letterboxd || '').trim();
+    $('#sharedFrom').textContent = who ? `A ticket from ${who}` : 'Someone shared a ticket with you';
+    $('#sharedBeam').hidden = false; $('#sharedBar').hidden = false;
+    $('#sharedNote').hidden = false; $('#sharedNote').textContent = 'Tap the ticket to see the back.';
+    document.title = (shared.title || 'Ticket') + ' · Ticket Store';
+    drawShared();
+  } catch (e) {
+    $('#sharedFrom').textContent = 'This ticket link doesn\'t work';
+    $('#sharedNote').hidden = false; $('#sharedNote').textContent = 'Check that the link was copied in full, or make a ticket of your own.';
+    $('#sharedBar').hidden = false; $('#sDownload').hidden = true; $('#sSave').hidden = true; document.querySelector('[data-sside]').parentElement.hidden = true;
+  }
+  return true;
+}
 
 /* ---------- draft (this browser only, a convenience) ---------- */
 let draftT;
@@ -2056,6 +2432,7 @@ async function visitCounter() {
 loadDraft();
 initSearch();
 buildTemplates();
+buildStickerPick();
 fillForm();
 schedule();
 refreshCollection();
@@ -2065,10 +2442,12 @@ if (document.fonts) {
     '400 40px "Alfa Slab One"', '400 40px Monoton', '700 40px Oswald', '500 40px Oswald', '400 40px "PT Mono"', '600 40px "IBM Plex Mono"', '700 40px "IBM Plex Mono"', '400 40px "Abril Fatface"', '400 40px "Rozha One"', '400 40px Bangers', '400 40px VT323', '700 40px "Josefin Sans"', '400 40px "Josefin Sans"', '700 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', 'italic 600 40px "Cormorant Garamond"', '500 40px Caveat', '700 40px Caveat'];
   const extra = [['800 40px "Shippori Mincho"', '鑑賞券一般列番日付開映劇場座席方式場所配信映Ab'], ['600 40px "Shippori Mincho"', '鑑賞券一般列番日付開映劇場座席方式場所配信映Ab'],
     ['700 40px Oswald', 'КИНОБИЛЕТКОНТРОЛЬ'], ['500 40px Oswald', 'ДАТАСЕАНСРЯДМЕСТОЦЕНА'], ['400 40px "PT Mono"', 'СЕРИЯ№'], ['400 40px "Rozha One"', 'सिनेमा'], ['700 40px "Instrument Sans"', 'SİNEMA BİLETİ İYİ']];
-  Promise.all([...specs.map(f => document.fonts.load(f).catch(() => null)), ...extra.map(([f, t]) => document.fonts.load(f, t).catch(() => null))]).then(() => schedule());
-  document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => schedule());
+  Promise.all([...specs.map(f => document.fonts.load(f).catch(() => null)), ...extra.map(([f, t]) => document.fonts.load(f, t).catch(() => null))]).then(() => { drawStickerPick(); schedule(); drawShared(); });
+  document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => { drawStickerPick(); schedule(); drawShared(); });
 }
 visitCounter();
+openSharedFromUrl();
+if (document.fonts) document.fonts.ready.then(drawStickerPick);
 
 </script>
 </body>
