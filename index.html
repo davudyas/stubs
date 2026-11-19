@@ -185,6 +185,8 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
+.visits{display:flex;justify-content:center;align-items:baseline;gap:8px;margin:0 0 12px;font-size:15px;color:var(--screen)}
+.visits b{font-family:var(--logo-font);font-weight:var(--logo-weight);font-style:var(--logo-style);font-size:26px;color:var(--logo-color);text-shadow:0 0 14px rgba(var(--glow),var(--logo-glow))}
 
 @media (max-width:1100px){.templates{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:980px){
@@ -361,7 +363,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   <div class="grid" id="grid"></div>
 </section>
 
-<footer>Ticket Store, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></footer>
+<footer><p class="visits" id="visits" hidden><b id="visitsN"></b> <span id="visitsT">people have visited Ticket Store</span></p>Ticket Store, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -2045,6 +2047,22 @@ function setTheme(name, save = true) {
 document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.themeBtn)));
 setTheme(document.documentElement.dataset.theme || 'velvet', false);
 
+/* ---------- visitor counter (on the Ticket Store website) ---------- */
+async function visitCounter() {
+  if (inArtifact || location.protocol === 'file:' || navigator.webdriver) return;
+  let counted = false; try { counted = !!localStorage.getItem('stubs.counted'); } catch (e) {}
+  try {
+    const r = await fetch('/api/visits', { method: counted ? 'GET' : 'POST', cache: 'no-store' });
+    if (!r.ok) return;
+    const { count } = await r.json();
+    if (!counted) { try { localStorage.setItem('stubs.counted', '1'); } catch (e) {} }
+    if (!count) return;
+    $('#visitsN').textContent = Number(count).toLocaleString(navigator.language || 'en');
+    $('#visitsT').textContent = count === 1 ? 'person has visited Ticket Store' : 'people have visited Ticket Store';
+    $('#visits').hidden = false;
+  } catch (e) { /* counter is a nice-to-have */ }
+}
+
 /* ---------- boot ---------- */
 loadDraft();
 initSearch();
@@ -2061,6 +2079,7 @@ if (document.fonts) {
   Promise.all([...specs.map(f => document.fonts.load(f).catch(() => null)), ...extra.map(([f, t]) => document.fonts.load(f, t).catch(() => null))]).then(() => schedule());
   document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', () => schedule());
 }
+visitCounter();
 
 </script>
 </body>
