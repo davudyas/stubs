@@ -93,6 +93,7 @@ input[type=color]{width:100%;height:38px;border:0;border-radius:9px;background:v
 .keybox>summary{cursor:pointer;font-size:13px;color:var(--dust);width:max-content}
 .keybox[open]>summary{margin-bottom:8px}
 .key-row{display:flex;gap:8px;margin-bottom:6px}
+.key-ok{color:#9FD8A8;margin-bottom:4px}
 .key-row input{flex:1;background:var(--velvet-3);border:1px solid transparent;border-radius:9px;padding:9px 11px;color:var(--screen);min-width:0}
 .serial-row input{flex:1}
 
@@ -196,6 +197,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
           <details class="keybox" id="keyBox">
             <summary>TMDB key</summary>
             <div class="key-row"><input type="password" id="tmdbKey" placeholder="API key or read access token" autocomplete="off"><button type="button" class="btn" id="saveKey">Save key</button></div>
+            <p class="hint key-ok" id="keyState" hidden>✓ Key saved. The field stays empty so the key isn't shown on screen. <button type="button" class="linkbtn" id="forgetKey">Remove key</button></p>
             <p class="hint">Search uses The Movie Database. Get a free key in your <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">TMDB account settings</a>. It stays in this browser.</p>
           </details>
         </div>
@@ -1030,37 +1032,65 @@ $('#removePoster').addEventListener('click', e => { e.preventDefault(); S.poster
 const TMDB_KEY_BUILTIN = '';
 const TMDB_IMG = 'https://image.tmdb.org/t/p/';
 function tmdbKey() { if (TMDB_KEY_BUILTIN) return TMDB_KEY_BUILTIN; try { return localStorage.getItem('stubs.tmdbKey') || ''; } catch (e) { return ''; } }
+let serverReady = false; // true when the site's own key is set on Netlify
+function canSearch() { return serverReady || !!tmdbKey(); }
 async function tmdb(path, params = {}) {
   const key = tmdbKey().trim();
-  const u = new URL('https://api.themoviedb.org/3' + path);
-  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
-  const opt = {};
-  if (key.startsWith('eyJ')) opt.headers = { Authorization: 'Bearer ' + key, accept: 'application/json' };
-  else u.searchParams.set('api_key', key);
+  let u, opt = {};
+  if (key) {
+    u = new URL('https://api.themoviedb.org/3' + path);
+    for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+    if (key.startsWith('eyJ')) opt.headers = { Authorization: 'Bearer ' + key, accept: 'application/json' };
+    else u.searchParams.set('api_key', key);
+  } else {
+    u = new URL('/api/tmdb', location.href);
+    u.searchParams.set('path', path);
+    for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  }
   const r = await fetch(u, opt);
-  if (r.status === 401) { const e = new Error('key'); e.kind = 'key'; throw e; }
+  if (r.status === 401 || (!key && r.status === 502)) { const e = new Error('key'); e.kind = 'key'; throw e; }
+  if (!key && r.status === 503) { const e = new Error('nokey'); e.kind = 'nokey'; throw e; }
   if (!r.ok) throw new Error('http ' + r.status);
   return r.json();
 }
 const qEl = $('#q'), hint = $('#searchHint'), results = $('#results');
 function setHint(msg) { hint.hidden = !msg; hint.innerHTML = msg || ''; }
-function initSearch() {
+const NO_KEY_HINT = 'Add your TMDB key below to search for films and posters.';
+function keyStatus() {
+  const has = !!tmdbKey();
+  $('#keyBox').querySelector('summary').textContent = has ? 'TMDB key (saved in this browser)' : 'TMDB key';
+  $('#keyState').hidden = !has;
+}
+async function initSearch() {
   const credit = $('#tmdbCredit');
   if (inArtifact) {
     $('#searchBox').querySelector('.search-row').hidden = true; $('#keyBox').hidden = true; credit.hidden = true;
     setHint('Poster search works on the Ticket Store website, ticket-store.netlify.app. Here, add a poster below.');
     return;
   }
-  if (!tmdbKey()) { $('#keyBox').open = true; setHint('Add your TMDB key below to search for films and posters.'); }
-  if (TMDB_KEY_BUILTIN) $('#keyBox').hidden = true;
+  keyStatus();
+  if (TMDB_KEY_BUILTIN) { $('#keyBox').hidden = true; return; }
+  try {
+    const r = await fetch('/api/tmdb?ping=1', { cache: 'no-store' });
+    if (r.ok) serverReady = !!(await r.json()).ready;
+  } catch (e) { /* not on Netlify, or offline */ }
+  if (serverReady) { $('#keyBox').hidden = !tmdbKey(); setHint(''); return; }
+  if (!tmdbKey()) { $('#keyBox').open = true; setHint(NO_KEY_HINT); }
 }
 $('#saveKey').addEventListener('click', () => {
   const v = $('#tmdbKey').value.trim();
-  try { localStorage.setItem('stubs.tmdbKey', v); } catch (e) {}
-  $('#tmdbKey').value = ''; $('#keyBox').open = false;
-  setHint(v ? '' : 'Add your TMDB key below to search for films and posters.');
-  toast(v ? 'Key saved. Try a search.' : 'Key removed.');
-  if (v && qEl.value.trim()) runSearch();
+  try { if (v) localStorage.setItem('stubs.tmdbKey', v); else localStorage.removeItem('stubs.tmdbKey'); } catch (e) {}
+  $('#tmdbKey').value = '';
+  keyStatus();
+  setHint(canSearch() ? '' : NO_KEY_HINT);
+  toast(v ? 'Key saved in this browser. Try a search.' : 'Key removed from this browser.');
+  if (canSearch() && qEl.value.trim()) runSearch();
+});
+$('#forgetKey').addEventListener('click', () => {
+  try { localStorage.removeItem('stubs.tmdbKey'); } catch (e) {}
+  keyStatus(); setHint(canSearch() ? '' : NO_KEY_HINT);
+  if (serverReady) $('#keyBox').hidden = true;
+  toast('Key removed from this browser.');
 });
 let qT, qSeq = 0;
 qEl.addEventListener('input', () => { clearTimeout(qT); qT = setTimeout(runSearch, 320); });
@@ -1074,7 +1104,7 @@ results.addEventListener('keydown', e => {
 async function runSearch() {
   const q = qEl.value.trim(), seq = ++qSeq;
   if (q.length < 2) { results.innerHTML = ''; return; }
-  if (!tmdbKey()) { $('#keyBox').open = true; setHint('Add your TMDB key below to search for films and posters.'); return; }
+  if (!canSearch()) { $('#keyBox').hidden = false; $('#keyBox').open = true; setHint(NO_KEY_HINT); return; }
   setHint('Searching…');
   try {
     const m = q.match(/^(.*?)\s*\(?((?:18|19|20)\d{2})\)?$/);
@@ -1096,8 +1126,9 @@ async function runSearch() {
     }
   } catch (e) {
     if (seq !== qSeq) return;
-    setHint(e.kind === 'key' ? 'TMDB didn\'t accept that key. Check it in your TMDB settings and save it again.' : 'TMDB can\'t be reached right now. Check your connection and try again.');
-    if (e.kind === 'key') $('#keyBox').open = true;
+    setHint(e.kind === 'key' ? (tmdbKey() ? 'TMDB didn\'t accept that key. Check it in your TMDB settings and save it again.' : 'TMDB didn\'t accept the site\'s key. Check TMDB_KEY in Netlify.') : e.kind === 'nokey' ? NO_KEY_HINT : 'TMDB can\'t be reached right now. Check your connection and try again.');
+    if (e.kind === 'key' && tmdbKey()) $('#keyBox').open = true;
+    if (e.kind === 'nokey') { serverReady = false; $('#keyBox').hidden = false; $('#keyBox').open = true; }
   }
 }
 async function posterFromTmdb(path) {
