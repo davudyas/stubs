@@ -16,6 +16,10 @@ Live at **https://ticket-store.netlify.app**
 - 14 website themes in a dropdown (Classic and Film looks)
 - Moderation for the admin account (`davud`, set in `netlify/lib/account.mjs`): users, tickets, walls, pictures, password resets, bans, account and share-link deletion (`admin.mjs`)
 - A visitor counter (`netlify/functions/visits.mjs`)
+- English, Türkçe and Deutsch, picked from the browser language or the globe menu. The words on the tickets switch too (`i18n.js` in the source)
+- Letterboxd import under **My tickets**: type a username and recent diary entries become tickets with poster, date, rating, like and review (`netlify/functions/letterboxd.mjs` reads the public RSS feed)
+- A quick guide for first-time visitors; the button only shows on a browser's first visit
+- Its own icon: a tilted ticket with a star (`favicon.svg`)
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).
 
