@@ -6,8 +6,8 @@
 <title>Ticket Store</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232A1621%22/%3E%3Cdefs%3E%3Cmask%20id%3D%22f%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%23fff%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2211%22%20r%3D%225.2%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2253%22%20r%3D%225.2%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2220%22%20r%3D%221.35%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2225%22%20r%3D%221.35%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2230%22%20r%3D%221.35%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2235%22%20r%3D%221.35%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2240%22%20r%3D%221.35%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2245%22%20r%3D%221.35%22%20fill%3D%22%23000%22/%3E%3Cpath%20d%3D%22M23.00%2C22.00%20L25.59%2C28.94%20L32.99%2C29.26%20L27.18%2C33.86%20L29.17%2C40.99%20L23.00%2C36.90%20L16.83%2C40.99%20L18.82%2C33.86%20L13.01%2C29.26%20L20.41%2C28.94Z%22%20fill%3D%22%23000%22/%3E%3C/mask%3E%3C/defs%3E%3Cg%20transform%3D%22rotate%28-12%2032%2032%29%22%3E%3Crect%20x%3D%225%22%20y%3D%2211%22%20width%3D%2254%22%20height%3D%2242%22%20rx%3D%227%22%20fill%3D%22%23F2CD7E%22%20mask%3D%22url%28%23f%29%22/%3E%3C/g%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="/favicon.svg">
-<meta name="description" content="Make a ticket stub for every film you watch, and keep them all in one place.">
-<meta property="og:title" content="Ticket Store"><meta property="og:description" content="Make a ticket stub for every film you watch, and keep them all in one place.">
+<meta name="description" content="Make a ticket for every film you watch, and keep them all in one place.">
+<meta property="og:title" content="Ticket Store"><meta property="og:description" content="Make a ticket for every film you watch, and keep them all in one place.">
 <meta property="og:image" content="https://ticket-store.netlify.app/og-default.jpg"><meta property="og:type" content="website"><meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -698,7 +698,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <p>These tickets are saved in this browser only. Log in to keep them on every device.</p>
     <button type="button" class="btn" id="bannerLogin">Log in or create an account</button>
   </div>
-  <p class="hint tear-hint" id="tearHint" hidden>Tip: swipe a stub to the right to tear it off.</p>
+  <p class="hint tear-hint" id="tearHint" hidden>Tip: swipe the right end of a ticket to tear it.</p>
   <div class="grid" id="grid"></div>
   <div class="album" id="album" hidden>
     <div class="book" id="book"></div>
@@ -2534,10 +2534,10 @@ const I18N_ROWS = [
   ['Page {n} of {total}', 'Sayfa {n} / {total}', 'Seite {n} von {total}'],
   ['Cover and page 1 of {total}', 'Kapak ve sayfa 1 / {total}', 'Cover und Seite 1 von {total}'],
   ['Pages {a}–{b} of {total}', 'Sayfa {a}–{b} / {total}', 'Seiten {a}–{b} von {total}'],
-  ['Tip: swipe a stub to the right to tear it off.', 'İpucu: koçanı koparmak için sağa kaydır.', 'Tipp: Wisch einen Abriss nach rechts, um ihn abzureißen.'],
-  ['Tear off stub', 'Koçanı kopar', 'Abriss abreißen'],
+  ['Tip: swipe the right end of a ticket to tear it.', 'İpucu: bileti yırtmak için sağ ucunu sağa kaydır.', 'Tipp: Wisch das rechte Ende eines Tickets nach rechts, um es zu zerreißen.'],
+  ['Tear ticket', 'Bileti yırt', 'Ticket zerreißen'],
   ['Tape it back', 'Geri yapıştır', 'Wieder ankleben'],
-  ['Stub torn off.', 'Koçan koparıldı.', 'Abriss abgerissen.'],
+  ['Ticket torn.', 'Bilet yırtıldı.', 'Ticket zerrissen.'],
   ['Taped back together.', 'Geri yapıştırıldı.', 'Wieder zusammengeklebt.'],
   // letterboxd import
   ['Import from Letterboxd', 'Letterboxd\'dan içe aktar', 'Von Letterboxd importieren'],
@@ -3481,7 +3481,7 @@ function renderWall() {
     const meta = document.createElement('div'); meta.className = 'stub-meta';
     meta.innerHTML = `<div class="sm-t"><b></b><small></small></div><div class="sm-a"><button class="mini" data-a="tear"></button><button class="mini" data-a="share"${inArtifact ? ' hidden' : ''}>Share</button><button class="mini" data-a="dl">Download</button><button class="mini danger" data-a="del">Delete</button></div>`;
     const tearBtn = meta.querySelector('[data-a=tear]');
-    const syncTear = () => { tearBtn.textContent = st.torn ? 'Tape it back' : 'Tear off stub'; };
+    const syncTear = () => { tearBtn.textContent = st.torn ? 'Tape it back' : 'Tear ticket'; };
     const tv = ticketView(st, .42, { tear: true, onTear: () => { syncTear(); setTorn(st, true); } });
     const c = tv.querySelector('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', tr('Open {title}', { title: st.title || 'Untitled' }));
     el.appendChild(tv);
@@ -3987,7 +3987,7 @@ function openTicket(st) { S = { ...defaults(), ...st }; fillForm(); setSide('fro
 async function setTorn(st, torn, el) {
   st.torn = torn;
   if (el && el._sep) animateVal(el._sep(), torn ? 1 : 0, v => el._sep(v));
-  try { await store.put(st); toast(torn ? 'Stub torn off.' : 'Taped back together.'); }
+  try { await store.put(st); toast(torn ? 'Ticket torn.' : 'Taped back together.'); }
   catch (e) { toast('That ticket couldn\'t be saved. Try again in a moment.'); }
   if (torn) { try { localStorage.setItem('stubs.tore', '1'); } catch (e2) {} $('#tearHint').hidden = true; }
 }
