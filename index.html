@@ -154,6 +154,65 @@
 .auth-warn{margin:8px 0 0;font-size:13px;color:var(--brass-hi)}
 .auth-error{margin:8px 0 0;font-size:14px;color:var(--danger);font-weight:600}
 .theme-btn{display:flex;align-items:center;gap:8px;cursor:pointer}
+/* holo foil */
+.holo-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:soft-light;opacity:.62}
+.flip canvas.holo-fx{transform:none}
+.flip canvas.holo-fx.back{transform:rotateY(180deg)}
+.holo-hint{margin:-4px 0 0;font-size:12.5px}
+.tk{position:relative;touch-action:pan-y}
+.tk>canvas:first-child{display:block;width:100%;height:auto}
+.tk.can-tear{cursor:pointer}
+.tk.tearing{cursor:grabbing}
+.tear-hint{margin:-6px 0 16px}
+/* seat picker */
+.seat-pick-btn{grid-column:1/-1;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.seat-card{width:min(640px,100%)}
+.hall{margin:16px 0 8px;padding:14px 10px 12px;border-radius:16px;background:var(--velvet-3);overflow-x:auto}
+.screen-arc{position:relative;height:34px;margin:0 6% 18px;border-top:4px solid var(--brass-hi);border-radius:50% 50% 0 0/100% 100% 0 0;text-align:center;box-shadow:0 -14px 22px -14px var(--brass-hi)}
+.screen-arc span{position:relative;top:6px;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--dust)}
+.seats{display:grid;grid-template-columns:16px repeat(4,minmax(0,1fr)) 10px repeat(8,minmax(0,1fr)) 10px repeat(4,minmax(0,1fr)) 16px;gap:5px 4px;align-items:center;min-width:330px}
+.seats .rl{font-size:11px;color:var(--dust);text-align:center;font-weight:600}
+.seats button{aspect-ratio:1/.92;min-width:0;padding:0;border:0;border-radius:5px 5px 3px 3px;background:var(--velvet-4);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25);cursor:pointer;transform:translateY(var(--o,0))}
+.seats button:hover{background:var(--brass);opacity:.8}
+.seats button[aria-pressed=true]{background:var(--brass-hi);box-shadow:0 0 0 2px var(--brass-hi),0 0 14px var(--brass-hi)}
+.seats button:focus-visible{outline:2px solid var(--screen);outline-offset:2px}
+.seat-now{min-height:1.4em;margin:6px 0 0;font-weight:600;text-align:center}
+/* wall / album switch */
+.seg{display:inline-flex;padding:3px;border-radius:12px;background:var(--velvet-3);border:1px solid var(--line)}
+.seg button{border:0;background:transparent;color:var(--dust);font:inherit;font-size:14px;font-weight:600;padding:6px 12px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--velvet-4);color:var(--screen)}
+/* album */
+.album{padding:6px 0 10px}
+.book{--paper:#F2EADA;position:relative;display:grid;grid-template-columns:1fr 1fr;width:min(1120px,100%);margin:0 auto;aspect-ratio:1.42;perspective:2600px;filter:drop-shadow(0 26px 30px rgba(0,0,0,.45));touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.book.single{grid-template-columns:1fr;aspect-ratio:.72;width:min(460px,100%)}
+.page{position:relative;overflow:hidden;background:var(--paper);background-image:radial-gradient(circle at 20% 10%,rgba(255,255,255,.55),transparent 40%),repeating-linear-gradient(0deg,rgba(120,90,60,.035) 0 1px,transparent 1px 26px);padding:7% 9% 9%;display:flex;flex-direction:column;justify-content:space-around;gap:4%}
+.page.l{border-radius:16px 4px 4px 16px;box-shadow:inset -38px 0 40px -34px rgba(60,35,20,.45)}
+.page.r{border-radius:4px 16px 16px 4px;box-shadow:inset 38px 0 40px -34px rgba(60,35,20,.45)}
+.book.single .page{border-radius:6px 16px 16px 6px;box-shadow:inset 26px 0 30px -24px rgba(60,35,20,.4)}
+.page .pno{position:absolute;bottom:3.5%;left:0;right:0;text-align:center;font:600 clamp(13px,1.5vw,17px) Caveat,cursive;color:#9A836B}
+.glued{position:relative;transform:rotate(var(--r,0deg));cursor:pointer}
+.glued .tk>canvas:first-child{filter:drop-shadow(0 5px 6px rgba(60,35,20,.28))}
+.glued .tape{position:absolute;width:15%;height:22%;background:var(--tape,rgba(255,226,140,.62));box-shadow:0 1px 2px rgba(0,0,0,.08);z-index:2;pointer-events:none}
+.glued .tape.a{left:-4%;top:-8%;transform:rotate(-32deg)}
+.glued .tape.b{right:-4%;bottom:12%;transform:rotate(-28deg)}
+.glued .cap{margin:4px 2% 0;display:flex;justify-content:space-between;gap:8px;font:600 clamp(13px,1.45vw,19px)/1.1 Caveat,cursive;color:#5B4632}
+.glued .cap b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glued:focus-visible{outline:2px dashed #9A836B;outline-offset:6px;border-radius:6px}
+.cover{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#4A3524;gap:10px}
+.cover svg{width:28%;color:#B07C24}
+.cover h3{margin:0;font:700 clamp(26px,3.6vw,46px)/1.05 Caveat,cursive}
+.cover p{margin:0;font:600 clamp(15px,1.7vw,21px) Caveat,cursive;color:#7A6350}
+.leaf{position:absolute;top:0;bottom:0;width:50%;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.35,.65,.2,1);z-index:5}
+.leaf.r{left:50%;transform-origin:left center}
+.leaf.l{left:0;transform-origin:right center}
+.book.single .leaf{left:0;width:100%;transform-origin:left center}
+.leaf .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.leaf .face.back{transform:rotateY(180deg)}
+.leaf .face .page{height:100%}
+.album-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:18px}
+.album-nav .btn{font-size:22px;line-height:1;padding:8px 16px}
+.album-nav span{min-width:150px;text-align:center;color:var(--dust);font-size:14px}
+@media (prefers-reduced-motion:reduce){.leaf{transition-duration:.01s}}
 .lang-btn{display:flex;align-items:center;gap:7px;cursor:pointer}
 .lang-btn b{font-weight:600;letter-spacing:.04em}
 .menu .lang-pop{min-width:170px}
@@ -346,7 +405,9 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
 .stub:nth-child(3n+1) canvas{transform:rotate(-.8deg)}
 .stub:nth-child(3n+2) canvas{transform:rotate(.6deg)}
 .stub canvas:hover{transform:rotate(0) translateY(-3px)}
-.stub-meta{display:flex;align-items:center;gap:8px}
+.stub-meta{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px}
+.stub-meta .sm-t{flex:1 1 100%;display:flex;align-items:baseline;gap:10px;min-width:0}
+.stub-meta .sm-a{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:2px 4px;margin-left:-8px}
 .stub-meta b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stub-meta small{color:var(--dust);white-space:nowrap}
 .stub-meta .spacer{flex:1}
@@ -397,7 +458,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 </head>
 <body>
 <header class="top">
-  <div class="marquee"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><defs><mask id="tsCut"><rect width="64" height="64" fill="#fff"/><circle cx="42" cy="11" r="5.2" fill="#000"/><circle cx="42" cy="53" r="5.2" fill="#000"/><circle cx="42" cy="20" r="1.35" fill="#000"/><circle cx="42" cy="25" r="1.35" fill="#000"/><circle cx="42" cy="30" r="1.35" fill="#000"/><circle cx="42" cy="35" r="1.35" fill="#000"/><circle cx="42" cy="40" r="1.35" fill="#000"/><circle cx="42" cy="45" r="1.35" fill="#000"/><path d="M23.00,22.00 L25.59,28.94 L32.99,29.26 L27.18,33.86 L29.17,40.99 L23.00,36.90 L16.83,40.99 L18.82,33.86 L13.01,29.26 L20.41,28.94Z" fill="#000"/></mask></defs><g transform="rotate(-12 32 32)"><rect x="5" y="11" width="54" height="42" rx="7" fill="currentColor" mask="url(#tsCut)"/></g></svg><span class="logo">Ticket Store</span></div>
+  <div class="marquee"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><defs><mask id="tsCut"><rect width="64" height="64" fill="#fff"/><circle cx="42" cy="11" r="5.2" fill="#000"/><circle cx="42" cy="53" r="5.2" fill="#000"/><circle cx="42" cy="20" r="1.35" fill="#000"/><circle cx="42" cy="25" r="1.35" fill="#000"/><circle cx="42" cy="30" r="1.35" fill="#000"/><circle cx="42" cy="35" r="1.35" fill="#000"/><circle cx="42" cy="40" r="1.35" fill="#000"/><circle cx="42" cy="45" r="1.35" fill="#000"/><path d="M23.00,22.00 L25.59,28.94 L32.99,29.26 L27.18,33.86 L29.17,40.99 L23.00,36.90 L16.83,40.99 L18.82,33.86 L13.01,29.26 L20.41,28.94Z" fill="#000"/></mask></defs><g id="tsMarkSym" transform="rotate(-12 32 32)"><rect x="5" y="11" width="54" height="42" rx="7" fill="currentColor" mask="url(#tsCut)"/></g></svg><span class="logo">Ticket Store</span></div>
   <p class="sub">Make a ticket for every film you watch, and keep them all in one place.</p>
   <button type="button" class="guide-btn" id="guideBtn" hidden>New here? Take the quick guide</button>
   <nav class="tabs" role="tablist" aria-label="Views">
@@ -484,6 +545,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
         </label>
         <label class="f" data-cinema><span>Row</span><input type="text" name="row" maxlength="4"></label>
         <label class="f"><span>Seat</span><input type="text" name="seat" maxlength="8"></label>
+        <button type="button" class="btn seat-pick-btn" id="seatPick" data-cinema><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="3" y="3" width="18" height="2.4" rx="1.2"/><rect x="3" y="9" width="4" height="4" rx="1"/><rect x="10" y="9" width="4" height="4" rx="1"/><rect x="17" y="9" width="4" height="4" rx="1"/><rect x="3" y="16" width="4" height="4" rx="1"/><rect x="10" y="16" width="4" height="4" rx="1" opacity=".45"/><rect x="17" y="16" width="4" height="4" rx="1"/></g></svg> Pick on a seat map</button>
         <label class="f" data-cinema><span>Price</span><input type="number" name="price" step="0.01" min="0"></label>
         <label class="f" data-cinema><span>Currency</span>
           <select name="currency"><option>€</option><option>$</option><option>£</option><option>₺</option><option>CHF </option><option>¥</option></select>
@@ -519,12 +581,16 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
         <label class="f"><span>Poster top–bottom</span><input type="range" name="posterY" min="0" max="1" step="0.01"></label>
         <label class="toggle"><input type="checkbox" name="grain"> Paper grain</label>
         <label class="toggle"><input type="checkbox" name="stamp"> "Watched" stamp</label>
+        <label class="f full"><span>Holo foil</span>
+          <select name="holo"><option value="">Off</option><option value="rainbow">Rainbow</option><option value="gold">Gold</option><option value="silver">Silver</option></select>
+        </label>
+        <p class="hint full holo-hint">Holo tickets shine when you tilt your phone or move the mouse.</p>
       </div>
     </details>
   </form>
 
   <section class="stage" aria-label="Ticket preview">
-    <div class="beam"><div class="flip" id="flip" role="img" aria-label="Ticket preview"><canvas id="cFront"></canvas><canvas id="cBack"></canvas></div></div>
+    <div class="beam"><div class="flip" id="flip" role="img" aria-label="Ticket preview"><canvas id="cFront"></canvas><canvas id="cBack"></canvas><canvas class="holo-fx" id="hFront" hidden></canvas><canvas class="holo-fx back" id="hBack" hidden></canvas></div></div>
     <div class="stickerbar" id="stickerBar" hidden role="toolbar" aria-label="Selected sticker">
       <span class="hint">Drag the sticker to move it.</span>
       <button type="button" class="btn" data-st="left" aria-label="Turn sticker left">↺ Turn</button>
@@ -562,7 +628,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 
 <section class="shared" id="viewShared" hidden aria-live="polite">
   <p class="shared-from" id="sharedFrom">Loading the ticket…</p>
-  <div class="beam" id="sharedBeam" hidden><div class="flip" id="sFlip" role="img" aria-label="Shared ticket"><canvas id="sFront"></canvas><canvas id="sBack"></canvas></div></div>
+  <div class="beam" id="sharedBeam" hidden><div class="flip" id="sFlip" role="img" aria-label="Shared ticket"><canvas id="sFront"></canvas><canvas id="sBack"></canvas><canvas class="holo-fx" id="hsFront" hidden></canvas><canvas class="holo-fx back" id="hsBack" hidden></canvas></div></div>
   <div class="stagebar" id="sharedBar" hidden>
     <div class="seg" role="group" aria-label="Show side">
       <button type="button" data-sside="front" aria-pressed="true">Front</button>
@@ -616,6 +682,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <p id="wallStats"></p>
     <span class="spacer" style="flex:1"></span>
     <button type="button" class="btn" id="lbOpen"><svg viewBox="0 0 30 12" width="26" height="11" aria-hidden="true" focusable="false"><circle cx="5" cy="6" r="5" fill="#FF8000"/><circle cx="15" cy="6" r="5" fill="#00E054"/><circle cx="25" cy="6" r="5" fill="#40BCF4"/></svg> Import from Letterboxd</button>
+    <div class="seg" role="group" aria-label="Layout"><button type="button" data-mode="wall" aria-pressed="true">Wall</button><button type="button" data-mode="album" aria-pressed="false">Album</button></div>
     <label class="sr" for="sortSel">Sort</label>
     <select id="sortSel"><option value="date">Newest screening first</option><option value="rating">Highest rated first</option><option value="title">Title A–Z</option></select>
   </div>
@@ -631,7 +698,12 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
     <p>These tickets are saved in this browser only. Log in to keep them on every device.</p>
     <button type="button" class="btn" id="bannerLogin">Log in or create an account</button>
   </div>
+  <p class="hint tear-hint" id="tearHint" hidden>Tip: swipe a stub to the right to tear it off.</p>
   <div class="grid" id="grid"></div>
+  <div class="album" id="album" hidden>
+    <div class="book" id="book"></div>
+    <div class="album-nav"><button type="button" class="btn" id="albPrev" aria-label="Previous page">‹</button><span id="albPage" aria-live="polite"></span><button type="button" class="btn" id="albNext" aria-label="Next page">›</button></div>
+  </div>
 </section>
 
 <footer><p class="visits" id="visits" hidden><b id="visitsN"></b> <span id="visitsT">people have visited Ticket Store</span></p>Ticket Store, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></footer>
@@ -646,6 +718,14 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
       <span class="spacer"></span>
       <button type="button" class="btn" id="closeShare">Close</button>
     </div>
+  </div>
+</div>
+<div class="modal" id="seatModal" hidden role="dialog" aria-modal="true" aria-labelledby="seatTitle">
+  <div class="modal-card seat-card">
+    <h3 id="seatTitle">Pick your seat</h3>
+    <div class="hall"><div class="screen-arc" aria-hidden="true"><span>SCREEN</span></div><div class="seats" id="seatGrid"></div></div>
+    <p class="seat-now" id="seatNow" aria-live="polite"></p>
+    <div class="share-actions"><button type="button" class="btn" id="seatClear">No seat number</button><span class="spacer"></span><button type="button" class="btn primary" id="seatClose">Done</button></div>
   </div>
 </div>
 <div class="modal" id="lbModal" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
@@ -938,8 +1018,11 @@ function mainFields(s) {
   if (s.format) f.push([L('Format'), s.format]);
   return f;
 }
+// a cinema ticket without a row or seat number gets "Seating: Free" instead of dashes
+function noSeat(s) { return !s.home && !String(s.row || '').trim() && !String(s.seat || '').trim(); }
 function seatFields(s) {
   const L = k => ownLabels(s) ? k : tk(k);
+  if (noSeat(s)) return [[L('Seating'), tk('Free')]];
   return s.home ? [[L('Seat'), s.seat || tk('Sofa')]] : [[L('Row'), s.row || '—'], [L('Seat'), s.seat || '—']];
 }
 function credits(s) {
@@ -1293,7 +1376,83 @@ function renderTicket(canvas, s, side, img, scale = 1, opts = {}) {
     }
   }
   ctx.restore();
+  if (s.holo && FOILS[s.holo] && !opts.noFoil) bakeFoil(canvas, s.holo);
   return canvas;
+}
+
+/* ---------- holo foil ---------- */
+const FOILS = {
+  rainbow: ['#ff6fd8', '#ffd86e', '#7dffb2', '#6fd0ff', '#b48cff'],
+  gold: ['#fff0b3', '#d6a03c', '#fff9e0', '#b07c24', '#ffe08a'],
+  silver: ['#ffffff', '#a7b3c4', '#f2f5fa', '#7f8ca0', '#e6ebf2'],
+};
+let foilLines = null;
+function foilLinesPattern(g) {
+  if (!foilLines) {
+    foilLines = document.createElement('canvas'); foilLines.width = foilLines.height = 12;
+    const q = foilLines.getContext('2d'); q.strokeStyle = 'rgba(255,255,255,.55)'; q.lineWidth = 1.2;
+    q.beginPath(); q.moveTo(-2, 14); q.lineTo(14, -2); q.stroke(); q.beginPath(); q.moveTo(-2, 2); q.lineTo(2, -2); q.stroke(); q.beginPath(); q.moveTo(10, 14); q.lineTo(14, 10); q.stroke();
+  }
+  return g.createPattern(foilLines, 'repeat');
+}
+// paints the foil colours for a tilt of tx, ty (each -1..1) into g
+function paintFoil(g, w, h, kind, tx = 0, ty = 0) {
+  const cols = FOILS[kind] || FOILS.rainbow, len = Math.hypot(w, h);
+  const ang = .55 + tx * .45 + ty * .2;
+  const cx = w / 2 - tx * w * .45, cy = h / 2 - ty * h * .45;
+  const dx = Math.cos(ang) * len * .55, dy = Math.sin(ang) * len * .55;
+  const gr = g.createLinearGradient(cx - dx, cy - dy, cx + dx, cy + dy);
+  const all = [...cols, ...cols, cols[0]];
+  all.forEach((c, i) => gr.addColorStop(i / (all.length - 1), c));
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.globalAlpha = .35; g.fillStyle = foilLinesPattern(g); g.fillRect(0, 0, w, h);
+  // the glint that travels with the light
+  const gx = w * (.5 + tx * .6), gy = h * (.5 + ty * .7), rg = g.createRadialGradient(gx, gy, 0, gx, gy, w * .32);
+  rg.addColorStop(0, 'rgba(255,255,255,.95)'); rg.addColorStop(.4, 'rgba(255,255,255,.35)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+  g.globalAlpha = 1; g.fillStyle = rg; g.fillRect(0, 0, w, h);
+}
+// a still sheen baked into the picture, so downloads and link previews show the foil too
+function bakeFoil(canvas, kind) {
+  const w = canvas.width, h = canvas.height, f = document.createElement('canvas'); f.width = w; f.height = h;
+  const g = f.getContext('2d'); paintFoil(g, w, h, kind, .25, -.15);
+  g.globalAlpha = 1; g.globalCompositeOperation = 'destination-in'; g.drawImage(canvas, 0, 0);
+  const ctx = canvas.getContext('2d'); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = 'soft-light'; ctx.globalAlpha = kind === 'rainbow' ? .5 : .45; ctx.drawImage(f, 0, 0);
+  ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = .05; ctx.drawImage(f, 0, 0);
+  ctx.restore();
+}
+
+/* ---------- torn stubs ---------- */
+// the tear line, the same every time for the same ticket
+function tearLine(id) {
+  let h = 2166136261; for (const c of String(id || 'stub')) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; };
+  const pts = [[PX + 4, -2]];
+  for (let y = 10; y < H; y += 9 + rnd() * 8) pts.push([PX + (rnd() - .5) * 18 + Math.sin(y / 60) * 4, y]);
+  pts.push([PX - 3, H + 2]);
+  return pts;
+}
+// draws src (a rendered front) torn at the perforation; k=0 closed, 1 resting torn, >1 pulled further
+function drawTorn(dst, src, st, k) {
+  const sc = src.width / W, f = .93;
+  dst.width = src.width; dst.height = src.height;
+  const g = dst.getContext('2d'); g.clearRect(0, 0, dst.width, dst.height);
+  const pts = tearLine(st.id || st.title);
+  const dx = 26 * k, dy = 14 * k, rot = .045 * k;
+  g.save(); g.setTransform(sc * f, 0, 0, sc * f, sc * (W * (1 - f) / 2 - 10 * Math.min(k, 1)), sc * (H * (1 - f) / 2 - 6 * Math.min(k, 1)));
+  const edge = (ctx) => { ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); };
+  // ticket
+  g.save(); edge(g); g.lineTo(-20, H + 2); g.lineTo(-20, -2); g.closePath(); g.clip();
+  g.drawImage(src, 0, 0, W, H);
+  edge(g); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 3; g.stroke(); g.restore();
+  // stub, pulled away and turned a little
+  g.save(); g.translate(PX + dx, dy); g.rotate(rot); g.translate(-PX, 0);
+  g.shadowColor = 'rgba(0,0,0,.28)'; g.shadowBlur = 14 * sc * 2; g.shadowOffsetY = 4;
+  g.save(); edge(g); g.lineTo(W + 20, H + 2); g.lineTo(W + 20, -2); g.closePath(); g.clip();
+  g.shadowColor = 'transparent'; g.drawImage(src, 0, 0, W, H);
+  edge(g); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 3; g.stroke(); g.restore();
+  g.restore(); g.restore();
+  return dst;
 }
 
 /* 1080×1920 story: blurred poster backdrop with front and back stacked */
@@ -1449,7 +1608,7 @@ Object.assign(FRONT, {
     const cx = PX + (W - PX) / 2, sw = W - PX - 90;
     ctx.save(); ctx.translate(0, 80); // centre the stub now the codes are gone
     text(ctx, '座席  Seat', cx, 100, { font: font(20, F.mincho, 600), color: alpha(ink, .6), align: 'center' });
-    const seatTxt = s.home ? (s.seat || 'Sofa') : `${s.row || '—'}列 ${s.seat || '—'}番`;
+    const seatTxt = s.home ? (s.seat || 'Sofa') : noSeat(s) ? '自由席' : `${s.row || '—'}列 ${s.seat || '—'}番`;
     text(ctx, seatTxt, cx, 190, { font: font(70, F.mincho, 800), color: ink, align: 'center', maxW: sw });
     const p = fmtPrice(s); if (p) text(ctx, p, cx, 246, { font: font(28, F.mincho, 800), color: ink, align: 'center' });
     // hanko seal
@@ -1553,7 +1712,7 @@ Object.assign(FRONT, {
     plane(ctx, 452, 205, 1.1, acc);
     if (s.tagline) text(ctx, s.tagline, 70, 382, { font: font(24, F.inst, 400, 'italic'), color: alpha(ink, .7), maxW: (hasP ? ppx : PX - 60) - 90 });
     ctx.fillStyle = alpha(ink, .12); ctx.fillRect(70, 420, PX - 130, 2);
-    const seat = s.home ? (s.seat || tk('Sofa')) : `${s.row || ''}${s.seat || '—'}`;
+    const seat = s.home ? (s.seat || tk('Sofa')) : noSeat(s) ? tk('Free') : `${s.row || ''}${s.seat || '—'}`;
     const list = [['Passenger', (s.loggedBy || s.letterboxd || 'Guest').trim() || 'Guest'], ['Date', fmtDate(s)], ['Boarding', fmtTime(s)]];
     if (!s.home) list.push(['Gate', s.screen || '—']);
     list.push(['Seat', seat], ['Class', s.format || 'Economy']);
@@ -1584,7 +1743,7 @@ Object.assign(FRONT, {
     const top = Math.max(y + 96, 332), lf = font(23, F.plex, 600), lc = ink;
     const left = [['DATE', fmtDate(s)], ['TIME', fmtTime(s)], [s.home ? 'VIA' : 'SCREEN', (s.home ? s.platform : s.screen) || '-'], ['FORMAT', s.format || '-']];
     const right = s.home ? [['SEAT', s.seat || 'Sofa'], ['RATING', +s.rating > 0 ? (+s.rating) + '/5' : '-'], ['LIKED', s.liked ? 'YES' : 'NO']]
-      : [['ROW', s.row || '-'], ['SEAT', s.seat || '-'], ['RATING', +s.rating > 0 ? (+s.rating) + '/5' : '-']];
+      : noSeat(s) ? [['SEAT', tk('Free').toUpperCase()], ['RATING', +s.rating > 0 ? (+s.rating) + '/5' : '-'], ['LIKED', s.liked ? 'YES' : 'NO']] : [['ROW', s.row || '-'], ['SEAT', s.seat || '-'], ['RATING', +s.rating > 0 ? (+s.rating) + '/5' : '-']];
     left.forEach(([k, v], i) => leader(ctx, k, String(v), 110, 440, top + i * 38, lf, lc));
     right.forEach(([k, v], i) => leader(ctx, k, String(v), 640, 440, top + i * 38, lf, lc));
     const p = fmtPrice(s);
@@ -1594,7 +1753,7 @@ Object.assign(FRONT, {
     const scx = PX + (W - PX) / 2, ssw = W - PX - 80;
     text(ctx, 'YOUR SEAT', scx, 150, { font: font(20, F.plex, 600), color: alpha(ink, .7), align: 'center', ls: 4 });
     ctx.save(); ctx.strokeStyle = alpha(ink, .55); ctx.lineWidth = 2; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(PX + 50, 176); ctx.lineTo(W - 50, 176); ctx.stroke(); ctx.restore();
-    if (s.home) text(ctx, s.seat || 'Sofa', scx, 290, { font: font(64, F.plex, 700), color: ink, align: 'center', maxW: ssw });
+    if (s.home || noSeat(s)) text(ctx, s.home ? (s.seat || 'Sofa') : tk('Free'), scx, 290, { font: font(64, F.plex, 700), color: ink, align: 'center', maxW: ssw });
     else {
       text(ctx, tk('Row').toUpperCase() + ' ' + (s.row || '-'), scx, 260, { font: font(48, F.plex, 700), color: ink, align: 'center', maxW: ssw });
       text(ctx, tk('Seat').toUpperCase() + ' ' + (s.seat || '-'), scx, 326, { font: font(48, F.plex, 700), color: ink, align: 'center', maxW: ssw });
@@ -1669,7 +1828,7 @@ Object.assign(BACK_FONTS, {
 });
 UPPER_BACK.push('popart', 'bauhaus', 'vhs');
 
-function seatLine(s) { return s.home ? (s.seat || tk('Sofa')) : `${tk('Row')} ${s.row || '—'}  ${tk('Seat')} ${s.seat || '—'}`; }
+function seatLine(s) { return s.home ? (s.seat || tk('Sofa')) : noSeat(s) ? tk('Free') : `${tk('Row')} ${s.row || '—'}  ${tk('Seat')} ${s.seat || '—'}`; }
 function tape(ctx, x, y, w, h, rot) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
   ctx.fillStyle = 'rgba(245,238,214,.72)'; ctx.fillRect(-w / 2, -h / 2, w, h);
@@ -1736,7 +1895,7 @@ Object.assign(FRONT, {
     fieldRow(ctx, mainFields(s), x, 494, w, { labelFont: font(16, F.cour, 700), labelColor: alpha(ink, .65), labelLS: 3, upperLabels: true, gap: 40, valueFont: font(28, F.cour, 700), valueColor: ink });
     const scx = PX + (W - PX) / 2, sw = W - PX - 90;
     tape(ctx, scx, 70, 120, 34, -0.06);
-    if (s.home) text(ctx, s.seat || tk('Sofa'), scx, 300, { font: font(92, F.cav, 700), color: ink, align: 'center', maxW: sw });
+    if (s.home || noSeat(s)) text(ctx, s.home ? (s.seat || tk('Sofa')) : tk('Free'), scx, 300, { font: font(92, F.cav, 700), color: ink, align: 'center', maxW: sw });
     else {
       text(ctx, 'row ' + (s.row || '—'), scx, 250, { font: font(72, F.cav, 700), color: ink, align: 'center', maxW: sw });
       text(ctx, 'seat ' + (s.seat || '—'), scx, 336, { font: font(72, F.cav, 700), color: ink, align: 'center', maxW: sw });
@@ -1889,7 +2048,7 @@ Object.assign(FRONT, {
     fieldRow(ctx, mainFields(s), x, 494, PX - x - 60, { labelFont: font(14, F.inst, 600), labelColor: acc, labelLS: 3, upperLabels: true, gap: 38, valueFont: font(28, F.corm, 700), valueColor: ink });
     const scx = PX + (W - PX) / 2, sw = W - PX - 110;
     laurel(ctx, scx, 290, 92, alpha(acc, .35));
-    text(ctx, s.home ? (s.seat || tk('Sofa')) : `${s.row || '—'} ${s.seat || '—'}`, scx, 318, { font: font(76, F.corm, 700), color: ink, align: 'center', maxW: sw });
+    text(ctx, s.home ? (s.seat || tk('Sofa')) : noSeat(s) ? tk('Free') : `${s.row || '—'} ${s.seat || '—'}`, scx, 318, { font: font(76, F.corm, 700), color: ink, align: 'center', maxW: sw });
     if (!s.home) text(ctx, 'ROW  SEAT', scx, 356, { font: font(14, F.inst, 600), color: alpha(ink, .5), align: 'center', ls: 5 });
     const p = fmtPrice(s); if (p) text(ctx, p, scx, 440, { font: font(28, F.corm, 700), color: ink, align: 'center' });
   },
@@ -2360,6 +2519,26 @@ const I18N_ROWS = [
   ['Already log films on Letterboxd? Import your diary under My tickets and every entry becomes a ticket.', 'Filmlerini zaten Letterboxd\'a mı kaydediyorsun? Günlüğünü Biletlerim\'den içe aktar, her kayıt bir bilet olsun.', 'Du loggst schon auf Letterboxd? Importier dein Tagebuch unter Meine Tickets, dann wird jeder Eintrag ein Ticket.'],
   ['Pick your language', 'Dilini seç', 'Wähl deine Sprache'],
   ['Ticket Store speaks English, Turkish and German. The tickets change language too.', 'Ticket Store İngilizce, Türkçe ve Almanca konuşur. Biletlerin dili de değişir.', 'Ticket Store spricht Englisch, Türkisch und Deutsch. Auch die Tickets wechseln die Sprache.'],
+  // holo, tearing, album, seat picker
+  ['Holo foil', 'Hologram folyo', 'Holo-Folie'], ['Off', 'Kapalı', 'Aus'], ['Rainbow', 'Gökkuşağı', 'Regenbogen'], ['Gold', 'Altın', 'Gold'], ['Silver', 'Gümüş', 'Silber'],
+  ['Holo tickets shine when you tilt your phone or move the mouse.', 'Hologram biletler telefonunu eğdiğinde ya da fareyi hareket ettirdiğinde parlar.', 'Holo-Tickets glänzen, wenn du dein Handy neigst oder die Maus bewegst.'],
+  ['Pick on a seat map', 'Koltuk planından seç', 'Auf dem Saalplan wählen'],
+  ['Pick your seat', 'Koltuğunu seç', 'Wähl deinen Platz'],
+  ['SCREEN', 'PERDE', 'LEINWAND'],
+  ['No seat number', 'Koltuk numarası yok', 'Keine Platznummer'],
+  ['Row {r}, seat {n}', 'Sıra {r}, koltuk {n}', 'Reihe {r}, Platz {n}'],
+  ['Tap a seat.', 'Bir koltuğa dokun.', 'Tipp auf einen Platz.'],
+  ['Wall', 'Duvar', 'Wand'], ['Album', 'Albüm', 'Album'], ['Layout', 'Düzen', 'Ansicht'],
+  ['Previous page', 'Önceki sayfa', 'Vorherige Seite'], ['Next page', 'Sonraki sayfa', 'Nächste Seite'],
+  ['Cover', 'Kapak', 'Cover'],
+  ['Page {n} of {total}', 'Sayfa {n} / {total}', 'Seite {n} von {total}'],
+  ['Cover and page 1 of {total}', 'Kapak ve sayfa 1 / {total}', 'Cover und Seite 1 von {total}'],
+  ['Pages {a}–{b} of {total}', 'Sayfa {a}–{b} / {total}', 'Seiten {a}–{b} von {total}'],
+  ['Tip: swipe a stub to the right to tear it off.', 'İpucu: koçanı koparmak için sağa kaydır.', 'Tipp: Wisch einen Abriss nach rechts, um ihn abzureißen.'],
+  ['Tear off stub', 'Koçanı kopar', 'Abriss abreißen'],
+  ['Tape it back', 'Geri yapıştır', 'Wieder ankleben'],
+  ['Stub torn off.', 'Koçan koparıldı.', 'Abriss abgerissen.'],
+  ['Taped back together.', 'Geri yapıştırıldı.', 'Wieder zusammengeklebt.'],
   // letterboxd import
   ['Import from Letterboxd', 'Letterboxd\'dan içe aktar', 'Von Letterboxd importieren'],
   ['Type your Letterboxd username. Ticket Store reads your public diary, so your latest entries show up here.', 'Letterboxd kullanıcı adını yaz. Ticket Store herkese açık günlüğünü okur, son kayıtların burada görünür.', 'Gib deinen Letterboxd-Benutzernamen ein. Ticket Store liest dein öffentliches Tagebuch, deine neuesten Einträge erscheinen dann hier.'],
@@ -2413,6 +2592,7 @@ const I18N_ROWS = [
 const TICKET_ROWS = [
   ['Date', 'Tarih', 'Datum'], ['Time', 'Saat', 'Zeit'], ['Cinema', 'Sinema', 'Kino'], ['Screen', 'Salon', 'Saal'], ['Format', 'Format', 'Format'],
   ['Where', 'Yer', 'Ort'], ['Via', 'Platform', 'Über'], ['Row', 'Sıra', 'Reihe'], ['Seat', 'Koltuk', 'Platz'], ['Home', 'Ev', 'Zuhause'], ['Sofa', 'Kanepe', 'Sofa'],
+  ['Seating', 'Oturma', 'Platzwahl'], ['Free', 'Serbest', 'Frei'],
   ['Seen', 'İzlendi', 'Gesehen'], ['Watched at home', 'Evde izlendi', 'Zu Hause gesehen'], ['No rating', 'Puan yok', 'Keine Wertung'],
   ['With {name}', '{name} ile', 'Mit {name}'], ['Your thoughts go here.', 'Düşüncelerin buraya.', 'Deine Gedanken hierhin.'], ['Kept by', 'Sahibi', 'Gesammelt von'],
 ];
@@ -2502,7 +2682,7 @@ function defaults() {
     row: 'F', seat: '14', price: '9.50', currency: '€',
     rating: '4.5', liked: true, withWho: '', note: '', loggedBy: '', letterboxd: '',
     template: 'classic', paper: t.paper, ink: t.ink, accent: t.accent,
-    posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false,
+    posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false, holo: '',
     serial: makeSerial(), palette: [], stickers: [],
   };
 }
@@ -2534,6 +2714,7 @@ function schedule(withThumbs = true) {
     if (dragOnly !== 'back') renderTicket($('#cFront'), S, 'front', img, 1, { selected: selSticker });
     if (dragOnly !== 'front') renderTicket($('#cBack'), S, 'back', img, 1, { selected: selSticker });
     dragOnly = null;
+    holoAttach($('#hFront'), $('#cFront'), S.holo); holoAttach($('#hBack'), $('#cBack'), S.holo);
     const onSide = (S.stickers || []).filter(t => (t.side || 'front') === side).length;
     $('#flip').classList.toggle('has-stickers', onSide > 0);
     $('#clearStickers').hidden = onSide === 0;
@@ -3029,7 +3210,17 @@ const store = {
   },
 };
 let collection = [];
-async function refreshCollection() { collection = await store.list(); $('#count').textContent = collection.length || ''; syncBanners(); if (!$('#viewWall').hidden) renderWall(); }
+function fixImported(list) {
+  const moved = [];
+  for (const st of list) {
+    if (!st.lbGuid || !Array.isArray(st.stickers)) continue;
+    const k = st.stickers.find(t => t.type === 'twice' && Math.abs(t.x - PX * .82) < 1 && Math.abs(t.y - H * .26) < 1);
+    if (k) { Object.assign(k, { x: (PX + W) / 2, y: H * .8, k: .8 }); moved.push(st); }
+  }
+  moved.forEach(st => store.put(st).catch(() => {}));
+  return list;
+}
+async function refreshCollection() { collection = fixImported(await store.list()); $('#count').textContent = collection.length || ''; syncBanners(); if (!$('#viewWall').hidden) renderWall(); }
 function syncBanners() {
   const local = store.localList().length;
   $('#moveBanner').hidden = !(session && local);
@@ -3275,30 +3466,33 @@ function stats(list) {
 function renderWall() {
   const grid = $('#grid'); grid.innerHTML = '';
   $('#wallStats').textContent = stats(collection);
+  const album = wallMode === 'album' && collection.length > 0;
+  $('#album').hidden = !album; grid.hidden = album;
+  let tore = false; try { tore = !!localStorage.getItem('stubs.tore'); } catch (e) {}
+  $('#tearHint').hidden = album || tore || !collection.some(x => !x.torn);
   if (!collection.length) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><h3>No tickets yet</h3><p>Make a ticket for the last film you saw, then press Save to My tickets.</p><p><button class="btn primary" id="emptyGo">Make a ticket</button></p>${inArtifact ? '' : '<p class="hint">Got a Letterboxd diary? Import it and get a ticket for every entry.</p><p><button class="btn" id="emptyLb">Import from Letterboxd</button></p>'}${store.mode === 'local' && inArtifact ? '' : ''}</div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><h3>No tickets yet</h3><p>Make a ticket for the last film you saw, then press Save to My tickets.</p><p><button class="btn primary" id="emptyGo">Make a ticket</button></p>${inArtifact ? '' : '<p class="hint">Got a Letterboxd diary? Import it and get a ticket for every entry.</p><p><button class="btn" id="emptyLb">Import from Letterboxd</button></p>'}</div>`;
     $('#emptyGo').addEventListener('click', () => showView('make'));
     return;
   }
-  const sort = $('#sortSel').value;
-  const list = [...collection].sort((a, b) =>
-    sort === 'rating' ? (+b.rating - +a.rating) :
-    sort === 'title' ? String(a.title).localeCompare(String(b.title)) :
-    (String(b.date) + String(b.time)).localeCompare(String(a.date) + String(a.time)));
-  for (const st of list) {
+  if (album) { renderAlbum(); return; }
+  for (const st of sortedCollection()) {
     const el = document.createElement('div'); el.className = 'stub';
-    const c = document.createElement('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', tr('Open {title}', { title: st.title || 'Untitled' }));
-    el.appendChild(c);
     const meta = document.createElement('div'); meta.className = 'stub-meta';
-    meta.innerHTML = `<b></b><small></small><span class="spacer"></span><button class="mini" data-a="share"${inArtifact ? ' hidden' : ''}>Share</button><button class="mini" data-a="dl">Download</button><button class="mini danger" data-a="del">Delete</button>`;
+    meta.innerHTML = `<div class="sm-t"><b></b><small></small></div><div class="sm-a"><button class="mini" data-a="tear"></button><button class="mini" data-a="share"${inArtifact ? ' hidden' : ''}>Share</button><button class="mini" data-a="dl">Download</button><button class="mini danger" data-a="del">Delete</button></div>`;
+    const tearBtn = meta.querySelector('[data-a=tear]');
+    const syncTear = () => { tearBtn.textContent = st.torn ? 'Tape it back' : 'Tear off stub'; };
+    const tv = ticketView(st, .42, { tear: true, onTear: () => { syncTear(); setTorn(st, true); } });
+    const c = tv.querySelector('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', tr('Open {title}', { title: st.title || 'Untitled' }));
+    el.appendChild(tv);
     meta.querySelector('b').textContent = st.title || 'Untitled'; meta.querySelector('b').setAttribute('translate', 'no');
     meta.querySelector('small').textContent = fmtDate(st);
+    syncTear();
     el.appendChild(meta); grid.appendChild(el);
-    renderTicket(c, st, 'front', null, .42);
-    if (st.poster) loadImg(st.poster).then(im => renderTicket(c, st, 'front', im, .42));
-    const open = () => { S = { ...defaults(), ...st }; fillForm(); setSide('front'); showView('make'); schedule(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    const open = () => { if (Date.now() - (tv._dragged || 0) < 400) return; openTicket(st); };
     c.addEventListener('click', open);
     c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    tearBtn.addEventListener('click', () => { setTorn(st, !st.torn, tv); syncTear(); });
     meta.querySelector('[data-a=dl]').addEventListener('click', () => download('front', st));
     meta.querySelector('[data-a=share]').addEventListener('click', () => shareTicket(st));
     const del = meta.querySelector('[data-a=del]');
@@ -3324,7 +3518,7 @@ $('#tabWall').addEventListener('click', () => { showView('wall'); refreshCollect
 /* ---------- share links (on the Ticket Store website) ---------- */
 const SHARE_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'poster', 'date', 'time', 'usFormat', 'home', 'cinema', 'screen', 'platform', 'format',
   'row', 'seat', 'price', 'currency', 'rating', 'liked', 'withWho', 'note', 'loggedBy', 'letterboxd', 'template', 'paper', 'ink', 'accent',
-  'posterOpacity', 'posterX', 'posterY', 'grain', 'stamp', 'serial', 'stickers'];
+  'posterOpacity', 'posterX', 'posterY', 'grain', 'stamp', 'serial', 'stickers', 'holo'];
 const shareCache = new Map();
 function sharePayload(st) { const o = {}; for (const k of SHARE_KEYS) if (st[k] !== undefined) o[k] = st[k]; return o; }
 async function shareTicket(st = S) {
@@ -3383,6 +3577,7 @@ function drawShared() {
   if (!shared) return;
   const img = getImg(shared.poster, drawShared);
   renderTicket($('#sFront'), shared, 'front', img, 1); renderTicket($('#sBack'), shared, 'back', img, 1);
+  holoAttach($('#hsFront'), $('#sFront'), shared.holo); holoAttach($('#hsBack'), $('#sBack'), shared.holo);
 }
 function setSSide(v) { sSide = v; $('#sFlip').classList.toggle('is-back', v === 'back'); document.querySelectorAll('[data-sside]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sside === v))); }
 document.querySelectorAll('[data-sside]').forEach(b => b.addEventListener('click', () => setSSide(b.dataset.sside)));
@@ -3543,14 +3738,12 @@ async function openProfileFromUrl() {
     for (const t of profile.tickets) {
       const st = { ...defaults(), ...t };
       const el = document.createElement('div'); el.className = 'stub';
-      const c = document.createElement('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', tr('Open {title}', { title: st.title || 'Untitled' }));
-      el.appendChild(c);
+      const tv = ticketView(st, .42); el.appendChild(tv);
+      const c = tv.querySelector('canvas'); c.setAttribute('role', 'button'); c.tabIndex = 0; c.setAttribute('aria-label', tr('Open {title}', { title: st.title || 'Untitled' }));
       const meta = document.createElement('div'); meta.className = 'stub-meta';
       meta.innerHTML = '<b></b><small></small>';
       meta.querySelector('b').textContent = st.title || 'Untitled'; meta.querySelector('b').setAttribute('translate', 'no'); meta.querySelector('small').textContent = fmtDate(st);
       el.appendChild(meta); grid.appendChild(el);
-      renderTicket(c, st, 'front', null, .42);
-      if (st.poster && /^data:image\//.test(st.poster)) loadImg(st.poster).then(im => renderTicket(c, st, 'front', im, .42));
       const open = () => sharedFromProfile(st);
       c.addEventListener('click', open); c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     }
@@ -3693,6 +3886,258 @@ $('#admSearch').addEventListener('input', renderAdmUsers);
 $('#admRefresh').addEventListener('click', () => { loadAdmin(); if (!$('#admShares').hidden) loadShares(); });
 $('#tabAdmin').addEventListener('click', () => { if (!(session && session.admin)) return; showView('admin'); loadAdmin(); });
 
+/* ---------- holo foil, live: follows the mouse or the tilt of the phone ---------- */
+const HOLO = { tx: 0, ty: 0, gx: 0, gy: 0, last: -1e9, items: new Set(), raf: 0 };
+const clamp1 = v => Math.max(-1, Math.min(1, v));
+const holoIO = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.target._holo) e.target._holo.vis = e.isIntersecting; }), { rootMargin: '80px' }) : null;
+function holoMask(e) {
+  const r = Math.min(1, 560 / Math.max(1, e.c.width));
+  const w = Math.max(2, Math.round(e.c.width * r)), h = Math.max(2, Math.round(e.c.height * r));
+  const m = e.mask || (e.mask = document.createElement('canvas'));
+  if (e.o.width !== w || e.o.height !== h) { e.o.width = w; e.o.height = h; }
+  m.width = w; m.height = h; m.getContext('2d').drawImage(e.c, 0, 0, w, h);
+}
+function holoAttach(o, c, kind) {
+  let e = o._holo;
+  if (!kind || !FOILS[kind]) { if (e) { HOLO.items.delete(e); o._holo = null; } o.hidden = true; return; }
+  if (!e) { e = { o, vis: true }; o._holo = e; HOLO.items.add(e); if (holoIO) holoIO.observe(o); }
+  e.c = c; e.kind = kind; o.hidden = false; holoMask(e); holoTick();
+}
+function holoFrame(t) {
+  HOLO.raf = 0;
+  for (const e of HOLO.items) if (!e.o.isConnected) HOLO.items.delete(e);
+  if (!HOLO.items.size || document.hidden) return;
+  if (t - HOLO.last > 2500) { HOLO.gx = Math.sin(t / 1900) * .75; HOLO.gy = Math.cos(t / 2600) * .45; } // drifts by itself when nothing moves
+  HOLO.tx += (HOLO.gx - HOLO.tx) * .1; HOLO.ty += (HOLO.gy - HOLO.ty) * .1;
+  for (const e of HOLO.items) {
+    if (!e.vis || e.o.hidden) continue;
+    const g = e.o.getContext('2d'), w = e.o.width, h = e.o.height;
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, w, h);
+    paintFoil(g, w, h, e.kind, HOLO.tx, HOLO.ty);
+    g.globalAlpha = 1; g.globalCompositeOperation = 'destination-in'; g.drawImage(e.mask, 0, 0);
+    g.globalCompositeOperation = 'source-over';
+  }
+  HOLO.raf = requestAnimationFrame(holoFrame);
+}
+function holoTick() { if (!HOLO.raf) HOLO.raf = requestAnimationFrame(holoFrame); }
+document.addEventListener('visibilitychange', holoTick);
+addEventListener('pointermove', e => { if (e.pointerType !== 'mouse' || !HOLO.items.size) return; HOLO.gx = (e.clientX / innerWidth - .5) * 2; HOLO.gy = (e.clientY / innerHeight - .5) * 2; HOLO.last = performance.now(); }, { passive: true });
+addEventListener('deviceorientation', e => { if (e.gamma == null || !HOLO.items.size) return; HOLO.gx = clamp1(e.gamma / 22); HOLO.gy = clamp1((e.beta - 45) / 22); HOLO.last = performance.now(); });
+let motionAsked = false; // iPhones ask once before a page may read the tilt
+addEventListener('touchend', () => {
+  if (motionAsked || !HOLO.items.size) return;
+  const D = window.DeviceOrientationEvent;
+  if (D && typeof D.requestPermission === 'function') { motionAsked = true; D.requestPermission().catch(() => {}); }
+}, { passive: true });
+
+/* ---------- ticket cards: used by the wall, the album and public walls ---------- */
+function animateVal(a, b, step, done, ms = 380) {
+  const t0 = performance.now();
+  const f = t => { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); step(a + (b - a) * e); if (k < 1) requestAnimationFrame(f); else if (done) done(); };
+  requestAnimationFrame(f);
+}
+function ticketView(st, sc, opts = {}) {
+  const el = document.createElement('div'); el.className = 'tk';
+  const c = document.createElement('canvas'); el.appendChild(c);
+  const o = document.createElement('canvas'); o.className = 'holo-fx'; o.hidden = true; el.appendChild(o);
+  const src = document.createElement('canvas'); let img = null, sep = st.torn ? 1 : 0;
+  const show = () => {
+    if (sep > 0) drawTorn(c, src, st, sep);
+    else { c.width = src.width; c.height = src.height; const g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); g.drawImage(src, 0, 0); }
+    holoAttach(o, c, st.holo);
+  };
+  const paint = () => { renderTicket(src, st, 'front', img, sc); show(); };
+  paint();
+  if (st.poster && /^data:image\//.test(st.poster)) loadImg(st.poster).then(im => { if (im) { img = im; paint(); } });
+  el._sep = v => { if (v === undefined) return sep; sep = v; show(); };
+  if (opts.tear) enableTear(el, c, st, opts.onTear);
+  return el;
+}
+// swipe the stub to the right to tear it off
+function enableTear(el, c, st, onTear) {
+  let start = null;
+  const inStub = e => { const r = c.getBoundingClientRect(); return (e.clientX - r.left) / r.width > PX / W - .04; };
+  el.addEventListener('pointerdown', e => {
+    if (st.torn || e.button > 0 || !inStub(e)) return;
+    start = { x: e.clientX, y: e.clientY, id: e.pointerId, moved: false };
+  });
+  el.addEventListener('pointermove', e => {
+    if (!start) { if (e.pointerType === 'mouse') el.classList.toggle('can-tear', !st.torn && inStub(e)); return; }
+    if (e.pointerId !== start.id) return;
+    const dx = e.clientX - start.x, dy = e.clientY - start.y;
+    if (!start.moved) {
+      if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) { start = null; return; }
+      if (dx < 8) { if (dx < -10) start = null; return; }
+      start.moved = true; el.classList.add('tearing'); try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    el._sep(Math.max(0, Math.min(2.4, dx / (c.getBoundingClientRect().width * .14))));
+  });
+  const end = e => {
+    if (!start || e.pointerId !== start.id) return;
+    const was = start; start = null; el.classList.remove('tearing');
+    if (!was.moved) return;
+    el._dragged = Date.now();
+    const from = el._sep(), done = from >= 1;
+    animateVal(from, done ? 1 : 0, v => el._sep(v), () => { if (done && !st.torn) { st.torn = true; if (navigator.vibrate) navigator.vibrate(18); if (onTear) onTear(st); } });
+  };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('pointerleave', () => el.classList.remove('can-tear'));
+}
+function openTicket(st) { S = { ...defaults(), ...st }; fillForm(); setSide('front'); showView('make'); schedule(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+async function setTorn(st, torn, el) {
+  st.torn = torn;
+  if (el && el._sep) animateVal(el._sep(), torn ? 1 : 0, v => el._sep(v));
+  try { await store.put(st); toast(torn ? 'Stub torn off.' : 'Taped back together.'); }
+  catch (e) { toast('That ticket couldn\'t be saved. Try again in a moment.'); }
+  if (torn) { try { localStorage.setItem('stubs.tore', '1'); } catch (e2) {} $('#tearHint').hidden = true; }
+}
+function sortedCollection() {
+  const sort = $('#sortSel').value;
+  return [...collection].sort((a, b) =>
+    sort === 'rating' ? (+b.rating - +a.rating) :
+    sort === 'title' ? String(a.title).localeCompare(String(b.title)) :
+    (String(b.date) + String(b.time)).localeCompare(String(a.date) + String(a.time)));
+}
+
+/* ---------- album: tickets glued into a scrapbook ---------- */
+let wallMode = 'wall', albumIdx = 0, albumBusy = false, albumWasSingle = null;
+try { if (localStorage.getItem('stubs.wallMode') === 'album') wallMode = 'album'; } catch (e) {}
+const PER_PAGE = 3, TAPES = ['rgba(255,226,140,.65)', 'rgba(255,170,190,.6)', 'rgba(150,215,255,.6)', 'rgba(180,235,170,.6)', 'rgba(210,180,255,.6)'];
+const albumSingle = () => innerWidth < 760;
+function albumPages() {
+  const list = sortedCollection(), pages = [{ cover: true, n: list.length }];
+  for (let i = 0; i < list.length; i += PER_PAGE) pages.push({ items: list.slice(i, i + PER_PAGE) });
+  return pages;
+}
+function gluedTicket(st) {
+  const rnd = seeded(st.id || st.title);
+  const g = document.createElement('div'); g.className = 'glued'; g.tabIndex = 0; g.setAttribute('role', 'button');
+  g.setAttribute('aria-label', tr('Open {title}', { title: st.title || 'Untitled' }));
+  g.style.setProperty('--r', ((rnd() - .5) * 4.4).toFixed(2) + 'deg');
+  const tape = cls => { const t = document.createElement('span'); t.className = 'tape ' + cls; t.style.setProperty('--tape', TAPES[Math.floor(rnd() * TAPES.length)]); return t; };
+  const cap = document.createElement('div'); cap.className = 'cap';
+  const b = document.createElement('b'); b.setAttribute('translate', 'no'); b.textContent = st.title || 'Untitled';
+  const sm = document.createElement('span'); sm.textContent = fmtDate(st) + (+st.rating > 0 ? '  ' + stars5(st.rating) : '') + (st.liked ? ' ♥' : '');
+  cap.append(b, sm);
+  g.append(tape('a'), ticketView(st, .36), tape('b'), cap);
+  g.addEventListener('click', () => openTicket(st));
+  g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTicket(st); } });
+  return g;
+}
+function buildPage(pages, i, side) {
+  const pg = document.createElement('div'); pg.className = 'page ' + side;
+  const p = pages[i]; if (!p) return pg;
+  if (p.cover) {
+    pg.classList.add('cover');
+    pg.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true"><use href="#tsMarkSym"/></svg><h3></h3><p></p>`;
+    pg.querySelector('h3').textContent = session ? tr('@{u}\'s tickets', { u: session.username }) : tr('My tickets');
+    pg.querySelector('p').textContent = stats(collection);
+  } else p.items.forEach(st => pg.appendChild(gluedTicket(st)));
+  if (i > 0) { const n = document.createElement('span'); n.className = 'pno'; n.textContent = String(i); pg.appendChild(n); }
+  return pg;
+}
+function albumLabel(pages) {
+  const single = albumSingle(), total = pages.length - 1;
+  if (single) return albumIdx === 0 ? tr('Cover') : tr('Page {n} of {total}', { n: albumIdx, total });
+  const a = albumIdx, b = Math.min(albumIdx + 1, total);
+  return a === 0 ? tr('Cover and page 1 of {total}', { total }) : tr('Pages {a}–{b} of {total}', { a, b, total });
+}
+function renderAlbum() {
+  const book = $('#book'), pages = albumPages(), single = albumSingle();
+  albumWasSingle = single;
+  albumIdx = Math.max(0, Math.min(albumIdx, pages.length - 1));
+  if (!single) albumIdx -= albumIdx % 2;
+  book.classList.toggle('single', single);
+  book.replaceChildren(...(single ? [buildPage(pages, albumIdx, 'r')] : [buildPage(pages, albumIdx, 'l'), buildPage(pages, albumIdx + 1, 'r')]));
+  $('#albPage').textContent = albumLabel(pages);
+  $('#albPrev').disabled = albumIdx === 0;
+  $('#albNext').disabled = albumIdx + (single ? 1 : 2) >= pages.length;
+}
+function mkLeaf(cls, front, back) {
+  const l = document.createElement('div'); l.className = 'leaf ' + cls;
+  const f = document.createElement('div'); f.className = 'face front'; f.appendChild(front);
+  const b = document.createElement('div'); b.className = 'face back'; b.appendChild(back);
+  l.append(f, b); return l;
+}
+function turn(el, tf, cb) {
+  let fired = false; const fin = () => { if (!fired) { fired = true; cb(); } };
+  requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transform = tf; }));
+  el.addEventListener('transitionend', fin, { once: true }); setTimeout(fin, 1150);
+}
+function albumFlip(dir) {
+  if (albumBusy) return;
+  const pages = albumPages(), single = albumSingle(), step = single ? 1 : 2, to = albumIdx + dir * step;
+  if (to < 0 || to >= pages.length) return;
+  const book = $('#book'); albumBusy = true;
+  const done = () => { albumIdx = to; albumBusy = false; renderAlbum(); };
+  const blank = () => { const p = document.createElement('div'); p.className = 'page l'; return p; };
+  if (single) {
+    if (dir > 0) { const leaf = mkLeaf('', buildPage(pages, albumIdx, 'r'), blank()); book.replaceChildren(buildPage(pages, to, 'r'), leaf); turn(leaf, 'rotateY(-180deg)', done); }
+    else { const leaf = mkLeaf('', buildPage(pages, to, 'r'), blank()); leaf.style.transform = 'rotateY(-180deg)'; book.replaceChildren(buildPage(pages, albumIdx, 'r'), leaf); turn(leaf, 'rotateY(0deg)', done); }
+  } else if (dir > 0) {
+    const leaf = mkLeaf('r', buildPage(pages, albumIdx + 1, 'r'), buildPage(pages, to, 'l'));
+    book.replaceChildren(buildPage(pages, albumIdx, 'l'), buildPage(pages, to + 1, 'r'), leaf); turn(leaf, 'rotateY(-180deg)', done);
+  } else {
+    const leaf = mkLeaf('l', buildPage(pages, albumIdx, 'l'), buildPage(pages, to + 1, 'r'));
+    book.replaceChildren(buildPage(pages, to, 'l'), buildPage(pages, albumIdx + 1, 'r'), leaf); turn(leaf, 'rotateY(180deg)', done);
+  }
+}
+$('#albPrev').addEventListener('click', () => albumFlip(-1));
+$('#albNext').addEventListener('click', () => albumFlip(1));
+document.addEventListener('keydown', e => {
+  if ($('#album').hidden || $('#viewWall').hidden || /INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName || '') || document.querySelector('.modal:not([hidden])')) return;
+  if (e.key === 'ArrowRight') albumFlip(1); else if (e.key === 'ArrowLeft') albumFlip(-1);
+});
+{
+  let sw = null;
+  $('#book').addEventListener('pointerdown', e => { sw = { x: e.clientX, y: e.clientY }; });
+  $('#book').addEventListener('pointerup', e => {
+    if (!sw) return; const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) { albumFlip(dx < 0 ? 1 : -1); $('#book')._swiped = Date.now(); }
+  });
+  $('#book').addEventListener('click', e => { if (Date.now() - ($('#book')._swiped || 0) < 400) { e.stopPropagation(); e.preventDefault(); } }, true);
+}
+let albumRT = 0;
+addEventListener('resize', () => { clearTimeout(albumRT); albumRT = setTimeout(() => { if (!$('#album').hidden && albumWasSingle !== albumSingle()) renderAlbum(); }, 150); });
+function setWallMode(m) {
+  wallMode = m; try { localStorage.setItem('stubs.wallMode', m); } catch (e) {}
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  renderWall();
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setWallMode(b.dataset.mode)));
+document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === wallMode)));
+
+/* ---------- seat picker ---------- */
+const HALL_ROWS = 'ABCDEFGHIJKL'.split(''), HALL_SEATS = 16;
+function buildSeatGrid() {
+  const grid = $('#seatGrid'); grid.innerHTML = '';
+  for (const r of HALL_ROWS) {
+    const lab = () => { const l = document.createElement('span'); l.className = 'rl'; l.textContent = r; l.setAttribute('aria-hidden', 'true'); return l; };
+    grid.appendChild(lab());
+    for (let n = 1; n <= HALL_SEATS; n++) {
+      if (n === 5 || n === 13) grid.appendChild(document.createElement('span'));
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.row = r; b.dataset.seat = String(n);
+      b.setAttribute('aria-label', tr('Row {r}, seat {n}', { r, n }));
+      b.style.setProperty('--o', (Math.pow((n - 8.5) / 7.5, 2) * -7).toFixed(1) + 'px'); // rows curve toward the screen
+      b.addEventListener('click', () => pickSeat(r, String(n)));
+      grid.appendChild(b);
+    }
+    grid.appendChild(lab());
+  }
+}
+function syncSeatGrid() {
+  const row = String(S.row || '').trim().toUpperCase(), seat = String(S.seat || '').trim();
+  $('#seatGrid').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.row === row && b.dataset.seat === seat)));
+  $('#seatNow').textContent = row || seat ? tr('Row {r}, seat {n}', { r: row || '—', n: seat || '—' }) : tr('Tap a seat.');
+}
+function pickSeat(r, n) { S.row = r; S.seat = n; fillForm(); schedule(); syncSeatGrid(); }
+$('#seatPick').addEventListener('click', () => { buildSeatGrid(); syncSeatGrid(); $('#seatModal').hidden = false; const cur = $('#seatGrid [aria-pressed=true]') || $('#seatGrid button'); cur.focus(); });
+const closeSeat = () => { $('#seatModal').hidden = true; $('#seatPick').focus(); };
+$('#seatClose').addEventListener('click', closeSeat);
+$('#seatClear').addEventListener('click', () => { S.row = ''; S.seat = ''; fillForm(); schedule(); syncSeatGrid(); });
+$('#seatModal').addEventListener('click', e => { if (e.target === $('#seatModal')) closeSeat(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatModal').hidden) closeSeat(); });
+
 /* ---------- language menu ---------- */
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); $('#langMenu').open = false; }));
 document.addEventListener('click', e => { const m = $('#langMenu'); if (m.open && !m.contains(e.target)) m.open = false; });
@@ -3704,6 +4149,7 @@ document.addEventListener('langchange', () => {
   document.querySelectorAll('[data-sticker-type]').forEach(b => b.setAttribute('aria-label', tr('Add sticker: {name}', { name: tr(STICKERS[b.dataset.stickerType].name) })));
   if (session && !$('#setModal').hidden) syncSettings();
   if (!$('#viewWall').hidden) renderWall();
+  if (!$('#seatModal').hidden) { buildSeatGrid(); syncSeatGrid(); }
   if (!$('#viewProfile').hidden && profile) { $('#profTitle').textContent = tr('@{u}\'s tickets', { u: profile.username }); $('#profStats').textContent = stats(profile.tickets) || tr('No tickets on this wall yet.'); }
   if (!$('#guide').hidden) placeGuide();
   if (!$('#lbModal').hidden && lbEntries.length) renderLbList();
@@ -3790,7 +4236,7 @@ async function lbTicket(en, style, home) {
     rating: String(en.rating || 0), liked: !!en.liked, withWho: '', note: String(en.review || '').slice(0, 300),
     template: style, paper: t.paper, ink: t.ink, accent: t.accent, stickers: [], lbGuid: en.guid,
   };
-  if (en.rewatch) st.stickers.push({ id: 'k' + Math.random().toString(36).slice(2, 9), type: 'twice', side: 'front', x: PX * .82, y: H * .26, rot: -.18, k: .9 });
+  if (en.rewatch) st.stickers.push({ id: 'k' + Math.random().toString(36).slice(2, 9), type: 'twice', side: 'front', x: (PX + W) / 2, y: H * .8, rot: -.18, k: .8 });
   if (en.tmdbId) {
     try {
       const d = await tmdb('/movie/' + en.tmdbId, { append_to_response: 'credits' });

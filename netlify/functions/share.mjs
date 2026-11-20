@@ -23,6 +23,7 @@ function clean(t) {
   for (const k of TEXT_KEYS) if (t[k] != null) out[k] = String(t[k]).slice(0, k === 'note' ? 400 : 160);
   for (const k of BOOL_KEYS) if (t[k] != null) out[k] = !!t[k];
   for (const k of COLOR_KEYS) if (typeof t[k] === 'string' && /^#[0-9a-fA-F]{6}$/.test(t[k])) out[k] = t[k];
+  if (['rainbow', 'gold', 'silver'].includes(t.holo)) out.holo = t.holo;
   if (typeof t.poster === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(t.poster)) out.poster = t.poster;
   if (Array.isArray(t.stickers)) {
     out.stickers = t.stickers.slice(0, 24).filter(s => s && STICKER_TYPES.has(s.type)).map((s, i) => ({

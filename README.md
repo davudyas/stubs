@@ -20,6 +20,10 @@ Live at **https://ticket-store.netlify.app**
 - Letterboxd import under **My tickets**: type a username and recent diary entries become tickets with poster, date, rating, like and review (`netlify/functions/letterboxd.mjs` reads the public RSS feed)
 - A quick guide for first-time visitors; the button only shows on a browser's first visit
 - Its own icon: a tilted ticket with a star (`favicon.svg`)
+- Holo foil (rainbow, gold or silver) that shines as you tilt your phone or move the mouse
+- Tear the stub off a ticket on the wall with a swipe; tape it back from the ticket's buttons
+- A seat map for picking row and seat, and "Seating: Free" on tickets without a seat number
+- An album view in My tickets: tickets taped into a scrapbook you flip page by page
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).
 
