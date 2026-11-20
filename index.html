@@ -160,12 +160,19 @@
 .lang-pop button[aria-checked=true]{background:var(--velvet-4)}
 .lang-pop button[aria-checked=true]::after{content:"✓";float:right;color:var(--brass-hi);font-weight:700}
 #lbOpen{display:inline-flex;align-items:center;gap:8px}
-.lb-card{width:min(620px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column}
+.lb-card{width:min(620px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden}
+.lb-card>*{flex:none}
+.lb-card>#lbPick{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.lb-card .share-actions{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.lb-scroll{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.lb-scroll::after{content:"";position:absolute;left:1px;right:1px;bottom:1px;height:34px;border-radius:0 0 12px 12px;background:linear-gradient(transparent,var(--velvet-2));pointer-events:none;opacity:var(--more,1);transition:opacity .2s}
 .lb-count{margin:14px 0 6px;font-weight:600}
 .lb-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 8px;font-size:14px}
 .lb-tools label{display:inline-flex;align-items:center;gap:6px}
 .lb-tools select{width:auto;background:var(--velvet-3);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
-.lb-list{list-style:none;margin:0;padding:0;overflow:auto;max-height:min(46vh,420px);border:1px solid var(--line);border-radius:12px}
+.lb-list{list-style:none;margin:0;padding:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;flex:1 1 auto;min-height:150px;border:1px solid var(--line);border-radius:12px;scrollbar-width:thin;scrollbar-color:var(--brass) transparent}
+.lb-list::-webkit-scrollbar{width:6px}
+.lb-list::-webkit-scrollbar-thumb{background:var(--brass);border-radius:6px}
 .lb-list li{border-bottom:1px solid var(--line)}
 .lb-list li:last-child{border-bottom:0}
 .lb-list label{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:9px 12px;cursor:pointer}
@@ -376,6 +383,13 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   .menu[open]::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:19}
   .templates{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:42%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
   .tpl{scroll-snap-align:start}
+  #lbModal{padding:8px}
+  .lb-card{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);padding:18px 16px 14px}
+  .lb-card.loaded .lb-intro{display:none}
+  .lb-card .share-row{margin:12px 0 8px}
+  .lb-count{margin:6px 0 4px}
+  .lb-tools{font-size:13.5px;gap:8px 10px}
+  .lb-list label{padding:8px 10px;gap:10px}
 }
 @media (max-width:520px){.logo{font-size:clamp(22px,7.2vw,var(--logo-size));letter-spacing:min(var(--logo-ls),.1em)}.marquee{padding:8px 18px 10px}.fields{grid-template-columns:minmax(0,1fr)}.colors{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -637,7 +651,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
 <div class="modal" id="lbModal" hidden role="dialog" aria-modal="true" aria-labelledby="lbTitle">
   <div class="modal-card lb-card">
     <h3 id="lbTitle">Import from Letterboxd</h3>
-    <p class="hint">Type your Letterboxd username. Ticket Store reads your public diary, so your latest entries show up here.</p>
+    <p class="hint lb-intro">Type your Letterboxd username. Ticket Store reads your public diary, so your latest entries show up here.</p>
     <form class="share-row" id="lbForm" novalidate><label class="sr" for="lbUser">Letterboxd username</label><input type="text" id="lbUser" placeholder="Letterboxd username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40"><button type="submit" class="btn primary" id="lbLoad">Load diary</button></form>
     <p class="auth-error" id="lbError" hidden></p>
     <div id="lbPick" hidden>
@@ -648,7 +662,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
         <label><span>Watched</span> <select id="lbWhere"><option value="home">At home</option><option value="cinema">In a cinema</option></select></label>
         <label><span>Style</span> <select id="lbStyle" translate="no"></select></label>
       </div>
-      <ul class="lb-list" id="lbList"></ul>
+      <div class="lb-scroll" id="lbScroll"><ul class="lb-list" id="lbList"></ul></div>
     </div>
     <p class="hint" id="lbProgress" hidden role="status"></p>
     <div class="share-actions"><span class="spacer"></span><button type="button" class="btn" id="lbClose">Close</button><button type="button" class="btn primary" id="lbGo" hidden>Make tickets</button></div>
@@ -3707,9 +3721,14 @@ function openLb() {
   if (!$('#lbStyle').options.length) for (const [key, t] of Object.entries(TEMPLATES)) { const o = document.createElement('option'); o.value = key; o.textContent = tr(t.name); $('#lbStyle').appendChild(o); }
   $('#lbStyle').value = S.template in TEMPLATES ? S.template : 'classic';
   for (const o of $('#lbStyle').options) o.textContent = tr(TEMPLATES[o.value].name);
-  $('#lbError').hidden = true; $('#lbModal').hidden = false; u.focus(); u.select();
+  $('#lbError').hidden = true; $('#lbModal').hidden = false; document.body.style.overflow = 'hidden';
+  if (!lbEntries.length || innerWidth > 700) { u.focus(); u.select(); }
 }
-function closeLb() { if (lbBusy) return; $('#lbModal').hidden = true; $('#lbOpen').focus(); }
+function closeLb() { if (lbBusy) return; $('#lbModal').hidden = true; document.body.style.overflow = ''; $('#lbOpen').focus(); }
+// fade at the bottom of the list while there is more to scroll
+function lbMore() { const l = $('#lbList'); $('#lbScroll').style.setProperty('--more', l.scrollHeight - l.scrollTop - l.clientHeight > 8 ? '1' : '0'); }
+$('#lbList').addEventListener('scroll', lbMore, { passive: true });
+addEventListener('resize', () => { if (!$('#lbModal').hidden) lbMore(); });
 function lbErr(msg) { const e = $('#lbError'); e.textContent = msg; e.hidden = !msg; }
 function syncLbGo() {
   const have = lbHave(), boxes = [...$('#lbList').querySelectorAll('input[type=checkbox]:not(:disabled)')];
@@ -3738,7 +3757,8 @@ function renderLbList() {
     list.appendChild(li);
   });
   $('#lbPick').hidden = !lbEntries.length;
-  syncLbGo();
+  $('#lbModal .lb-card').classList.toggle('loaded', lbEntries.length > 0);
+  syncLbGo(); requestAnimationFrame(lbMore);
 }
 async function loadLb(e) {
   e && e.preventDefault();
@@ -3805,7 +3825,7 @@ async function runLbImport() {
   lbBusy = false; $('#lbClose').disabled = false; $('#lbLoad').disabled = false; prog.hidden = true;
   await refreshCollection();
   renderLbList();
-  if (made === picks.length) { toast(made === 1 ? tr('Made 1 ticket from your Letterboxd diary.') : tr('Made {n} tickets from your Letterboxd diary.', { n: made })); $('#lbModal').hidden = true; showView('wall'); }
+  if (made === picks.length) { toast(made === 1 ? tr('Made 1 ticket from your Letterboxd diary.') : tr('Made {n} tickets from your Letterboxd diary.', { n: made })); $('#lbModal').hidden = true; document.body.style.overflow = ''; showView('wall'); }
   else lbErr(tr('Made {n} of {total} tickets. The rest couldn\'t be saved.', { n: made, total: picks.length }));
 }
 $('#lbOpen').hidden = inArtifact;
