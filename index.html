@@ -421,6 +421,8 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
+footer .suggest{margin:12px 0 0;font-size:14px;color:var(--screen)}
+footer .suggest a{color:var(--brass-hi);font-weight:600}
 .visits{display:flex;justify-content:center;align-items:baseline;gap:8px;margin:0 0 12px;font-size:15px;color:var(--screen)}
 .visits b{font-family:var(--logo-font);font-weight:var(--logo-weight);font-style:var(--logo-style);font-size:26px;color:var(--logo-color);text-shadow:0 0 14px rgba(var(--glow),var(--logo-glow))}
 
@@ -706,7 +708,7 @@ footer{text-align:center;color:var(--dust);font-size:13px;padding:0 20px 30px}
   </div>
 </section>
 
-<footer><p class="visits" id="visits" hidden><b id="visitsN"></b> <span id="visitsT">people have visited Ticket Store</span></p>Ticket Store, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></footer>
+<footer><p class="visits" id="visits" hidden><b id="visitsN"></b> <span id="visitsT">people have visited Ticket Store</span></p>Ticket Store, made by <a href="https://letterboxd.com/davudiswatchin/" target="_blank" rel="noopener">davudiswatchin</a>.<span id="tmdbCredit"> Film data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.</span><p class="suggest">Ideas to make Ticket Store better? Write to <a href="https://x.com/davudsdiary" target="_blank" rel="noopener" translate="no">@davudsdiary</a> on X.</p></footer>
 <div class="modal" id="shareModal" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
   <div class="modal-card">
     <h3 id="shareTitle">Your ticket link is ready</h3>
@@ -2387,6 +2389,8 @@ const I18N_ROWS = [
   ['Ticket Store, made by', 'Ticket Store\'u yapan:', 'Ticket Store, gemacht von'],
   ['Film data and posters from', 'Film bilgileri ve afişler:', 'Filmdaten und Poster von'],
   ['. This product uses the TMDB API but is not endorsed or certified by TMDB.', '. Bu ürün TMDB API\'sini kullanır ancak TMDB tarafından onaylanmamış veya sertifikalandırılmamıştır.', '. Dieses Produkt nutzt die TMDB-API, wird aber nicht von TMDB unterstützt oder zertifiziert.'],
+  ['Ideas to make Ticket Store better? Write to', 'Ticket Store\'u daha iyi yapmak için fikrin mi var? X\'te', 'Ideen, wie Ticket Store besser werden kann? Schreib'],
+  ['on X.', 'hesabına yaz.', 'auf X.'],
   // share
   ['Your ticket link is ready', 'Bilet bağlantın hazır', 'Dein Ticket-Link ist fertig'],
   ['Anyone with this link can see the ticket, front and back.', 'Bu bağlantıya sahip herkes biletin önünü ve arkasını görebilir.', 'Alle mit diesem Link sehen das Ticket, vorne und hinten.'],
