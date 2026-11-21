@@ -213,6 +213,17 @@
 .album-nav .btn{font-size:22px;line-height:1;padding:8px 16px}
 .album-nav span{min-width:150px;text-align:center;color:var(--dust);font-size:14px}
 @media (prefers-reduced-motion:reduce){.leaf{transition-duration:.01s}}
+.cine-f{position:relative}
+.cine-pop{position:absolute;left:0;right:0;top:100%;margin-top:6px;z-index:30;background:var(--velvet-2);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.45);padding:6px;max-height:320px;overflow:auto}
+.cine-pop ul{list-style:none;margin:0;padding:0}
+.cine-pop li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer}
+.cine-pop li[aria-selected=true],.cine-pop li:hover{background:var(--velvet-4)}
+.cine-pop li .flag{font-size:18px;line-height:1;flex:none}
+.cine-pop li b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cine-pop li small{display:block;color:var(--dust);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cine-pop li>span:last-child{min-width:0}
+.cine-note{margin:4px 8px;font-size:12.5px;color:var(--dust)}
+.cine-note:empty{display:none}
 .lang-btn{display:flex;align-items:center;gap:7px;cursor:pointer}
 .lang-btn b{font-weight:600;letter-spacing:.04em}
 .menu .lang-pop{min-width:170px}
@@ -539,7 +550,8 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
         <label class="f"><span>Time</span><input type="time" name="time"></label>
         <label class="toggle"><input type="checkbox" name="usFormat"> US date and 12-hour time</label>
         <label class="toggle"><input type="checkbox" name="home"> Watched at home</label>
-        <label class="f full"><span id="lblCinema">Cinema</span><input type="text" name="cinema" maxlength="40"></label>
+        <div class="f full cine-f"><label class="f"><span id="lblCinema">Cinema</span><input type="text" name="cinema" maxlength="40" id="cinemaIn" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cineList" autocomplete="off"></label>
+          <div class="cine-pop" id="cinePop" hidden><ul id="cineList" role="listbox" aria-label="Cinemas"></ul><p class="cine-note" id="cineNote"></p></div></div>
         <label class="f" data-cinema><span>Screen</span><input type="text" name="screen" maxlength="16" placeholder="Saal 2"></label>
         <label class="f" data-home hidden><span>Via</span><input type="text" name="platform" maxlength="20" placeholder="MUBI, Blu-ray…"></label>
         <label class="f"><span>Format</span>
@@ -2391,6 +2403,10 @@ const I18N_ROWS = [
   ['. This product uses the TMDB API but is not endorsed or certified by TMDB.', '. Bu ürün TMDB API\'sini kullanır ancak TMDB tarafından onaylanmamış veya sertifikalandırılmamıştır.', '. Dieses Produkt nutzt die TMDB-API, wird aber nicht von TMDB unterstützt oder zertifiziert.'],
   ['Ideas to make Ticket Store better? Write to', 'Ticket Store\'u daha iyi yapmak için fikrin mi var? X\'te', 'Ideen, wie Ticket Store besser werden kann? Schreib'],
   ['on X.', 'hesabına yaz.', 'auf X.'],
+  ['Cinemas', 'Sinemalar', 'Kinos'],
+  ['Looking for cinemas…', 'Sinemalar aranıyor…', 'Kinos werden gesucht…'],
+  ['No cinemas found for "{q}". You can keep typing your own.', '"{q}" için sinema bulunamadı. Kendin yazmaya devam edebilirsin.', 'Keine Kinos zu „{q}“ gefunden. Du kannst den Namen einfach selbst eintippen.'],
+  ['Cinema search isn\'t working right now. Type the name yourself.', 'Sinema arama şu an çalışmıyor. Adını kendin yaz.', 'Die Kinosuche funktioniert gerade nicht. Gib den Namen selbst ein.'],
   // share
   ['Your ticket link is ready', 'Bilet bağlantın hazır', 'Dein Ticket-Link ist fertig'],
   ['Anyone with this link can see the ticket, front and back.', 'Bu bağlantıya sahip herkes biletin önünü ve arkasını görebilir.', 'Alle mit diesem Link sehen das Ticket, vorne und hinten.'],
@@ -4141,6 +4157,70 @@ $('#seatClose').addEventListener('click', closeSeat);
 $('#seatClear').addEventListener('click', () => { S.row = ''; S.seat = ''; fillForm(); schedule(); syncSeatGrid(); });
 $('#seatModal').addEventListener('click', e => { if (e.target === $('#seatModal')) closeSeat(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatModal').hidden) closeSeat(); });
+
+/* ---------- cinema search: real cinemas anywhere in the world (OpenStreetMap) ---------- */
+{
+  const inp = $('#cinemaIn'), pop = $('#cinePop'), list = $('#cineList'), note = $('#cineNote');
+  let timer = 0, ctrl = null, items = [], active = -1, lastQ = '';
+  const cache = new Map();
+  const flag = cc => /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0))) : '🎬';
+  const close = () => { pop.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); active = -1; };
+  const open = () => { pop.hidden = false; inp.setAttribute('aria-expanded', 'true'); };
+  const setActive = i => {
+    active = i;
+    list.querySelectorAll('li').forEach((li, k) => li.setAttribute('aria-selected', String(k === i)));
+    if (i >= 0) { inp.setAttribute('aria-activedescendant', 'cine' + i); list.children[i].scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant');
+  };
+  const choose = c => {
+    S.cinema = c.name.slice(0, 40); inp.value = S.cinema; close(); schedule();
+  };
+  const show = (cs, q) => {
+    items = cs; list.innerHTML = '';
+    cs.forEach((c, i) => {
+      const li = document.createElement('li'); li.id = 'cine' + i; li.setAttribute('role', 'option'); li.setAttribute('translate', 'no');
+      li.innerHTML = '<span class="flag" aria-hidden="true"></span><span><b></b><small></small></span>';
+      li.querySelector('.flag').textContent = flag(c.cc);
+      li.querySelector('b').textContent = c.name;
+      li.querySelector('small').textContent = [c.place, c.country].filter(Boolean).join(', ');
+      li.addEventListener('mousedown', e => e.preventDefault()); // keep focus in the field
+      li.addEventListener('click', () => choose(c));
+      list.appendChild(li);
+    });
+    note.textContent = cs.length ? '' : tr('No cinemas found for "{q}". You can keep typing your own.', { q });
+    active = -1; open();
+  };
+  const search = async q => {
+    if (cache.has(q)) { show(cache.get(q), q); return; }
+    if (ctrl) ctrl.abort(); ctrl = new AbortController();
+    note.textContent = tr('Looking for cinemas…'); list.innerHTML = ''; items = []; open();
+    try {
+      const r = await fetch('/api/cinemas?q=' + encodeURIComponent(q) + '&lang=' + LANG, { signal: ctrl.signal });
+      const d = await r.json();
+      if (!r.ok) throw new Error('bad');
+      cache.set(q, d.cinemas || []);
+      if (inp.value.trim() === q) show(d.cinemas || [], q);
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      list.innerHTML = ''; items = []; note.textContent = tr('Cinema search isn\'t working right now. Type the name yourself.'); open();
+    }
+  };
+  inp.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = inp.value.trim();
+    if (inArtifact || S.home || q.length < 2) { close(); return; }
+    if (q === lastQ && !pop.hidden) return;
+    timer = setTimeout(() => { lastQ = q; search(q); }, 280);
+  });
+  inp.addEventListener('keydown', e => {
+    if (pop.hidden) { if (e.key === 'ArrowDown' && items.length) { open(); setActive(0); e.preventDefault(); } return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(items.length - 1, active + 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(-1, active - 1)); }
+    else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); choose(items[active]); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+  });
+  inp.addEventListener('blur', () => setTimeout(close, 120));
+  inp.addEventListener('focus', () => { if (!S.home) setTimeout(() => inp.select(), 0); }); // typing replaces the old cinema
+}
 
 /* ---------- language menu ---------- */
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); $('#langMenu').open = false; }));
