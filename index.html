@@ -252,6 +252,9 @@
 .cine-pop li>span:last-child{min-width:0}
 .cine-note{margin:4px 8px;font-size:12.5px;color:var(--dust)}
 .cine-note:empty{display:none}
+.flip-hint{margin:-8px 0 0;text-align:center;font-size:13px;color:var(--dust)}
+.m-search{background:var(--velvet-2);border:1px solid var(--line);border-radius:16px;padding:14px}
+.m-search .search{border-bottom:0;padding-bottom:0;margin-bottom:0}
 .lang-btn{display:flex;align-items:center;gap:7px;cursor:pointer}
 .lang-btn b{font-weight:600;letter-spacing:.04em}
 .menu .lang-pop{min-width:170px}
@@ -538,6 +541,23 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
 }
 @media (max-width:520px){.logo{font-size:clamp(22px,7.2vw,var(--logo-size));letter-spacing:min(var(--logo-ls),.1em)}.marquee{padding:8px 18px 10px}.fields{grid-template-columns:minmax(0,1fr)}.colors{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:620px){
+  .stage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .stage>*{grid-column:1/-1}
+  .stage>.stagebar{display:contents}
+  .stagebar>.spacer{display:none}
+  .stage>.beam{order:1}
+  .stage>.stickerbar,.stage>.flip-hint{order:2}
+  .stagebar>.seg{grid-column:1/-1;order:3;display:flex}
+  .stagebar>.seg button{flex:1}
+  .stage>.m-search{order:4}
+  #saveBtn{grid-column:1/-1;order:5;padding:14px;font-size:17px;justify-content:center;text-align:center}
+  #dlMenu{order:6;grid-column:auto}
+  #shareBtn{order:7;grid-column:auto}
+  #newBtn{order:8;grid-column:auto}
+  #dlMenu>summary,#shareBtn,#newBtn{width:100%;justify-content:center;text-align:center;padding-left:4px;padding-right:4px;font-size:15px}
+  .stage>.tpl-title,.stage>.templates,.stage>.st-head,.stage>.stickers{order:9}
+}
 </style>
 </head>
 <body>
@@ -652,7 +672,7 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
       </div>
     </details>
 
-    <details class="group" open>
+    <details class="group">
       <summary>Look</summary>
       <div class="fields">
         <div class="colors">
@@ -685,6 +705,7 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
       <button type="button" class="btn danger" data-st="remove">Remove</button>
       <button type="button" class="btn ghost" data-st="done">Done</button>
     </div>
+    <p class="flip-hint" id="flipHint" hidden>Tap the ticket to see the back.</p>
     <div class="stagebar">
       <div class="seg" role="group" aria-label="Show side">
         <button type="button" data-side="front" aria-pressed="true">Front</button>
@@ -704,6 +725,7 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
       <button type="button" class="btn" id="shareBtn">Share</button>
       <button type="button" class="btn primary" id="saveBtn">Save to My tickets</button>
     </div>
+    <div class="m-search" id="mSearch" hidden></div>
     <p class="tpl-title">Style</p>
     <div class="templates" id="templates"></div>
     <div class="st-head"><p class="tpl-title">Stickers <span class="hint">Tap one to put it on the side you're looking at.</span></p><button type="button" class="linkbtn" id="clearStickers" hidden>Remove all from this side</button></div>
@@ -2881,8 +2903,21 @@ function syncUI() {
   });
   $('#saveBtn').textContent = S.id ? 'Update ticket' : 'Save to My tickets';
 }
+/* The example ticket (Paris, Texas at "Arthouse Kino") is only a demo: as soon as someone starts their own
+   film or screening, the example details are cleared so they don't end up on a real ticket. */
+const FILM_KEYS = ['title', 'tagline', 'director', 'year', 'runtime'], SCREEN_KEYS = ['cinema', 'screen', 'format', 'row', 'seat', 'price'];
+function dropSample(keep = []) {
+  if (!S.sample) return false;
+  delete S.sample;
+  const blank = { tagline: '', director: '', year: '', runtime: '', cinema: '', screen: '', format: '', row: '', seat: '', price: '', rating: '0', liked: false, note: '', withWho: '' };
+  if (!keep.includes('title')) blank.title = '';
+  for (const k of keep) delete blank[k];
+  Object.assign(S, blank);
+  return true;
+}
 form.addEventListener('input', e => {
   const el = e.target; if (!el.name) return;
+  if (S.sample && [...FILM_KEYS, ...SCREEN_KEYS].includes(el.name)) { dropSample([el.name]); S[el.name] = el.value; fillForm(); }
   S[el.name] = el.type === 'checkbox' ? el.checked : el.value;
   if (['rating', 'home', 'title'].includes(el.name)) syncUI();
   schedule(el.type !== 'range' || el.name === 'posterOpacity' ? true : true);
@@ -3070,6 +3105,7 @@ async function chooseFilm(id) {
     const lang = (navigator.language || 'en').slice(0, 2);
     const d = await tmdb('/movie/' + id, { append_to_response: 'credits,images', include_image_language: `en,${lang},null` });
     const dir = (d.credits?.crew || []).filter(c => c.job === 'Director').map(c => c.name).slice(0, 2).join(' & ');
+    dropSample(['date', 'time']);
     Object.assign(S, { title: d.title || S.title, tagline: d.tagline || '', director: dir, year: (d.release_date || '').slice(0, 4), runtime: d.runtime ? String(d.runtime) : '' });
     qEl.value = '';
     fillForm(); schedule();
@@ -3096,6 +3132,7 @@ async function chooseFilm(id) {
 
 /* ---------- side flip ---------- */
 function setSide(v) {
+  if (v === 'back' && $('#flipHint') && !$('#flipHint').hidden) { $('#flipHint').hidden = true; try { localStorage.setItem('stubs.flipped', '1'); } catch (e) {} }
   side = v; selSticker = null; if ($('#stickerBar')) $('#stickerBar').hidden = true; $('#flip').classList.toggle('is-back', v === 'back');
   document.querySelectorAll('[data-side]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === v)));
   schedule(false);
@@ -3529,7 +3566,7 @@ async function checkSession() {
   try { const r = await api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'me' }) }); if (r.ok) { const d = await r.json(); setSession({ ...session, public: !!d.public, avatar: d.avatar || 0, admin: !!d.admin }); syncSettings(); } } catch (e) {}
 }
 
-function clean(s) { const o = { ...s }; delete o.id; return o; }
+function clean(s) { const o = { ...s }; delete o.id; delete o.sample; return o; }
 $('#saveBtn').addEventListener('click', async () => {
   const btn = $('#saveBtn'); btn.disabled = true;
   const isNew = !S.id;
@@ -3546,7 +3583,7 @@ $('#saveBtn').addEventListener('click', async () => {
 });
 $('#newBtn').addEventListener('click', () => {
   const keep = { loggedBy: S.loggedBy, letterboxd: S.letterboxd, usFormat: S.usFormat, currency: S.currency, template: S.template, paper: S.paper, ink: S.ink, accent: S.accent, grain: S.grain };
-  S = { ...defaults(), ...keep, title: '', tagline: '', director: '', year: '', runtime: '', rating: '0', liked: false, cinema: S.cinema, price: '', row: '', seat: '', screen: '', format: '' };
+  S = { ...defaults(), ...keep, title: '', tagline: '', director: '', year: '', runtime: '', rating: '0', liked: false, cinema: S.sample ? '' : S.cinema, price: '', row: '', seat: '', screen: '', format: '' };
   fillForm(); setSide('front'); schedule();
   $('#posterPickWrap').hidden = true; $('#posterPick').innerHTML = '';
   if (!inArtifact) qEl.focus(); else form.elements.title.focus();
@@ -3565,6 +3602,7 @@ function renderWall() {
   const grid = $('#grid'); grid.innerHTML = '';
   $('#wallStats').textContent = stats(collection);
   const album = wallMode === 'album' && collection.length > 0;
+  document.querySelector('.wall-head .seg').hidden = !collection.length; $('#sortSel').hidden = !collection.length;
   $('#album').hidden = !album; grid.hidden = album;
   let tore = false; try { tore = !!localStorage.getItem('stubs.tore'); } catch (e) {}
   $('#tearHint').hidden = album || tore || !collection.some(x => !x.torn);
@@ -3789,6 +3827,7 @@ async function visitCounter() {
 }
 
 /* ---------- boot ---------- */
+if (!localStorage.getItem(DRAFT_KEY)) S.sample = true; // a first visit starts on the example ticket
 loadDraft();
 initSearch();
 buildTemplates();
@@ -4087,7 +4126,7 @@ function enableTear(el, c, st, onTear) {
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   el.addEventListener('pointerleave', () => el.classList.remove('can-tear'));
 }
-function openTicket(st) { S = { ...defaults(), ...st }; fillForm(); setSide('front'); showView('make'); schedule(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function openTicket(st) { S = { ...defaults(), ...st }; delete S.sample; fillForm(); setSide('front'); showView('make'); schedule(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 async function setTorn(st, torn, el) {
   st.torn = torn;
   if (el && el._sep) animateVal(el._sep(), torn ? 1 : 0, v => el._sep(v));
@@ -4234,7 +4273,7 @@ function syncSeatGrid() {
   $('#seatGrid').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.row === row && b.dataset.seat === seat)));
   $('#seatNow').textContent = row || seat ? tr('Row {r}, seat {n}', { r: row || '—', n: seat || '—' }) : tr('Tap a seat.');
 }
-function pickSeat(r, n) { S.row = r; S.seat = n; fillForm(); schedule(); syncSeatGrid(); }
+function pickSeat(r, n) { dropSample(['row', 'seat']); S.row = r; S.seat = n; fillForm(); schedule(); syncSeatGrid(); }
 $('#seatPick').addEventListener('click', () => { buildSeatGrid(); syncSeatGrid(); $('#seatModal').hidden = false; const cur = $('#seatGrid [aria-pressed=true]') || $('#seatGrid button'); cur.focus(); });
 const closeSeat = () => { $('#seatModal').hidden = true; $('#seatPick').focus(); };
 $('#seatClose').addEventListener('click', closeSeat);
@@ -4256,7 +4295,11 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatM
     if (i >= 0) { inp.setAttribute('aria-activedescendant', 'cine' + i); list.children[i].scrollIntoView({ block: 'nearest' }); } else inp.removeAttribute('aria-activedescendant');
   };
   const choose = c => {
-    S.cinema = c.name.slice(0, 40); inp.value = S.cinema; close(); schedule();
+    dropSample(['cinema', 'date', 'time']);
+    // a chain like "Cineplex" shows up many times: add the city so the ticket says which one
+    const generic = items.filter(x => x.name === c.name).length > 1 || /^(cineplex|cinestar|cinemaxx|uci|cinemaximum|cinemax|pathé|pathe|odeon|vue|cineworld|kinopolis|yorck|amc|regal|cinépolis|cinepolis|kinepolis|ugc|mk2)$/i.test(c.name.trim());
+    const city = c.city || (c.place || '').split(',').pop().trim();
+    S.cinema = (generic && city && !c.name.toLowerCase().includes(city.toLowerCase()) ? c.name + ' ' + city : c.name).slice(0, 40); inp.value = S.cinema; close(); schedule();
   };
   const show = (cs, q) => {
     items = cs; list.innerHTML = '';
@@ -4278,7 +4321,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatM
     if (ctrl) ctrl.abort(); ctrl = new AbortController();
     note.textContent = tr('Looking for cinemas…'); list.innerHTML = ''; items = []; open();
     try {
-      const r = await fetch('/api/cinemas?q=' + encodeURIComponent(q) + '&lang=' + LANG, { signal: ctrl.signal });
+      const cc = ((navigator.language || '').split('-')[1] || { tr: 'TR', de: 'DE' }[LANG] || '').toUpperCase();
+      const r = await fetch('/api/cinemas?q=' + encodeURIComponent(q) + '&lang=' + LANG + '&cc=' + cc, { signal: ctrl.signal });
       const d = await r.json();
       if (!r.ok) throw new Error('bad');
       cache.set(q, d.cinemas || []);
@@ -4304,6 +4348,19 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatM
   });
   inp.addEventListener('blur', () => setTimeout(close, 120));
   inp.addEventListener('focus', () => { if (!S.home) setTimeout(() => inp.select(), 0); }); // typing replaces the old cinema
+}
+
+/* ---------- phones: film search right under the ticket ---------- */
+{
+  const box = $('#searchBox'), home = box.parentNode, next = box.nextSibling, slot = $('#mSearch');
+  const mq = matchMedia('(max-width: 980px)');
+  const place = () => { if (mq.matches) { slot.appendChild(box); slot.hidden = false; } else { home.insertBefore(box, next); slot.hidden = true; } };
+  place(); (mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place));
+}
+/* ---------- a hint to flip the ticket, until someone has done it once ---------- */
+{
+  let flipped = false; try { flipped = !!localStorage.getItem('stubs.flipped'); } catch (e) {}
+  $('#flipHint').hidden = flipped;
 }
 
 /* ---------- the logo takes you home from anywhere ---------- */
