@@ -255,6 +255,20 @@
 .flip-hint{margin:-8px 0 0;text-align:center;font-size:13px;color:var(--dust)}
 .m-search{background:var(--velvet-2);border:1px solid var(--line);border-radius:16px;padding:14px}
 .m-search .search{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.icon-btn{width:42px;justify-content:center;padding-left:0!important;padding-right:0!important}
+.people-card{width:min(520px,100%)}
+.people-search{display:flex;align-items:center;gap:6px;margin:14px 0 10px;padding:0 14px;border-radius:12px;background:var(--velvet-3);border:1px solid var(--line)}
+.people-search:focus-within{border-color:var(--brass-hi)}
+.people-search span{color:var(--dust);font-weight:700;font-size:17px}
+.people-search input{flex:1;border:0;background:transparent;padding:12px 0;font-size:17px;outline:none;color:var(--screen)}
+.people-list{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:min(50vh,420px);overflow:auto}
+.people-list a{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:12px;text-decoration:none;color:inherit}
+.people-list a:hover,.people-list a:focus-visible{background:var(--velvet-4);outline:none}
+.people-list .avatar{width:40px;height:40px;flex:none;font-size:17px}
+.people-list b{display:block;font-weight:600}
+.people-list small{display:block;color:var(--dust);font-size:13px}
+.people-list .go{margin-left:auto;color:var(--dust);font-size:20px}
+#peopleNote:empty{display:none}
 .lang-btn{display:flex;align-items:center;gap:7px;cursor:pointer}
 .lang-btn b{font-weight:600;letter-spacing:.04em}
 .menu .lang-pop{min-width:170px}
@@ -572,6 +586,7 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
   </nav>
   <div class="tools">
   <div class="account" id="account" hidden>
+    <button type="button" class="btn icon-btn" id="peopleBtn" aria-label="Find people" title="Find people" hidden><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></g></svg></button>
     <button type="button" class="btn" id="loginBtn">Log in</button>
     <button type="button" class="btn whoami" id="whoami" hidden aria-haspopup="dialog"></button>
   </div>
@@ -827,6 +842,16 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
     </div>
   </div>
 </div>
+<div class="modal" id="peopleModal" hidden role="dialog" aria-modal="true" aria-labelledby="peopleTitle">
+  <div class="modal-card people-card">
+    <h3 id="peopleTitle">Find people</h3>
+    <p class="hint">Search for someone by their username. Only people who made their wall public show up.</p>
+    <div class="people-search"><span aria-hidden="true">@</span><input type="search" id="peopleQ" placeholder="username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="21" aria-label="Username"></div>
+    <ul class="people-list" id="peopleList" aria-live="polite"></ul>
+    <p class="hint" id="peopleNote"></p>
+    <div class="share-actions"><span class="spacer"></span><button type="button" class="btn" id="peopleClose">Close</button></div>
+  </div>
+</div>
 <div class="modal" id="seatModal" hidden role="dialog" aria-modal="true" aria-labelledby="seatTitle">
   <div class="modal-card seat-card">
     <h3 id="seatTitle">Pick your seat</h3>
@@ -896,7 +921,7 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
     <section>
       <h4>Public profile</h4>
       <label class="toggle"><input type="checkbox" id="setPublic"> Show my tickets on a public wall</label>
-      <p class="hint">Anyone with the link sees all your saved tickets, including the notes on the back. Switch it off at any time.</p>
+      <p class="hint">Anyone with the link sees all your saved tickets, including the notes on the back, and people can find you by your username. Switch it off at any time.</p>
       <div class="share-row" id="setLinkRow" hidden><label class="sr" for="setLink">Your wall</label><input type="text" id="setLink" readonly><button type="button" class="btn" id="setCopy">Copy</button></div>
     </section>
     <section>
@@ -2507,6 +2532,14 @@ const I18N_ROWS = [
   ['Looking for cinemas…', 'Sinemalar aranıyor…', 'Kinos werden gesucht…'],
   ['No cinemas found for "{q}". You can keep typing your own.', '"{q}" için sinema bulunamadı. Kendin yazmaya devam edebilirsin.', 'Keine Kinos zu „{q}“ gefunden. Du kannst den Namen einfach selbst eintippen.'],
   ['Cinema search isn\'t working right now. Type the name yourself.', 'Sinema arama şu an çalışmıyor. Adını kendin yaz.', 'Die Kinosuche funktioniert gerade nicht. Gib den Namen selbst ein.'],
+  ['Find people', 'Kişi bul', 'Leute finden'],
+  ['Search for someone by their username. Only people who made their wall public show up.', 'Birini kullanıcı adıyla ara. Sadece duvarını herkese açık yapanlar görünür.', 'Such jemanden über den Benutzernamen. Es erscheinen nur Leute, deren Wand öffentlich ist.'],
+  ['username', 'kullanıcı adı', 'Benutzername'],
+  ['1 ticket', '1 bilet', '1 Ticket'], ['{n} tickets', '{n} bilet', '{n} Tickets'],
+  ['Nobody with a public wall matches "{q}".', '"{q}" ile eşleşen herkese açık duvar yok.', 'Keine öffentliche Wand passt zu „{q}“.'],
+  ['Searching…', 'Aranıyor…', 'Suche läuft…'],
+  ['Type at least 2 letters.', 'En az 2 harf yaz.', 'Gib mindestens 2 Buchstaben ein.'],
+  ['Anyone with the link sees all your saved tickets, including the notes on the back, and people can find you by your username. Switch it off at any time.', 'Bağlantıya sahip herkes, arka yüzdeki notlar dahil tüm kayıtlı biletlerini görür ve insanlar seni kullanıcı adınla bulabilir. İstediğin zaman kapatabilirsin.', 'Alle mit dem Link sehen deine gespeicherten Tickets, auch die Notizen auf der Rückseite, und andere können dich über deinen Benutzernamen finden. Du kannst das jederzeit ausschalten.'],
   // share
   ['Your ticket link is ready', 'Bilet bağlantın hazır', 'Dein Ticket-Link ist fertig'],
   ['Anyone with this link can see the ticket, front and back.', 'Bu bağlantıya sahip herkes biletin önünü ve arkasını görebilir.', 'Alle mit diesem Link sehen das Ticket, vorne und hinten.'],
@@ -4361,6 +4394,47 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatM
 {
   let flipped = false; try { flipped = !!localStorage.getItem('stubs.flipped'); } catch (e) {}
   $('#flipHint').hidden = flipped;
+}
+
+/* ---------- find people: search public walls by username ---------- */
+{
+  const modal = $('#peopleModal'), q = $('#peopleQ'), list = $('#peopleList'), note = $('#peopleNote');
+  let timer = 0, ctrl = null; const cache = new Map();
+  $('#peopleBtn').hidden = inArtifact;
+  const show = (people, term) => {
+    list.innerHTML = '';
+    for (const p of people) {
+      const li = document.createElement('li'); const a = document.createElement('a'); a.href = '/@' + encodeURIComponent(p.username); a.setAttribute('translate', 'no');
+      const txt = document.createElement('span'); const b = document.createElement('b'); b.textContent = '@' + p.username;
+      const sm = document.createElement('small'); sm.textContent = tr(p.tickets === 1 ? '1 ticket' : '{n} tickets', { n: p.tickets });
+      txt.append(b, sm);
+      const go = document.createElement('span'); go.className = 'go'; go.setAttribute('aria-hidden', 'true'); go.textContent = '›';
+      a.append(avatarEl(p.username, p.avatar), txt, go); li.appendChild(a); list.appendChild(li);
+    }
+    note.textContent = people.length ? '' : tr('Nobody with a public wall matches "{q}".', { q: term });
+  };
+  const search = async term => {
+    if (cache.has(term)) { show(cache.get(term), term); return; }
+    if (ctrl) ctrl.abort(); ctrl = new AbortController();
+    note.textContent = tr('Searching…');
+    try {
+      const r = await fetch('/api/people?q=' + encodeURIComponent(term), { signal: ctrl.signal });
+      const d = await r.json(); if (!r.ok) throw new Error('bad');
+      cache.set(term, d.people || []); if (q.value.trim().replace(/^@/, '').toLowerCase() === term) show(d.people || [], term);
+    } catch (e) { if (e.name !== 'AbortError') { list.innerHTML = ''; note.textContent = tr('Ticket Store can\'t be reached right now.'); } }
+  };
+  q.addEventListener('input', () => {
+    clearTimeout(timer);
+    const term = q.value.trim().replace(/^@/, '').toLowerCase();
+    if (term.length < 2) { list.innerHTML = ''; note.textContent = term ? tr('Type at least 2 letters.') : ''; return; }
+    timer = setTimeout(() => search(term), 260);
+  });
+  q.addEventListener('keydown', e => { if (e.key === 'Enter') { const first = list.querySelector('a'); if (first) first.click(); } });
+  const close = () => { modal.hidden = true; $('#peopleBtn').focus(); };
+  $('#peopleBtn').addEventListener('click', () => { modal.hidden = false; q.focus(); q.select(); });
+  $('#peopleClose').addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
 }
 
 /* ---------- the logo takes you home from anywhere ---------- */

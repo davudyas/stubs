@@ -25,6 +25,7 @@ Live at **https://ticket-store.netlify.app**
 - A seat map for picking row and seat, and "Seating: Free" on tickets without a seat number
 - An album view in My tickets: tickets taped into a scrapbook you flip page by page
 - Cinema search: type a cinema or a place and pick from real cinemas worldwide (OpenStreetMap data via Photon, `netlify/functions/cinemas.mjs`)
+- Find people: search public walls by username (`netlify/functions/people.mjs`; private and blocked accounts never show up)
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).
 
