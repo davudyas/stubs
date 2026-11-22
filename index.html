@@ -333,12 +333,14 @@ a{color:var(--brass-hi)}
 /* ---- header: the marquee ---- */
 .top{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"logo . tabs tools" "intro intro intro intro";align-items:center;gap:12px 14px;padding:20px 28px 14px;max-width:1500px;margin:0 auto}
 .top>.marquee{grid-area:logo;justify-self:start}
+.marquee:focus-visible{outline:3px solid var(--brass-hi);outline-offset:4px}
+.marquee:active{transform:scale(.98)}
 .top>.tabs{grid-area:tabs}
 .top>.tools{grid-area:tools}
 .intro{grid-area:intro;display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;min-height:34px}
 .top .tools .btn{height:42px;display:inline-flex;align-items:center;padding-top:0;padding-bottom:0}
 .top .theme-btn{padding-left:10px;padding-right:12px}
-.marquee{position:relative;padding:8px 26px 10px;border-radius:14px;background:var(--marquee-bg);display:flex;align-items:center;gap:12px}
+.marquee{position:relative;text-decoration:none;color:inherit;cursor:pointer;padding:8px 26px 10px;border-radius:14px;background:var(--marquee-bg);display:flex;align-items:center;gap:12px}
 .mark{width:44px;height:44px;flex:none;color:var(--logo-color);filter:drop-shadow(0 0 8px rgba(var(--glow),calc(var(--logo-glow) + .15)));transform:translateY(1px)}
 @media (max-width:520px){.mark{width:32px;height:32px}.marquee{gap:8px}}
 .marquee::before{content:"";position:absolute;inset:0;border-radius:14px;border:6px dotted var(--brass);filter:drop-shadow(0 0 4px rgba(var(--glow),.75));animation:bulbs 1.3s steps(6) 1 both}
@@ -540,7 +542,7 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
 </head>
 <body>
 <header class="top">
-  <div class="marquee"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><defs><mask id="tsCut"><rect width="64" height="64" fill="#fff"/><circle cx="42" cy="11" r="5.2" fill="#000"/><circle cx="42" cy="53" r="5.2" fill="#000"/><circle cx="42" cy="20" r="1.35" fill="#000"/><circle cx="42" cy="25" r="1.35" fill="#000"/><circle cx="42" cy="30" r="1.35" fill="#000"/><circle cx="42" cy="35" r="1.35" fill="#000"/><circle cx="42" cy="40" r="1.35" fill="#000"/><circle cx="42" cy="45" r="1.35" fill="#000"/><path d="M23.00,22.00 L25.59,28.94 L32.99,29.26 L27.18,33.86 L29.17,40.99 L23.00,36.90 L16.83,40.99 L18.82,33.86 L13.01,29.26 L20.41,28.94Z" fill="#000"/></mask></defs><g id="tsMarkSym" transform="rotate(-12 32 32)"><rect x="5" y="11" width="54" height="42" rx="7" fill="currentColor" mask="url(#tsCut)"/></g></svg><span class="logo">Ticket Store</span></div>
+  <a class="marquee" href="/" id="homeLink" aria-label="Ticket Store, home"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><defs><mask id="tsCut"><rect width="64" height="64" fill="#fff"/><circle cx="42" cy="11" r="5.2" fill="#000"/><circle cx="42" cy="53" r="5.2" fill="#000"/><circle cx="42" cy="20" r="1.35" fill="#000"/><circle cx="42" cy="25" r="1.35" fill="#000"/><circle cx="42" cy="30" r="1.35" fill="#000"/><circle cx="42" cy="35" r="1.35" fill="#000"/><circle cx="42" cy="40" r="1.35" fill="#000"/><circle cx="42" cy="45" r="1.35" fill="#000"/><path d="M23.00,22.00 L25.59,28.94 L32.99,29.26 L27.18,33.86 L29.17,40.99 L23.00,36.90 L16.83,40.99 L18.82,33.86 L13.01,29.26 L20.41,28.94Z" fill="#000"/></mask></defs><g id="tsMarkSym" transform="rotate(-12 32 32)"><rect x="5" y="11" width="54" height="42" rx="7" fill="currentColor" mask="url(#tsCut)"/></g></svg><span class="logo">Ticket Store</span></a>
   <div class="intro"><p class="sub">Make a ticket for every film you watch, and keep them all in one place.</p>
   <button type="button" class="guide-btn" id="guideBtn" hidden>New here? Take the quick guide</button></div>
   <nav class="tabs" role="tablist" aria-label="Views">
@@ -2308,6 +2310,7 @@ const I18N_ROWS = [
   // header and views
   ['Make a ticket for every film you watch, and keep them all in one place.', 'İzlediğin her film için bir bilet yap, hepsini tek bir yerde sakla.', 'Mach ein Ticket für jeden Film, den du schaust, und bewahr alle an einem Ort auf.'],
   ['New here? Take the quick guide', 'Yeni misin? Hızlı rehbere göz at', 'Neu hier? Starte die kurze Tour'],
+  ['Ticket Store, home', 'Ticket Store, ana sayfa', 'Ticket Store, Startseite'],
   ['Views', 'Görünümler', 'Ansichten'],
   ['Make a ticket', 'Bilet yap', 'Ticket machen'],
   ['My tickets', 'Biletlerim', 'Meine Tickets'],
@@ -4302,6 +4305,19 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatM
   inp.addEventListener('blur', () => setTimeout(close, 120));
   inp.addEventListener('focus', () => { if (!S.home) setTimeout(() => inp.select(), 0); }); // typing replaces the old cinema
 }
+
+/* ---------- the logo takes you home from anywhere ---------- */
+$('#homeLink').addEventListener('click', e => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button > 0) return; // new tab works as usual
+  const atHome = location.pathname === '/' && !location.search;
+  if (!inArtifact && !atHome) return; // shared tickets and public walls: load the start page
+  e.preventDefault();
+  document.querySelectorAll('.modal:not([hidden])').forEach(m => { m.hidden = true; });
+  document.querySelectorAll('details.menu[open]').forEach(d => { d.open = false; });
+  document.body.style.overflow = '';
+  showView('make');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 /* ---------- language menu ---------- */
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); $('#langMenu').open = false; }));
