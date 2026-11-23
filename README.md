@@ -26,6 +26,7 @@ Live at **https://ticket-store.netlify.app**
 - An album view in My tickets: tickets taped into a scrapbook you flip page by page
 - Cinema search: type a cinema or a place and pick from real cinemas worldwide (OpenStreetMap data via Photon, `netlify/functions/cinemas.mjs`)
 - Find people: search public walls by username (`netlify/functions/people.mjs`; private and blocked accounts never show up)
+- TV series as well as films: search finds both, and a series ticket can name the season and episode
 
 Made by [davudiswatchin](https://letterboxd.com/davudiswatchin/).
 

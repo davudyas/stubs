@@ -1,7 +1,8 @@
 // Ticket Store: asks TMDB on the site's behalf so the key stays on Netlify, never in the page.
 // Set the key in Netlify: Project configuration > Environment variables > TMDB_KEY.
-const ALLOWED_PARAMS = new Set(['query', 'year', 'include_adult', 'append_to_response', 'include_image_language', 'language', 'page']);
-const ALLOWED_PATH = /^\/(search\/movie|movie\/\d{1,9})$/;
+const ALLOWED_PARAMS = new Set(['query', 'year', 'first_air_date_year', 'include_adult', 'append_to_response', 'include_image_language', 'language', 'page']);
+// films and TV series (a series, and one of its seasons for the episode list)
+const ALLOWED_PATH = /^\/(search\/(movie|tv)|movie\/\d{1,9}|tv\/\d{1,9}(\/season\/\d{1,3})?)$/;
 
 const json = (body, status = 200, extra = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json; charset=utf-8', ...extra } });

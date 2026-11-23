@@ -3,7 +3,7 @@ import { getStore } from '@netlify/blobs';
 
 const MAX_BYTES = 800_000;
 const ID_RE = /^[A-Za-z0-9_-]{8,24}$/;
-const TEXT_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'date', 'time', 'cinema', 'screen', 'platform', 'format', 'row', 'seat',
+const TEXT_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'kind', 'season', 'episode', 'episodeName', 'date', 'time', 'cinema', 'screen', 'platform', 'format', 'row', 'seat',
   'price', 'currency', 'rating', 'withWho', 'note', 'loggedBy', 'letterboxd', 'template', 'posterOpacity', 'posterX', 'posterY', 'serial'];
 const BOOL_KEYS = ['usFormat', 'home', 'liked', 'grain', 'stamp'];
 const COLOR_KEYS = ['paper', 'ink', 'accent'];

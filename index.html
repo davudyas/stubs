@@ -608,12 +608,12 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
 <main class="app" id="viewMake">
   <form class="controls" id="form" autocomplete="off" onsubmit="return false">
     <details class="group" open>
-      <summary>Film</summary>
+      <summary>Film or series</summary>
       <div class="fields">
         <div class="search" id="searchBox">
           <div class="search-row">
             <label class="sr" for="q">Search for a film</label>
-            <input type="search" id="q" placeholder="Search for a film to fill everything in" autocomplete="off">
+            <input type="search" id="q" placeholder="Search for a film or series to fill everything in" autocomplete="off">
           </div>
           <p class="hint" id="searchHint" hidden></p>
           <div class="results" id="results" role="listbox" aria-label="Search results"></div>
@@ -630,9 +630,11 @@ footer .suggest a{color:var(--brass-hi);font-weight:600}
         </div>
         <label class="f full"><span>Title</span><input type="text" name="title" maxlength="90"></label>
         <label class="f full"><span>Tagline</span><input type="text" name="tagline" maxlength="110" placeholder="A line that sums it up"></label>
-        <label class="f full"><span>Director</span><input type="text" name="director" maxlength="60"></label>
+        <label class="f full"><span id="lblDirector">Director</span><input type="text" name="director" maxlength="60"></label>
         <label class="f"><span>Year</span><input type="number" name="year" min="1888" max="2100"></label>
         <label class="f"><span>Runtime (min)</span><input type="number" name="runtime" min="1" max="999"></label>
+        <label class="f tv-only" hidden><span>Season</span><select name="season" id="seasonSel"><option value="">All seasons</option></select></label>
+        <label class="f tv-only" hidden><span>Episode</span><select name="episode" id="episodeSel"><option value="">Whole season</option></select></label>
         <label class="drop" id="drop">
           <input type="file" id="posterFile" accept="image/*" class="sr">
           <span class="ph" id="posterPh" aria-hidden="true">▦</span>
@@ -1158,7 +1160,10 @@ function seatFields(s) {
   return s.home ? [[L('Seat'), s.seat || tk('Sofa')]] : [[L('Row'), s.row || '—'], [L('Seat'), s.seat || '—']];
 }
 function credits(s) {
-  return [s.director, s.year, s.runtime ? s.runtime + ' min' : ''].filter(Boolean).join(', ');
+  // a series shows which season and episode, like "S5 E14 Ozymandias"
+  let ep = '';
+  if (s.kind === 'tv' && s.season) ep = 'S' + s.season + (s.episode ? ' E' + s.episode + (s.episodeName ? ' \u201C' + s.episodeName + '\u201D' : '') : '');
+  return [s.director, s.year, ep, s.runtime ? s.runtime + ' min' : ''].filter(Boolean).join(', ');
 }
 /* Lay fields out in even columns, shrinking values that run long. */
 function fieldRow(ctx, list, x, y, w, o) {
@@ -2540,6 +2545,16 @@ const I18N_ROWS = [
   ['Searching…', 'Aranıyor…', 'Suche läuft…'],
   ['Type at least 2 letters.', 'En az 2 harf yaz.', 'Gib mindestens 2 Buchstaben ein.'],
   ['Anyone with the link sees all your saved tickets, including the notes on the back, and people can find you by your username. Switch it off at any time.', 'Bağlantıya sahip herkes, arka yüzdeki notlar dahil tüm kayıtlı biletlerini görür ve insanlar seni kullanıcı adınla bulabilir. İstediğin zaman kapatabilirsin.', 'Alle mit dem Link sehen deine gespeicherten Tickets, auch die Notizen auf der Rückseite, und andere können dich über deinen Benutzernamen finden. Du kannst das jederzeit ausschalten.'],
+  ['Series', 'Dizi', 'Serie'],
+  ['Created by', 'Yaratıcı', 'Erfunden von'],
+  ['Season', 'Sezon', 'Staffel'], ['Episode', 'Bölüm', 'Folge'],
+  ['All seasons', 'Tüm sezonlar', 'Alle Staffeln'], ['Whole season', 'Tüm sezon', 'Ganze Staffel'],
+  ['Season {n}', '{n}. Sezon', 'Staffel {n}'],
+  ['Loading the series…', 'Dizi yükleniyor…', 'Serie wird geladen…'],
+  ['That series couldn\'t be loaded. Try again.', 'Bu dizi yüklenemedi. Tekrar dene.', 'Die Serie ließ sich nicht laden. Versuch es noch mal.'],
+  ['Nothing found for "{q}". Check the spelling or add the year.', '"{q}" için sonuç bulunamadı. Yazımı kontrol et ya da yılı ekle.', 'Nichts zu „{q}“ gefunden. Prüf die Schreibweise oder ergänz das Jahr.'],
+  ['Search for a film or series to fill everything in', 'Her şeyi doldurmak için bir film ya da dizi ara', 'Such einen Film oder eine Serie, dann füllt sich alles von selbst aus'],
+  ['Film or series', 'Film ya da dizi', 'Film oder Serie'],
   // share
   ['Your ticket link is ready', 'Bilet bağlantın hazır', 'Dein Ticket-Link ist fertig'],
   ['Anyone with this link can see the ticket, front and back.', 'Bu bağlantıya sahip herkes biletin önünü ve arkasını görebilir.', 'Alle mit diesem Link sehen das Ticket, vorne und hinten.'],
@@ -2835,7 +2850,7 @@ function defaults() {
     row: 'F', seat: '14', price: '9.50', currency: '€',
     rating: '4.5', liked: true, withWho: '', note: '', loggedBy: '', letterboxd: '',
     template: 'classic', paper: t.paper, ink: t.ink, accent: t.accent,
-    posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false, holo: '',
+    posterOpacity: '0.14', posterX: '0.5', posterY: '0.35', grain: true, stamp: false, holo: '', kind: '', tvId: '', season: '', episode: '', episodeName: '',
     serial: makeSerial(), palette: [], stickers: [],
   };
 }
@@ -2911,6 +2926,7 @@ function fillForm() {
     else el.value = S[el.name] ?? '';
   }
   syncUI();
+  if (typeof syncTv === 'function') syncTv();
 }
 function stars5(r) { r = +r; let s = ''; for (let i = 1; i <= 5; i++) s += r >= i ? '★' : r >= i - .5 ? '½' : ''; return s || 'No rating'; }
 function syncUI() {
@@ -3106,18 +3122,23 @@ async function runSearch() {
     const m = q.match(/^(.*?)\s*\(?((?:18|19|20)\d{2})\)?$/);
     const params = { query: m && m[1] ? m[1] : q, include_adult: 'false' };
     if (m && m[1]) params.year = m[2];
-    const j = await tmdb('/search/movie', params);
+    // films and TV series together, the most popular first
+    const tvParams = { query: params.query, include_adult: 'false' }; if (params.year) tvParams.first_air_date_year = params.year;
+    const [jm, jt] = await Promise.all([tmdb('/search/movie', params), tmdb('/search/tv', tvParams).catch(() => ({ results: [] }))]);
     if (seq !== qSeq) return;
     results.innerHTML = '';
-    const list = (j.results || []).slice(0, 8);
-    setHint(list.length ? '' : tr('No films found for "{q}". Check the spelling or add the year.', { q: q.replace(/[<>&]/g, '') }));
+    const all = [...(jm.results || []).map(x => ({ ...x, type: 'movie' })), ...(jt.results || []).map(x => ({ ...x, type: 'tv' }))];
+    const exact = x => ((x.title || x.name || '').toLowerCase() === params.query.toLowerCase() ? 1 : 0);
+    const list = all.sort((a, b) => exact(b) - exact(a) || (b.popularity || 0) - (a.popularity || 0)).slice(0, 8);
+    setHint(list.length ? '' : tr('Nothing found for "{q}". Check the spelling or add the year.', { q: q.replace(/[<>&]/g, '') }));
     for (const mv of list) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'res'; b.setAttribute('role', 'option');
-      const year = (mv.release_date || '').slice(0, 4);
+      const tv = mv.type === 'tv', name = tv ? mv.name : mv.title, orig = tv ? mv.original_name : mv.original_title;
+      const year = ((tv ? mv.first_air_date : mv.release_date) || '').slice(0, 4);
       b.innerHTML = (mv.poster_path ? `<img alt="" loading="lazy" src="${TMDB_IMG}w92${mv.poster_path}">` : '<span class="noimg"></span>') + '<span><b></b><small></small></span>';
-      b.querySelector('b').textContent = mv.title; b.querySelector('b').setAttribute('translate', 'no');
-      b.querySelector('small').textContent = [year, mv.original_title !== mv.title ? mv.original_title : ''].filter(Boolean).join(', ') || 'Year unknown';
-      b.addEventListener('click', () => chooseFilm(mv.id));
+      b.querySelector('b').textContent = name; b.querySelector('b').setAttribute('translate', 'no');
+      b.querySelector('small').textContent = [tv ? tr('Series') : '', year, orig && orig !== name ? orig : ''].filter(Boolean).join(', ') || tr('Year unknown');
+      b.addEventListener('click', () => tv ? chooseSeries(mv.id) : chooseFilm(mv.id));
       results.appendChild(b);
     }
   } catch (e) {
@@ -3139,9 +3160,17 @@ async function chooseFilm(id) {
     const d = await tmdb('/movie/' + id, { append_to_response: 'credits,images', include_image_language: `en,${lang},null` });
     const dir = (d.credits?.crew || []).filter(c => c.job === 'Director').map(c => c.name).slice(0, 2).join(' & ');
     dropSample(['date', 'time']);
+    Object.assign(S, { kind: '', tvId: '', season: '', episode: '', episodeName: '' });
     Object.assign(S, { title: d.title || S.title, tagline: d.tagline || '', director: dir, year: (d.release_date || '').slice(0, 4), runtime: d.runtime ? String(d.runtime) : '' });
     qEl.value = '';
     fillForm(); schedule();
+    await offerPosters(d);
+  } catch (e) {
+    setHint(e.kind === 'key' ? 'TMDB didn\'t accept that key. Check it and save it again.' : 'That film couldn\'t be loaded. Try again.');
+  }
+}
+async function offerPosters(d) {
+  {
     const posters = [];
     if (d.poster_path) posters.push(d.poster_path);
     for (const p of (d.images?.posters || []).sort((a, b) => b.vote_average - a.vote_average)) if (!posters.includes(p.file_path)) posters.push(p.file_path);
@@ -3157,9 +3186,8 @@ async function chooseFilm(id) {
     });
     $('#posterPickWrap').hidden = posters.length < 2;
     setHint('');
-    if (posters[0]) await posterFromTmdb(posters[0]); else toast('Filled in. TMDB has no poster for this one, so add your own.');
-  } catch (e) {
-    setHint(e.kind === 'key' ? 'TMDB didn\'t accept that key. Check it and save it again.' : 'That film couldn\'t be loaded. Try again.');
+    if (posters[0]) { try { await posterFromTmdb(posters[0]); } catch (e) { toast('That poster couldn\'t be loaded. Try another.'); } }
+    else toast('Filled in. TMDB has no poster for this one, so add your own.');
   }
 }
 
@@ -3685,7 +3713,7 @@ $('#tabMake').addEventListener('click', () => showView('make'));
 $('#tabWall').addEventListener('click', () => { showView('wall'); refreshCollection(); });
 
 /* ---------- share links (on the Ticket Store website) ---------- */
-const SHARE_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'poster', 'date', 'time', 'usFormat', 'home', 'cinema', 'screen', 'platform', 'format',
+const SHARE_KEYS = ['title', 'tagline', 'director', 'year', 'runtime', 'kind', 'season', 'episode', 'episodeName', 'poster', 'date', 'time', 'usFormat', 'home', 'cinema', 'screen', 'platform', 'format',
   'row', 'seat', 'price', 'currency', 'rating', 'liked', 'withWho', 'note', 'loggedBy', 'letterboxd', 'template', 'paper', 'ink', 'accent',
   'posterOpacity', 'posterX', 'posterY', 'grain', 'stamp', 'serial', 'stickers', 'holo'];
 const shareCache = new Map();
@@ -4382,6 +4410,66 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#seatM
   inp.addEventListener('blur', () => setTimeout(close, 120));
   inp.addEventListener('focus', () => { if (!S.home) setTimeout(() => inp.select(), 0); }); // typing replaces the old cinema
 }
+
+/* ---------- TV series: pick the series, then a season and an episode ---------- */
+const tvCache = new Map(); // id or id/season -> TMDB data
+async function tvData(path) { if (!tvCache.has(path)) tvCache.set(path, tmdb(path, path.includes('/season/') ? {} : {})); try { return await tvCache.get(path); } catch (e) { tvCache.delete(path); throw e; } }
+async function chooseSeries(id) {
+  results.innerHTML = ''; setHint('Loading the series…');
+  try {
+    const lang = (navigator.language || 'en').slice(0, 2);
+    const d = await tmdb('/tv/' + id, { append_to_response: 'images', include_image_language: `en,${lang},null` });
+    tvCache.set('/tv/' + id, Promise.resolve(d));
+    dropSample(['date', 'time']);
+    Object.assign(S, {
+      kind: 'tv', tvId: String(id), season: '', episode: '', episodeName: '',
+      title: d.name || S.title, tagline: d.tagline || '',
+      director: (d.created_by || []).map(c => c.name).slice(0, 2).join(' & '),
+      year: (d.first_air_date || '').slice(0, 4),
+      runtime: (d.episode_run_time || [])[0] ? String(d.episode_run_time[0]) : '',
+    });
+    if (!S.cinema) S.home = true; // series are mostly watched at home; switch it back for a cinema screening
+    qEl.value = ''; fillForm(); schedule();
+    await offerPosters(d);
+  } catch (e) {
+    setHint(e.kind === 'key' ? 'TMDB didn\'t accept that key. Check it and save it again.' : 'That series couldn\'t be loaded. Try again.');
+  }
+}
+async function syncTv() {
+  const tv = S.kind === 'tv';
+  document.querySelectorAll('.tv-only').forEach(el => { el.hidden = !tv; });
+  $('#lblDirector').textContent = tv ? 'Created by' : 'Director';
+  if (!tv || !S.tvId || !canSearch()) return;
+  const sSel = $('#seasonSel'), eSel = $('#episodeSel'), id = S.tvId;
+  try {
+    const d = await tvData('/tv/' + id);
+    if (S.tvId !== id) return;
+    const seasons = (d.seasons || []).filter(x => x.season_number > 0);
+    if (sSel.dataset.for !== id) {
+      sSel.innerHTML = '<option value="">All seasons</option>' + seasons.map(x => `<option value="${x.season_number}"></option>`).join('');
+      [...sSel.options].slice(1).forEach((o, i) => { o.textContent = tr('Season {n}', { n: seasons[i].season_number }); });
+      sSel.dataset.for = id;
+    }
+    sSel.value = S.season || '';
+    if (!S.season) { eSel.innerHTML = '<option value="">Whole season</option>'; eSel.disabled = true; delete eSel.dataset.for; return; }
+    const key = id + '/' + S.season;
+    if (eSel.dataset.for !== key) {
+      const sd = await tvData('/tv/' + id + '/season/' + S.season);
+      if (S.tvId !== id) return;
+      eSel.innerHTML = '<option value="">Whole season</option>';
+      for (const ep of sd.episodes || []) { const o = document.createElement('option'); o.value = String(ep.episode_number); o.textContent = ep.episode_number + '. ' + (ep.name || ''); o.dataset.name = ep.name || ''; o.dataset.runtime = ep.runtime || ''; o.setAttribute('translate', 'no'); eSel.appendChild(o); }
+      eSel.dataset.for = key;
+    }
+    eSel.disabled = false; eSel.value = S.episode || '';
+  } catch (e) { /* the series still works without the lists */ }
+}
+$('#seasonSel').addEventListener('change', () => { S.season = $('#seasonSel').value; S.episode = ''; S.episodeName = ''; schedule(); syncTv(); });
+$('#episodeSel').addEventListener('change', () => {
+  const o = $('#episodeSel').selectedOptions[0];
+  S.episode = $('#episodeSel').value; S.episodeName = S.episode && o ? o.dataset.name || '' : '';
+  if (o && o.dataset.runtime) S.runtime = o.dataset.runtime;
+  fillForm(); schedule();
+});
 
 /* ---------- phones: film search right under the ticket ---------- */
 {
